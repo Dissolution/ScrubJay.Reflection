@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "dgSpecHash": "o8SaIl7km8uXdUAwpapcAah0nTZFOSJOXtUnLjtWvRk0ZKwDuzer/HHPgjKlk1SSzHlixu0wFRF2TxE5ntEg0A==",
+  "success": true,
+  "projectFilePath": "C:\\git\\ScrubJay.Reflection\\src\\ScrubJay.Reflection.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Timothy\\.nuget\\packages\\fody\\6.8.0\\fody.6.8.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\inlineil.fody\\1.8.0\\inlineil.fody.1.8.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.netframework.referenceassemblies\\1.0.3\\microsoft.netframework.referenceassemblies.1.0.3.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.netframework.referenceassemblies.net481\\1.0.3\\microsoft.netframework.referenceassemblies.net481.1.0.3.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\polysharp\\1.14.1\\polysharp.1.14.1.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.buffers\\4.5.1\\system.buffers.4.5.1.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.memory\\4.5.5\\system.memory.4.5.5.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.numerics.vectors\\4.4.0\\system.numerics.vectors.4.4.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.numerics.vectors\\4.5.0\\system.numerics.vectors.4.5.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\4.5.3\\system.runtime.compilerservices.unsafe.4.5.3.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\system.runtime.compilerservices.unsafe\\6.0.0\\system.runtime.compilerservices.unsafe.6.0.0.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.29\\microsoft.netcore.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.29\\microsoft.windowsdesktop.app.ref.6.0.29.nupkg.sha512",
+    "C:\\Users\\Timothy\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.29\\microsoft.aspnetcore.app.ref.6.0.29.nupkg.sha512"
+  ],
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Problem reading the cache file C:\\git\\ScrubJay.Reflection\\src\\obj\\project.nuget.cache : Found invalid data while decoding."
+    }
+  ]
+}
