@@ -1,4 +1,5 @@
 ﻿using Vis = ScrubJay.Reflection.Visibility;
+using Acc = ScrubJay.Reflection.Access;
 
 namespace ScrubJay.Reflection.Extensions;
 
@@ -56,4 +57,34 @@ public static class MemberInfoExtensions
                 return vis;
         }
     }
+
+    public static Acc Access(this MemberInfo? member)
+    {
+        Acc acc = Acc.None;
+        switch (member)
+        {
+            case EventInfo eventInfo:
+                acc |= Access(eventInfo.AddMethod);
+                acc |= Access(eventInfo.RemoveMethod);
+                acc |= Access(eventInfo.RaiseMethod);
+                return acc;
+            case FieldInfo fieldInfo:
+                acc |= fieldInfo.IsStatic ? Acc.Static : Acc.Instance;
+                return acc;
+            case MethodBase methodBase:
+                acc |= methodBase.IsStatic ? Acc.Static : Acc.Instance;
+                return acc;
+            case PropertyInfo propertyInfo:
+                acc |= Access(propertyInfo.GetMethod);
+                acc |= Access(propertyInfo.SetMethod);
+                return acc;
+            case Type type:
+                acc |= (type.IsAbstract && type.IsSealed) ? Acc.Static : Acc.Instance;
+                return acc;
+            case null:
+            default:
+                return acc;
+        }
+    }
+    
 }

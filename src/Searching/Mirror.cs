@@ -1,140 +1,87 @@
-﻿using System.Diagnostics;
-using ScrubJay.Extensions;
-using ScrubJay.Reflection.Extensions;
+﻿using ScrubJay.Extensions;
+using ScrubJay.Reflection.Searching.Criteria;
 
 namespace ScrubJay.Reflection.Searching;
 
 public static class Mirror
 {
-    private static IEnumerable<MemberInfo> MatchMembers(Type type, MemberCriteria criteria)
+    public static IEnumerable<MemberInfo> FindMembers(Type type, MemberCriteria criteria)
     {
         var members = type.GetMembers(criteria.BindingFlags);
         foreach (MemberInfo member in members)
         {
-            if (!criteria.Visibility.HasFlags(member.Visibility()))
-                continue;
-            if (!criteria.MemberType.HasFlags(member.MemberType))
-                continue;
-            if (criteria.Name is not null)
-            {
-                if (criteria.NameCriteria == NameCriteria.Exact)
-                {
-                    if (!string.Equals(member.Name, criteria.Name, criteria.NameComparison))
-                        continue;
-                }
-                else if (criteria.NameCriteria.HasFlags(NameCriteria.Contains))
-                {
-                    if (!member.Name.Contains(criteria.Name, criteria.NameComparison))
-                        continue;
-                }
-                else
-                {
-                    if (criteria.NameCriteria.HasFlags(NameCriteria.StartsWith))
-                    {
-                        if (!member.Name.StartsWith(criteria.Name, criteria.NameComparison))
-                            continue;
-                    }
-                    if (criteria.NameCriteria.HasFlags(NameCriteria.EndsWith))
-                    {
-                        if (!member.Name.EndsWith(criteria.Name, criteria.NameComparison))
-                            continue;
-                    }
-                }
-            }
-            
-            // passes
-            yield return member;
+            if (criteria.Matches(member))
+                yield return member;
         }
     }
 
-    private static IEnumerable<FieldInfo> MatchFields(Type type, FieldCriteria criteria)
-    {
-        foreach (var member in MatchMembers(type, criteria))
-        {
-            Debug.Assert(member.MemberType == MemberTypes.Field);
-            Debug.Assert(member is FieldInfo);
-            FieldInfo field = (FieldInfo)member;
-            if (criteria.FieldType is not null)
-            {
-                if (!field.FieldType.Passes(criteria.TypeCriteria, criteria.FieldType))
-                    continue;
-            }
-            if (criteria.Modifiers != FieldModifiers.Any)
-            {
-                if (criteria.Modifiers.HasFlags(FieldModifiers.InitOnly) != field.IsInitOnly)
-                    continue;
-                if (criteria.Modifiers.HasFlags(FieldModifiers.Const) != field.IsLiteral)
-                    continue;
-                if (criteria.Modifiers.HasFlags(FieldModifiers.HasDefault) != field.Attributes.HasFlags(FieldAttributes.HasDefault))
-                    continue;
-            }
-
-            yield return field;
-        }
-    }
-    
-    
     public static MemberInfo? FindMember(Type type, MemberCriteria criteria)
+        => FindMembers(type, criteria).OneOrDefault();
+    
+    public static IEnumerable<TMember> FindMembers<TMember>(Type type, Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+        where TMember : MemberInfo
     {
-        return MatchMembers(type, criteria).OneOrDefault();
+        var builder = new MemberCriteriaBuilder();
+        ICriteria<TMember> memberCriteria = buildCriteria(builder);
+        var members = type
+            .GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance)
+            .OfType<TMember>();
+        foreach (TMember member in members)
+        {
+            if (memberCriteria.Matches(member))
+                yield return member;
+        }
     }
 
-    public static MemberInfo? FindMember<T>(MemberCriteria criteria)
+    public static TMember? FindMember<TMember>(Type type, Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+        where TMember : MemberInfo
     {
-        return MatchMembers(typeof(T), criteria).OneOrDefault();
-    }
-    
-    public static IEnumerable<MemberInfo> FindMembers(Type type, MemberCriteria criteria)
-    {
-        return MatchMembers(type, criteria);
-    }
-    
-    public static IEnumerable<MemberInfo> FindMembers<T>(MemberCriteria criteria)
-    {
-        return MatchMembers(typeof(T), criteria);
+        return FindMembers<TMember>(type, buildCriteria).OneOrDefault();
     }
 
-    public static TMember? FindMember<TMember>(Type type, MemberCriteria criteria)
+    public static IEnumerable<TMember> FindMembers<T, TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
         where TMember : MemberInfo
     {
-        return MatchMembers(type, criteria).OneOrDefault() as TMember;
+        return FindMembers<TMember>(typeof(T), buildCriteria);
     }
     
-    public static TMember? FindMember<T, TMember>(MemberCriteria criteria)
+    public static TMember? FindMember<T, TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
         where TMember : MemberInfo
     {
-        return MatchMembers(typeof(T), criteria).OneOrDefault() as TMember;
-    }
-    
-    public static IEnumerable<TMember> FindMembers<TMember>(Type type, MemberCriteria criteria)
-        where TMember : MemberInfo
-    {
-        return MatchMembers(type, criteria).OfType<TMember>();
-    }
-    
-    public static IEnumerable<TMember> FindMembers<T, TMember>(MemberCriteria criteria)
-        where TMember : MemberInfo
-    {
-        return MatchMembers(typeof(T), criteria).OfType<TMember>();
+        return FindMembers<TMember>(typeof(T), buildCriteria).OneOrDefault();
     }
 
-    public static FieldInfo? FindField(Type type, FieldCriteria criteria)
+    public static class Search<T>
     {
-        return MatchFields(type, criteria).OneOrDefault();
-    }
+        public static IEnumerable<TMember> FindMembers<TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+            where TMember : MemberInfo
+        {
+            return Mirror.FindMembers<TMember>(typeof(T), buildCriteria);
+        }
     
-    public static FieldInfo? FindField<T>(FieldCriteria criteria)
-    {
-        return MatchFields(typeof(T), criteria).OneOrDefault();
-    }
-    
-    public static IEnumerable<FieldInfo> FindFields(Type type, FieldCriteria criteria)
-    {
-        return MatchFields(type, criteria);
-    }
-    
-    public static IEnumerable<FieldInfo> FindFields<T>(FieldCriteria criteria)
-    {
-        return MatchFields(typeof(T), criteria);
+        public static TMember? FindMember<TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+            where TMember : MemberInfo
+        {
+            return Mirror.FindMembers<TMember>(typeof(T), buildCriteria).OneOrDefault();
+        }
+        
+        public static Result<TMember, MemberAccessException> TryFindMember<TMember>(
+            Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+            where TMember : MemberInfo
+        {
+            var mcBuilder = new MemberCriteriaBuilder();
+            var criteria = buildCriteria(mcBuilder);
+            var member = typeof(T).GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
+                .OfType<TMember>()
+                .Where(m => criteria.Matches(m))
+                .OneOrDefault();
+            if (member is not null)
+                return member;
+            return new MemberAccessException($"""
+                Criteria:                              
+                {criteria}
+                Matched non-1 members                              
+                """);
+        }
     }
 }
