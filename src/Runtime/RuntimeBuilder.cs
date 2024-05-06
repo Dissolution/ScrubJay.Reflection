@@ -1,4 +1,5 @@
-﻿using ScrubJay.Reflection.Info;
+﻿using ScrubJay.Extensions;
+using ScrubJay.Reflection.Info;
 using ScrubJay.Reflection.Runtime.Naming;
 using ScrubJay.Reflection.Searching;
 using ConstructorInfo = System.Reflection.ConstructorInfo;
@@ -40,24 +41,28 @@ public static class RuntimeBuilder
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
         where TAttribute : Attribute, new()
     {
-        var ctor = Mirror.Search<TAttribute>.FindMember(b => b.Instance.Constructor.NoParameters());
-        if (ctor is null)
-            throw new InvalidOperationException(Dump($"Cannot find an empty {typeof(TAttribute)} constructor."));
+        var ctor = Mirror.Search<TAttribute>
+            .TryFindMember(b => b.Instance.Constructor.NoParameters())
+            .OkOrThrow();
         return new CustomAttributeBuilder(ctor, Array.Empty<object>());
     }
 
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>(params object[] ctorArgs)
         where TAttribute : Attribute
     {
-        var ctor = Searching.MemberSearch.FindConstructor(typeof(TAttribute), ctorArgs);
+        var ctor = Mirror.Search<TAttribute>
+            .TryFindMember(b => b.Instance.Constructor.ParameterTypes(ctorArgs))
+            .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
 
     public static CustomAttributeBuilder GetCustomAttributeBuilder(Type attributeType, params object[] ctorArgs)
     {
         if (!attributeType.Implements<Attribute>())
-            throw new ArgumentException(Dump($"{attributeType} is not an Attribute"));
-        var ctor = Searching.MemberSearch.FindConstructor(attributeType, ctorArgs);
+            throw new ArgumentException($"{attributeType} is not an Attribute");
+        var ctor = Mirror.Search
+            .TryFindMember(attributeType, b => b.Instance.Constructor.ParameterTypes(ctorArgs))
+            .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
 }

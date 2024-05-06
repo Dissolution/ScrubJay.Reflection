@@ -86,5 +86,9 @@ public static class MemberInfoExtensions
                 return acc;
         }
     }
-    
+
+    public static Type OwnerType(this MemberInfo member)
+    {
+        return member.ReflectedType ?? member.DeclaringType ?? member.Module.GetType();
+    }
 }

@@ -53,6 +53,7 @@
         <Using Include="System.Reflection.Emit"/>
         
         <Using Include="ScrubJay.Enums"/>
+        <Using Include="ScrubJay.Extensions"/>
         <Using Include="ScrubJay.Utilities"/>
     </ItemGroup>
 
@@ -90,6 +91,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Dunet" Version="1.11.2" />
         <PackageReference Include="Fody" Version="6.8.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -105,6 +107,10 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
 
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Runtime\Building\Emission\Instructions\" />
     </ItemGroup>
     <PropertyGroup>
         <PolySharpUsePublicAccessibilityForGeneratedTypes>true</PolySharpUsePublicAccessibilityForGeneratedTypes>

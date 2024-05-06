@@ -88,6 +88,12 @@ public abstract class MethodCriteriaBuilder<TBuilder, TCriteria> : MemberCriteri
         return _builder;
     }
 
+    public TBuilder ParameterTypes(params object[] arguments)
+    {
+        _criteria.Parameters = Array.ConvertAll<object, ParameterCriteria>(arguments, static o => o.GetType());
+        return _builder;
+    }
+
     public TBuilder NoParameters()
     {
         _criteria.Parameters = Array.Empty<ParameterCriteria>();
