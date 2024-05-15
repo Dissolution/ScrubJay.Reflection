@@ -4,35 +4,35 @@ namespace ScrubJay.Reflection.Extensions;
 
 public static class ParameterInfoExtensions
 {
-    public static RefKind RefType(this ParameterInfo parameter)
+    public static RefKind RefKind(this ParameterInfo parameter)
     {
         var parameterType = parameter.ParameterType;
         if (parameterType.IsByRef)
         {
             if (parameter.IsIn)
-                return RefKind.In;
+                return Reflection.RefKind.In;
             if (parameter.IsOut)
-                return RefKind.Out;
-            return RefKind.Ref;
+                return Reflection.RefKind.Out;
+            return Reflection.RefKind.Ref;
         }
         Debug.Assert(!parameter.IsIn && !parameter.IsOut);
-        return RefKind.None;
+        return Reflection.RefKind.None;
     }
     
-    public static RefKind RefType(this ParameterInfo parameter, out Type parameterType)
+    public static RefKind RefKind(this ParameterInfo parameter, out Type parameterType)
     {
         parameterType = parameter.ParameterType;
         if (parameterType.IsByRef)
         {
             parameterType = parameterType.GetElementType()!;
             if (parameter.IsIn)
-                return RefKind.In;
+                return Reflection.RefKind.In;
             if (parameter.IsOut)
-                return RefKind.Out;
-            return RefKind.Ref;
+                return Reflection.RefKind.Out;
+            return Reflection.RefKind.Ref;
         }
         Debug.Assert(!parameter.IsIn && !parameter.IsOut);
-        return RefKind.None;
+        return Reflection.RefKind.None;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -2,7 +2,7 @@ namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class EventCriteria : MemberCriteria, ICriteria<EventInfo>
 {
-    public static EventCriteria Create(MemberCriteria criteria)
+    public static new EventCriteria Create(MemberCriteria criteria)
     {
         return new()
         {

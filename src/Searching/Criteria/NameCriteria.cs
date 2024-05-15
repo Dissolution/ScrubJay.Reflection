@@ -1,4 +1,3 @@
-using ScrubJay.Reflection.Extensions;
 using ScrubJay.Validation;
 
 namespace ScrubJay.Reflection.Searching.Criteria;

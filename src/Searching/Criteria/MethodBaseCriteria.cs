@@ -1,5 +1,3 @@
-using ScrubJay.Reflection.Extensions;
-
 namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class MethodBaseCriteria : MemberCriteria, ICriteria<MethodBase>
@@ -19,7 +17,7 @@ public record class MethodBaseCriteria : MemberCriteria, ICriteria<MethodBase>
             Parameters = parameters,
         };
     }
-    public static MethodBaseCriteria Create(MemberCriteria criteria)
+    public static new MethodBaseCriteria Create(MemberCriteria criteria)
     {
         return new()
         {
@@ -33,9 +31,10 @@ public record class MethodBaseCriteria : MemberCriteria, ICriteria<MethodBase>
     
     public TypeCriteria? ReturnType { get; set; } = null;
     public ParameterCriteria[]? Parameters { get; set; } = null;
+    public GenericTypesCriteria? GenericTypes { get; set; } = null;
 
     public override MemberTypes MemberType => MemberTypes.Method | MemberTypes.Constructor;
-
+    
     public bool Matches(MethodBase? method)
     {
         if (!base.Matches(method))
@@ -53,16 +52,21 @@ public record class MethodBaseCriteria : MemberCriteria, ICriteria<MethodBase>
                     return false;
             }
         }
+        if (GenericTypes is not null)
+        {
+            if (!GenericTypes.Matches(method))
+                return false;
+        }
         return true;
     }
 }
 
-public abstract class MethodCriteriaBuilder<TBuilder, TCriteria> : MemberCriteriaBuilder<TBuilder, TCriteria>
+public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCriteriaBuilder<TBuilder, TCriteria>
     where TBuilder : MemberCriteriaBuilder<TBuilder, TCriteria>
     where TCriteria : MethodBaseCriteria, new()
 {
-    protected MethodCriteriaBuilder() { }
-    protected MethodCriteriaBuilder(TCriteria criteria) : base(criteria) { }
+    protected MethodBaseCriteriaBuilder() { }
+    protected MethodBaseCriteriaBuilder(TCriteria criteria) : base(criteria) { }
 
     public TBuilder ReturnType(TypeCriteria criteria)
     {
@@ -99,9 +103,40 @@ public abstract class MethodCriteriaBuilder<TBuilder, TCriteria> : MemberCriteri
         _criteria.Parameters = Array.Empty<ParameterCriteria>();
         return _builder;
     }
+    
+    
+    public TBuilder Generic
+    {
+        get
+        {
+            _criteria.GenericTypes = new GenericTypesCriteria() { IsGeneric = true };
+            return _builder;
+        }
+    }
+
+    public TBuilder NonGeneric
+    {
+        get
+        {
+            _criteria.GenericTypes = new GenericTypesCriteria() { IsGeneric = false };
+            return _builder;
+        }
+    }
+
+    public TBuilder GenericTypes(params TypeCriteria[] criteria)
+    {
+        _criteria.GenericTypes = new GenericTypesCriteria()
+        {
+            IsGeneric = true,
+            TypesCriteria = criteria,
+        };
+        return _builder;
+    }
+
+    public TBuilder GenericTypes(params Type[] types) => GenericTypes(types.ConvertAll(static type => TypeCriteria.Create(type)));
 }
 
-public sealed class MethodBaseCriteriaBuilder : MethodCriteriaBuilder<MethodBaseCriteriaBuilder, MethodBaseCriteria>, ICriteria<MethodBase>
+public sealed class MethodBaseCriteriaBuilder : MethodBaseCriteriaBuilder<MethodBaseCriteriaBuilder, MethodBaseCriteria>, ICriteria<MethodBase>
 {
     internal MethodBaseCriteriaBuilder()
     {

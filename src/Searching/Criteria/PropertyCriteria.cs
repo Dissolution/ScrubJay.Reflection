@@ -1,5 +1,3 @@
-using ScrubJay.Extensions;
-
 namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class PropertyCriteria : MemberCriteria, ICriteria<PropertyInfo>
@@ -11,7 +9,7 @@ public record class PropertyCriteria : MemberCriteria, ICriteria<PropertyInfo>
             Type = propertyType,
         };
     }
-    public static PropertyCriteria Create(MemberCriteria criteria)
+    public static new PropertyCriteria Create(MemberCriteria criteria)
     {
         return new()
         {

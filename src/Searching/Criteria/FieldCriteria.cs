@@ -24,7 +24,7 @@ public record class FieldCriteria : MemberCriteria, ICriteria<FieldInfo>
             Modifiers = modifiers,
         };
     }
-    public static FieldCriteria Create(MemberCriteria criteria)
+    public static new FieldCriteria Create(MemberCriteria criteria)
     {
         return new()
         {
@@ -67,9 +67,15 @@ public abstract class FieldCriteriaBuilder<TBuilder, TCriteria> : MemberCriteria
     protected FieldCriteriaBuilder() { }
     protected FieldCriteriaBuilder(TCriteria criteria) : base(criteria) { }
 
-    public TBuilder Type(TypeCriteria criteria)
+    public TBuilder FieldType(TypeCriteria criteria)
     {
         _criteria.Type = criteria;
+        return _builder;
+    }
+
+    public TBuilder FieldType<TField>()
+    {
+        _criteria.Type = typeof(TField);
         return _builder;
     }
 
@@ -89,5 +95,5 @@ public sealed class FieldCriteriaBuilder : FieldCriteriaBuilder<FieldCriteriaBui
     {
     }
 
-    public bool Matches(FieldInfo field) => _criteria.Matches(field);
+    public bool Matches(FieldInfo? field) => _criteria.Matches(field);
 }

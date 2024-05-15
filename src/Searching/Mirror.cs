@@ -1,5 +1,4 @@
-﻿using ScrubJay.Extensions;
-using ScrubJay.Reflection.Searching.Criteria;
+﻿using ScrubJay.Reflection.Searching.Criteria;
 
 namespace ScrubJay.Reflection.Searching;
 

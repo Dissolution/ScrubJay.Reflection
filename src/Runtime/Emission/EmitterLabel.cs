@@ -1,6 +1,4 @@
-﻿using Jay.Reflection.Building.Emission;
-
-namespace ScrubJay.Reflection.Runtime.Emission;
+﻿namespace ScrubJay.Reflection.Runtime.Emission;
 
 public readonly struct EmitterLabel :
 #if NET7_0_OR_GREATER
@@ -10,8 +8,6 @@ public readonly struct EmitterLabel :
     IEquatable<EmitterLabel>,
     IEquatable<Label>
 {
-    public static implicit operator Label(EmitterLabel emitterLabel) => emitterLabel.Label;
-
     public static bool operator ==(EmitterLabel left, EmitterLabel right) => left.Equals(right);
     public static bool operator !=(EmitterLabel left, EmitterLabel right) => !left.Equals(right);
     public static bool operator ==(EmitterLabel left, Label right) => left.Equals(right);

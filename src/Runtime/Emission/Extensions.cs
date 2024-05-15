@@ -1,4 +1,4 @@
-﻿using ScrubJay.Reflection.Extensions;
+﻿using ScrubJay.Reflection.Info;
 
 namespace ScrubJay.Reflection.Runtime.Emission;
 
@@ -10,13 +10,16 @@ public static class Extensions
         return value <= 127 && value >= 0;
     }
 
-    public static bool IsShortForm(this LocalBuilder local)
+    public static bool IsShortForm(this LocalVariableInfo local)
     {
         return local.LocalIndex <= byte.MaxValue;
     }
 
     public static OpCode GetCallOpCode(this MethodBase method)
     {
+        if (method.IsConstructor)
+            return OpCodes.Newobj;
+        
         /* Call is for calling non-virtual, static, or superclass methods
          *   i.e. the target of the Call is not subject to overriding
          * Callvirt is for calling virtual methods
@@ -38,13 +41,40 @@ public static class Extensions
         return OpCodes.Callvirt;
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="method"></param>
-    /// <returns></returns>
-    /// <see href="https://stackoverflow.com/questions/38078948/check-if-a-classes-property-or-method-is-declared-as-sealed"/>
-    public static bool IsOverridable(this MethodBase method) => method.IsVirtual && !method.IsFinal;
+
+
+
+    public static void SetReturnSignature(this MethodBuilder methodBuilder, ReturnSignature signature)
+    {
+        _ = methodBuilder.DefineParameter(0, signature.GetParameterAttributes(), null);
+    }
+
+    public static void SetParameterSignature(this MethodBuilder methodBuilder, int index, ParameterSignature signature)
+    {
+        if (index < 0)
+            throw new ArgumentOutOfRangeException(nameof(index), index, $"Index must be zero or greater");
+        
+        var parameterBuilder = methodBuilder.DefineParameter(index + 1, signature.GetParameterAttributes(), signature.Name);
+        if (signature.Default.IsSome(out var @default))
+        {
+            parameterBuilder.SetConstant(@default);
+        }
+    }
     
-    public static bool IsSealed(this MethodBase method) => !IsOverridable(method);
+    public static void SetReturnSignature(this DynamicMethod dynamicMethod, ReturnSignature signature)
+    {
+        _ = dynamicMethod.DefineParameter(0, signature.GetParameterAttributes(), null);
+    }
+
+    public static void SetParameterSignature(this DynamicMethod dynamicMethod, int index, ParameterSignature signature)
+    {
+        if (index < 0)
+            throw new ArgumentOutOfRangeException(nameof(index), index, $"Index must be zero or greater");
+        
+        var parameterBuilder = dynamicMethod.DefineParameter(index + 1, signature.GetParameterAttributes(), signature.Name);
+        if (signature.Default.IsSome(out var @default))
+        {
+            parameterBuilder?.SetConstant(@default);
+        }
+    }
 }

@@ -1,4 +1,5 @@
-using ScrubJay.Reflection.Extensions;
+using Vis = ScrubJay.Reflection.Visibility;
+using Acc = ScrubJay.Reflection.Access;
 
 namespace ScrubJay.Reflection.Searching.Criteria;
 
@@ -16,8 +17,8 @@ public record class MemberCriteria : Criteria, ICriteria<MemberInfo>
     }
     
     public NameCriteria? Name { get; set; } = null;
-    public Visibility Visibility { get; set; } = Visibility.Any;
-    public Access Access { get; set; } = Access.Any;
+    public Vis Visibility { get; set; } = Vis.Any;
+    public Acc Access { get; set; } = Acc.Any;
     public virtual MemberTypes MemberType { get; set; } = MemberTypes.All;
 
     internal BindingFlags BindingFlags
@@ -25,17 +26,17 @@ public record class MemberCriteria : Criteria, ICriteria<MemberInfo>
         get
         {
             BindingFlags flags = default;
-            if (Visibility.HasFlag(Visibility.Private))
+            if (Visibility.HasFlag(Vis.Private))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Visibility.Protected))
+            if (Visibility.HasFlag(Vis.Protected))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Visibility.Internal))
+            if (Visibility.HasFlag(Vis.Internal))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Visibility.Public))
+            if (Visibility.HasFlag(Vis.Public))
                 flags |= BindingFlags.Public;
-            if (Access.HasFlag(Access.Static))
+            if (Access.HasFlag(Acc.Static))
                 flags |= BindingFlags.Static;
-            if (Access.HasFlag(Access.Instance))
+            if (Access.HasFlag(Acc.Instance))
                 flags |= BindingFlags.Instance;
             return flags;
         }
@@ -69,6 +70,7 @@ public abstract class MemberCriteriaBuilder<TBuilder, TCriteria> : CriteriaBuild
     public MethodBaseCriteriaBuilder MethodBase => new(MethodBaseCriteria.Create(_criteria));
     public MethodCriteriaBuilder Method => new(MethodCriteria.Create(_criteria));
     public ConstructorCriteriaBuilder Constructor => new(ConstructorCriteria.Create(_criteria));
+    public TypeCriteriaBuilder Type => new(TypeCriteria.Create(_criteria));
 
     protected MemberCriteriaBuilder() { }
     protected MemberCriteriaBuilder(TCriteria criteria) : base(criteria) { }
@@ -79,13 +81,59 @@ public abstract class MemberCriteriaBuilder<TBuilder, TCriteria> : CriteriaBuild
         return _builder;
     }
 
-    public TBuilder Visibility(Visibility visibility)
+    public TBuilder Visibility(Vis visibility)
     {
         _criteria.Visibility = visibility;
         return _builder;
     }
+    
+    public TBuilder Public
+    {
+        get
+        {
+            _criteria.Visibility = Vis.Public;
+            return _builder;
+        }
+    }
+    
+    public TBuilder NonPublic
+    {
+        get
+        {
+            _criteria.Visibility = Vis.NonPublic;
+            return _builder;
+        }
+    }
+    
+    public TBuilder Internal
+    {
+        get
+        {
+            _criteria.Visibility = Vis.Internal;
+            return _builder;
+        }
+    }
 
-    public TBuilder Access(Access access)
+    public TBuilder Protected
+    {
+        get
+        {
+            _criteria.Visibility = Vis.Protected;
+            return _builder;
+        }
+    }
+
+    public TBuilder Private
+    {
+        get
+        {
+            _criteria.Visibility = Vis.Private;
+            return _builder;
+        }
+    }
+
+
+    public TBuilder Access(Acc access)
     {
         _criteria.Access = access;
         return _builder;
@@ -95,7 +143,7 @@ public abstract class MemberCriteriaBuilder<TBuilder, TCriteria> : CriteriaBuild
     {
         get
         {
-            _criteria.Access = Reflection.Access.Static;
+            _criteria.Access = Acc.Static;
             return _builder;
         }
     }
@@ -104,7 +152,7 @@ public abstract class MemberCriteriaBuilder<TBuilder, TCriteria> : CriteriaBuild
     {
         get
         {
-            _criteria.Access = Reflection.Access.Instance;
+            _criteria.Access = Acc.Instance;
             return _builder;
         }
     }

@@ -1,7 +1,97 @@
 ﻿using Dunet;
+using ScrubJay.Reflection.Runtime.Naming;
 // ReSharper disable IdentifierTypo
 
-namespace ScrubJay.Reflection.Runtime.Emission;
+//https://github.com/0xd4d/dnlib/blob/master/src/DotNet/Emit/Instruction.cs
+
+
+namespace ScrubJay.Reflection.Runtime.Emission.Instructions;
+
+public record class OpCodeInstruction : Instruction
+{
+    public OpCode OpCode { get; }
+
+    public override int Size
+    {
+        get
+        {
+            int size = OpCode.Size;
+            if (OpCode.OperandType != OperandType.InlineNone)
+                throw new InvalidOperationException();
+            return size;
+        }
+    }
+
+    public OpCodeInstruction(OpCode opCode)
+    {
+        this.OpCode = opCode;
+    }
+
+    public override string ToString() => OpCode.Name ?? OpCode.GetType().Dump();
+}
+
+public record class OpCodeArgInstruction<T> : OpCodeInstruction
+{
+    public T Arg { get; }
+
+    public override int Size
+    {
+        get
+        {
+            int size = OpCode.Size;
+            
+            switch (OpCode.OperandType)
+            {
+                case OperandType.InlineSwitch:
+                {
+                    if (Arg is not Instruction[] instructions)
+                        throw new InvalidOperationException();
+                    size += (1 + instructions.Length) * 4;
+                    break;
+                }
+                case OperandType.InlineI8:
+                case OperandType.InlineR:
+                    size += 8;
+                    break;
+                case OperandType.InlineBrTarget:
+                case OperandType.InlineField:
+                case OperandType.InlineI:
+                case OperandType.InlineMethod:
+                case OperandType.InlineString:
+                case OperandType.InlineTok:
+                case OperandType.InlineType:
+                case OperandType.ShortInlineR:
+                case OperandType.InlineSig:
+                    size += 4;
+                    break;
+                case OperandType.InlineVar:
+                    size += 2;
+                    break;
+                case OperandType.ShortInlineBrTarget:
+                case OperandType.ShortInlineI:
+                case OperandType.ShortInlineVar:
+                    size += 1;
+                    break;
+                case OperandType.InlinePhi:
+                case OperandType.InlineNone:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            return size;
+        }
+    }
+
+    public OpCodeArgInstruction(OpCode opCode, T arg) : base(opCode)
+    {
+        this.Arg = arg;
+    }
+
+    public override string ToString() => InterpolatedName.Resolve($"{OpCode} {Arg}");
+}
+
+
+/*
 
 public sealed record class OpInstruction : Instruction
 {
@@ -69,68 +159,11 @@ static class Test
 
 }
 
-
-
+*/
+/*
 [Union]
 public partial record class OpCodeInstruction : Instruction
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static short ValidateArgIndex(int index,
-        [CallerArgumentExpression(nameof(index))]
-        string? indexName = null)
-    {
-        if (index is <= short.MaxValue and >= 0)
-            return (short)index;
-        throw new ArgumentOutOfRangeException(indexName, index,
-            $"Argument Index must be between 0 and {short.MaxValue}");
-    }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static byte ValidateShortArgIndex(
-        int index,
-        [CallerArgumentExpression(nameof(index))]
-        string? indexName = null)
-    {
-        if (index is <= byte.MaxValue and >= byte.MinValue)
-            return (byte)index;
-        throw new ArgumentOutOfRangeException(indexName, index,
-            $"Short-form Argument Index must be between {byte.MinValue} and {byte.MaxValue}");
-    }
-
-    public OpCode OpCode { get; }
-
-    public virtual int Size => OpCode.Size;
-
-    protected OpCodeInstruction(OpCode opCode)
-    {
-        this.OpCode = opCode;
-    }
-
-    public override string ToString()
-    {
-        return $"{OpCode.Name}";
-    }
-}
-
-[Union]
-public partial record class OpCodeInstruction<T> : OpCodeInstruction
-{
-    public T Arg { get; }
-    
-    protected OpCodeInstruction(OpCode opCode, T arg) : base(opCode)
-    {
-        this.Arg = arg;
-    }
-    
-    public override string ToString()
-    {
-        return $"{OpCode.Name} {Arg}";
-    }
-}
-
-partial record OpCodeInstruction
-{
-
 #region TryCatchFinally
     /// <summary>
     /// Transfers control from the filter clause of an exception back to the Common Language Infrastructure (CLI) exception handler.
@@ -328,4 +361,69 @@ partial record OpCodeInstruction
     }
 #endregion
 #endregion
+
+
+    public partial record class WithByte(byte Arg) : OpCodeInstruction
+    {
+        public WithByte(OpCode opCode, byte arg) : this(arg)
+        {
+            this.OpCode = opCode;
+        }
+    }
+
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static short ValidateArgIndex(int index,
+        [CallerArgumentExpression(nameof(index))]
+        string? indexName = null)
+    {
+        if (index is <= short.MaxValue and >= 0)
+            return (short)index;
+        throw new ArgumentOutOfRangeException(indexName, index,
+            $"Argument Index must be between 0 and {short.MaxValue}");
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    protected static byte ValidateShortArgIndex(
+        int index,
+        [CallerArgumentExpression(nameof(index))]
+        string? indexName = null)
+    {
+        if (index is <= byte.MaxValue and >= byte.MinValue)
+            return (byte)index;
+        throw new ArgumentOutOfRangeException(indexName, index,
+            $"Short-form Argument Index must be between {byte.MinValue} and {byte.MaxValue}");
+    }
+
+    public OpCode OpCode { get; }
+
+    public override int Size => OpCode.Size;
+
+    public OpCodeInstruction(OpCode opCode)
+    {
+        this.OpCode = opCode;
+    }
+
+    public override string ToString()
+    {
+        return $"{OpCode.Name}";
+    }
 }
+/*
+
+[Union]
+public partial record class OpCodeArgInstruction<T> : OpCodeInstruction
+{
+    public T Arg { get; }
+
+    public OpCodeArgInstruction(OpCode opCode, T arg) : base(opCode)
+    {
+        this.Arg = arg;
+    }
+
+    public override sealed string ToString()
+    {
+        return $"{OpCode.Name} {Arg}";
+    }
+}
+*/

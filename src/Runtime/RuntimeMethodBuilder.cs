@@ -1,4 +1,3 @@
-using ScrubJay.Extensions;
 using ScrubJay.Reflection.Info;
 using ScrubJay.Reflection.Runtime.Emission;
 
@@ -7,44 +6,47 @@ namespace ScrubJay.Reflection.Runtime;
 public class DelegateBuilder
 {
     protected readonly DynamicMethod _dynamicMethod;
-    protected readonly Type _delegateType;
     protected ILGenerator? _ilGenerator;
-    protected ILEmitter? _ilEmitter;
+    protected IBasicEmitter? _ilEmitter;
+    
+    public DelegateSignature Signature { get; }
     
     public ILGenerator ILGenerator
     {
         get => _ilGenerator ??= _dynamicMethod.GetILGenerator();
     }
 
-    public ILEmitter Emitter
+    public IBasicEmitter BasicEmitter
     {
-        get => _ilEmitter ??= new(ILGenerator);
+        get => _ilEmitter ?? throw new NotImplementedException();
     }
-    
-    public DelegateBuilder(Type delegateType)
+
+    public DelegateBuilder(DelegateSignature signature)
     {
-        if (!delegateType.Implements<Delegate>())
-            throw new ArgumentException("Not a valid Delegate Type", nameof(delegateType));
-        _delegateType = delegateType;
-        _dynamicMethod = RuntimeBuilder.CreateDynamicMethod(MethodSignature.For(delegateType));
+        this.Signature = signature;
+        _dynamicMethod = RuntimeBuilder.CreateDynamicMethod(signature);
     }
 
     public Delegate CreateDelegate()
     {
-        return _dynamicMethod.CreateDelegate(_delegateType);
+        return _dynamicMethod.CreateDelegate(this.Signature.GetOrCreateDelegateType());
     }
 }
 
 public class DelegateBuilder<TDelegate> : DelegateBuilder
     where TDelegate : Delegate
 {
-    public DelegateBuilder() : base(typeof(TDelegate))
+    public DelegateBuilder() : base(DelegateSignature.For<TDelegate>())
     {
-        
+
     }
 
     public new TDelegate CreateDelegate()
     {
+#if NET6_0_OR_GREATER
         return _dynamicMethod.CreateDelegate<TDelegate>();
+#else
+        return (TDelegate)_dynamicMethod.CreateDelegate(typeof(TDelegate));
+#endif
     }
 }

@@ -1,8 +1,8 @@
 ﻿using ScrubJay.Text;
 
-namespace ScrubJay.Reflection.Runtime.Emission;
+namespace ScrubJay.Reflection.Runtime.Emission.Instructions;
 
-public class InstructionStream : LinkedList<InstructionLine>
+public class InstructionStream : List<InstructionLine>
 {
     public InstructionLine? FindByOffset(int offset)
     {
@@ -17,16 +17,6 @@ public class InstructionStream : LinkedList<InstructionLine>
             }
         }
         return null;
-    }
-
-    public void RemoveAfter(LinkedListNode<InstructionLine>? node)
-    {
-        if (node is null) return;
-        var last = Last;
-        if (last is not null && last.Value != node.Value)
-        {
-            RemoveLast();
-        }
     }
     
     public override string ToString()

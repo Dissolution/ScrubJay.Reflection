@@ -19,7 +19,7 @@ public record class MethodCriteria : MethodBaseCriteria, ICriteria<MethodInfo>
 }
 
 public sealed class MethodCriteriaBuilder :
-    MethodCriteriaBuilder<MethodCriteriaBuilder, MethodCriteria>,
+    MethodBaseCriteriaBuilder<MethodCriteriaBuilder, MethodCriteria>,
     ICriteria<MethodInfo>
 {
     public MethodCriteriaBuilder()

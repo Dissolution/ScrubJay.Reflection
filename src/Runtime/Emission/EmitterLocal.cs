@@ -1,20 +1,16 @@
-﻿using Jay.Reflection.Building.Emission;
-using ScrubJay.Comparison;
+﻿using ScrubJay.Comparison;
+using ScrubJay.Reflection.Runtime.Naming;
 
 namespace ScrubJay.Reflection.Runtime.Emission;
 
-public sealed class EmitterLocal : 
+public sealed class EmitterLocal : LocalVariableInfo,
 #if NET7_0_OR_GREATER
     IEqualityOperators<EmitterLocal, EmitterLocal, bool>,
-    IEqualityOperators<EmitterLocal, LocalBuilder, bool>,
     IEqualityOperators<EmitterLocal, LocalVariableInfo, bool>,
 #endif
-    IEquatable<EmitterLocal>, 
-    IEquatable<LocalBuilder>,
+    IEquatable<EmitterLocal>,
     IEquatable<LocalVariableInfo>
 {
-    public static implicit operator LocalBuilder(EmitterLocal local) => local._localBuilder;
-
     public static bool operator ==(EmitterLocal? left, EmitterLocal? right)
     {
         if (ReferenceEquals(left, right)) return true;
@@ -22,13 +18,6 @@ public sealed class EmitterLocal :
         return left.Equals(right);
     }
     public static bool operator !=(EmitterLocal? left, EmitterLocal? right) => !(left == right);
-    public static bool operator ==(EmitterLocal? left, LocalBuilder? right)
-    {
-        if (left is null)
-            return right is null;
-        return left.Equals(right);
-    }
-    public static bool operator !=(EmitterLocal? left, LocalBuilder? right) => !(left == right);
     public static bool operator ==(EmitterLocal? left, LocalVariableInfo? right)
     {
         if (left is null)
@@ -38,58 +27,57 @@ public sealed class EmitterLocal :
     public static bool operator !=(EmitterLocal? left, LocalVariableInfo? right) => !(left == right);
 
     
-    private readonly LocalBuilder _localBuilder;
-    private readonly string? _name;
+    public string? Name { get; }
+    public override int LocalIndex { get; }
+    public override Type LocalType { get; }
+    public override bool IsPinned { get; }
+    public bool IsShortForm => LocalIndex <= byte.MaxValue;
 
-    public LocalBuilder Local => _localBuilder;
-    public string? Name => _name;
-
-    public int Index => _localBuilder.LocalIndex;
-    public Type Type => _localBuilder.LocalType;
-    public bool IsPinned => _localBuilder.IsPinned;
-    public bool IsShortForm => _localBuilder.IsShortForm();
-
-    public EmitterLocal(LocalBuilder local, string? name = null)
+    public EmitterLocal(int index, Type type, bool isPinned = false, string? name = null)
     {
-        _localBuilder = local;
-        _name = name;
+        this.LocalIndex = index;
+        this.LocalType = type;
+        this.IsPinned = isPinned;
+        this.Name = name;
+    }
+    public EmitterLocal(LocalVariableInfo localVariableInfo, string? name = null)
+    {
+        this.LocalIndex = localVariableInfo.LocalIndex;
+        this.LocalType = localVariableInfo.LocalType;
+        this.IsPinned = localVariableInfo.IsPinned;
+        this.Name = name;
     }
 
     public bool Equals(EmitterLocal? emitterLocal)
     {
-        if (emitterLocal is null) return false;
-        return LocalBuilderEqualityComparer.Default.Equals(_localBuilder, emitterLocal._localBuilder);
+        return emitterLocal is not null &&
+            emitterLocal.LocalIndex == this.LocalIndex &&
+            emitterLocal.LocalType == this.LocalType &&
+            emitterLocal.IsPinned == this.IsPinned;
     }
-
-    public bool Equals(LocalBuilder? localBuilder)
-    {
-        if (localBuilder is null) return false;
-        return LocalBuilderEqualityComparer.Default.Equals(_localBuilder, localBuilder);
-    }
-
+    
     public bool Equals(LocalVariableInfo? localVariableInfo)
     {
         return localVariableInfo is not null &&
-               localVariableInfo.LocalIndex == _localBuilder.LocalIndex &&
-               localVariableInfo.LocalType == _localBuilder.LocalType &&
-               localVariableInfo.IsPinned == _localBuilder.IsPinned;
+            localVariableInfo.LocalIndex == this.LocalIndex &&
+            localVariableInfo.LocalType == this.LocalType &&
+            localVariableInfo.IsPinned == this.IsPinned;
     }
 
     public override bool Equals(object? obj) => obj switch
     {
         EmitterLocal emitterLocal => Equals(emitterLocal),
-        LocalBuilder localBuilder => Equals(localBuilder),
         LocalVariableInfo localVariableInfo => Equals(localVariableInfo),
         _ => false,
     };
     
     public override int GetHashCode()
     {
-        return Index;
+        return LocalIndex;
     }
     
     public override string ToString()
     {
-        return $"[{Index}]: {(IsPinned ? "fixed " : "")}{Type} {Name ?? "???"}";
+        return InterpolatedName.Resolve($"[{LocalIndex}]: {(IsPinned ? "fixed " : "")}{LocalType} {Name ?? "???"}");
     }
 }

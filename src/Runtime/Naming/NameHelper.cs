@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using Microsoft.CodeAnalysis.CSharp;
-using ScrubJay.Extensions;
 using ScrubJay.Text;
 
 namespace ScrubJay.Reflection.Runtime.Naming;

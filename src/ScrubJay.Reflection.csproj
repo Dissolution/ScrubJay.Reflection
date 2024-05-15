@@ -12,6 +12,7 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
         <RootNamespace>ScrubJay.Reflection</RootNamespace>
         <AssemblyName>ScrubJay.Reflection</AssemblyName>
@@ -55,6 +56,9 @@
         <Using Include="ScrubJay.Enums"/>
         <Using Include="ScrubJay.Extensions"/>
         <Using Include="ScrubJay.Utilities"/>
+
+        <Using Include="ScrubJay.Reflection.Extensions"/>
+        <Using Include="ScrubJay.Reflection.Utilities"/>
     </ItemGroup>
 
     <!-- Project References -->
@@ -65,7 +69,7 @@
     <!-- NuGet Packages -->
     <ItemGroup Condition=" '$(TargetFramework)' == 'net481' ">
         <PackageReference Include="System.Memory" Version="4.5.5">
-            <PrivateAssets>all</PrivateAssets>
+<!--            <PrivateAssets>all</PrivateAssets>-->
         </PackageReference>
     </ItemGroup>
 
@@ -107,10 +111,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
 
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Runtime\Building\Emission\Instructions\" />
     </ItemGroup>
     <PropertyGroup>
         <PolySharpUsePublicAccessibilityForGeneratedTypes>true</PolySharpUsePublicAccessibilityForGeneratedTypes>

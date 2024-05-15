@@ -1,8 +1,7 @@
-﻿using ScrubJay.Extensions;
-using ScrubJay.Reflection.Info;
+﻿using ScrubJay.Reflection.Info;
+using ScrubJay.Reflection.Runtime.Emission;
 using ScrubJay.Reflection.Runtime.Naming;
 using ScrubJay.Reflection.Searching;
-using ConstructorInfo = System.Reflection.ConstructorInfo;
 
 namespace ScrubJay.Reflection.Runtime;
 
@@ -15,20 +14,7 @@ public static class RuntimeBuilder
     {
         var assemblyName = new AssemblyName("ScrubJay.Reflections");
         AssemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-        ModuleBuilder = AssemblyBuilder.DefineDynamicModule("Runtime");
-    }
-
-
-    public static DynamicMethod CreateDynamicMethod(MethodSignature signature)
-    {
-        return new DynamicMethod(
-            name: NameHelper.CreateMemberName(MemberTypes.Method, signature.Name),
-            attributes: MethodAttributes.Public | MethodAttributes.Static, // only valid value
-            callingConvention: CallingConventions.Standard, // only valid value
-            returnType: signature.ReturnType,
-            parameterTypes: signature.ParameterTypes,
-            m: ModuleBuilder,
-            skipVisibility: true);
+        ModuleBuilder = AssemblyBuilder.DefineDynamicModule(nameof(Runtime));
     }
     
     public static TypeBuilder DefineType(TypeAttributes typeAttributes, string? name = null)
@@ -65,37 +51,71 @@ public static class RuntimeBuilder
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
+    
+    public static DynamicMethod CreateDynamicMethod(DelegateSignature signature)
+    {
+        var returnSig = signature.ReturnSignature;
+        var paramsSigs = signature.ParameterSignatures;
+        
+        DynamicMethod dynamicMethod = new DynamicMethod(
+            name: NameHelper.CreateMemberName(MemberTypes.Method, signature.Name),
+            attributes: MethodAttributes.Public | MethodAttributes.Static, // only valid value
+            callingConvention: CallingConventions.Standard, // only valid value
+            returnType: returnSig.Type,
+            parameterTypes: signature.GetParameterTypes(),
+            m: ModuleBuilder,
+            skipVisibility: true);
+
+        dynamicMethod.SetReturnSignature(returnSig);
+        for (var i = 0; i < paramsSigs.Count; i++)
+        {
+            dynamicMethod.SetParameterSignature(i, paramsSigs[i]);
+        }
+
+        return dynamicMethod;
+    }
+
+    public static DelegateBuilder CreateDelegateBuilder(DelegateSignature signature) 
+        => new DelegateBuilder(signature);
+    
+    public static DelegateBuilder<TDelegate> CreateDelegateBuilder<TDelegate>()
+        where TDelegate : Delegate
+        => new DelegateBuilder<TDelegate>();
+
+    public static Delegate BuildDelegate(DelegateSignature signature, Action<DelegateBuilder> buildDelegate)
+    {
+        var builder = CreateDelegateBuilder(signature);
+        buildDelegate(builder);
+        return builder.CreateDelegate();
+    } 
+    
+    public static TDelegate BuildDelegate<TDelegate>(Action<DelegateBuilder<TDelegate>> buildDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>();
+        buildDelegate(builder);
+        return builder.CreateDelegate();
+    } 
+    
+    public static Delegate GenerateDelegate(DelegateSignature signature, Action<ILGenerator> generateDelegate)
+    {
+        var builder = CreateDelegateBuilder(signature);
+        generateDelegate(builder.ILGenerator);
+        return builder.CreateDelegate();
+    } 
+    
+    public static TDelegate GenerateDelegate<TDelegate>(Action<ILGenerator> generateDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>();
+        generateDelegate(builder.ILGenerator);
+        return builder.CreateDelegate();
+    } 
 }
 
 
 /*
 
-public static DynamicMethod CreateDynamicMethod(DelegateInfo sig, string? name = null)
-    {
-        return new DynamicMethod(MemberNaming.CreateMemberName(MemberTypes.Method, name),
-            MethodAttributes.Public | MethodAttributes.Static,
-            CallingConventions.Standard,
-            sig.ReturnType,
-            sig.ParameterTypes,
-            ModuleBuilder,
-            true);
-    }
-
-    public static RuntimeDelegateBuilder CreateRuntimeDelegateBuilder(DelegateInfo delegateSig, string? name = null)
-    {
-        var dynamicMethod = CreateDynamicMethod(delegateSig, name);
-        return new RuntimeDelegateBuilder(dynamicMethod, delegateSig);
-    }
-
-    public static RuntimeDelegateBuilder CreateRuntimeDelegateBuilder(Type delegateType, string? name = null)
-        => CreateRuntimeDelegateBuilder(DelegateInfo.For(delegateType), name);
-    
-    public static RuntimeDelegateBuilder<TDelegate> CreateRuntimeDelegateBuilder<TDelegate>(string? name = null)
-        where TDelegate : Delegate
-    {
-        var dynamicMethod = CreateDynamicMethod(DelegateInfo.For<TDelegate>(), name);
-        return new RuntimeDelegateBuilder<TDelegate>(dynamicMethod);
-    }
 
     public static Delegate CreateDelegate(DelegateInfo delegateSig, string? name, Action<RuntimeDelegateBuilder> buildDelegate)
     {

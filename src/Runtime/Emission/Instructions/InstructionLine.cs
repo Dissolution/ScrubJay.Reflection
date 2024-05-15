@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.Runtime.Emission;
+﻿namespace ScrubJay.Reflection.Runtime.Emission.Instructions;
 
 public sealed record class InstructionLine(int? Offset, Instruction Instruction)
 {

@@ -1,6 +1,3 @@
-using ScrubJay.Extensions;
-using ScrubJay.Reflection.Extensions;
-
 namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class ParameterCriteria : Criteria, ICriteria<ParameterInfo>
@@ -19,7 +16,7 @@ public record class ParameterCriteria : Criteria, ICriteria<ParameterInfo>
         if (parameter is null) return false;
         if (Name is not null && !Name.Matches(parameter.Name))
             return false;
-        var paramRefType = parameter.RefType(out var parameterType);
+        var paramRefType = parameter.RefKind(out var parameterType);
         if (!RefKind.HasAnyFlags(paramRefType))
             return false;
         if (Type is not null && !Type.Matches(parameterType))

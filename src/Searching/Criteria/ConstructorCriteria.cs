@@ -19,7 +19,7 @@ public record class ConstructorCriteria : MethodBaseCriteria, ICriteria<Construc
 }
 
 public sealed class ConstructorCriteriaBuilder :
-    MethodCriteriaBuilder<ConstructorCriteriaBuilder, ConstructorCriteria>,
+    MethodBaseCriteriaBuilder<ConstructorCriteriaBuilder, ConstructorCriteria>,
     ICriteria<ConstructorInfo>
 {
     public ConstructorCriteriaBuilder()
