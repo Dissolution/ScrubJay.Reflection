@@ -2,8 +2,24 @@ namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class ParameterCriteria : Criteria, ICriteria<ParameterInfo>
 {
-    public static implicit operator ParameterCriteria(Type type) => new() { Type = type };
-    public static implicit operator ParameterCriteria(TypeCriteria typeCriteria) => new() { Type = typeCriteria };
+    public static implicit operator ParameterCriteria(Type type) => Create(type);
+    public static implicit operator ParameterCriteria(TypeCriteria typeCriteria) => Create(typeCriteria);
+
+    public static ParameterCriteria Create(Type parameterType)
+    {
+        return new ParameterCriteria()
+        {
+            Type = TypeCriteria.Create(parameterType),
+        };
+    }
+    
+    public static ParameterCriteria Create(TypeCriteria parameterTypeCriteria)
+    {
+        return new ParameterCriteria()
+        {
+            Type = parameterTypeCriteria,
+        };
+    }
     
     public NameCriteria? Name { get; set; } = null;
     public TypeCriteria? Type { get; set; } = null;

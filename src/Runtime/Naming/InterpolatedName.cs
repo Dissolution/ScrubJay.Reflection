@@ -4,21 +4,21 @@ using ScrubJay.Text;
 namespace ScrubJay.Reflection.Runtime.Naming;
 
 [InterpolatedStringHandler]
-public ref struct InterpolatedName
+public ref struct InterpolateDeeper
 {
-    public static string Resolve(ref InterpolatedName interpolation)
+    public static string Resolve(ref InterpolateDeeper interpolation)
     {
         return interpolation.ToStringAndDispose();
     }
 
     private StringBuilder _stringBuilder;
 
-    public InterpolatedName()
+    public InterpolateDeeper()
     {
         _stringBuilder = StringBuilderPool.Rent();
     }
 
-    public InterpolatedName(int literalLength, int formattedCount)
+    public InterpolateDeeper(int literalLength, int formattedCount)
     {
         _stringBuilder = StringBuilderPool.Rent();
     }
@@ -137,5 +137,5 @@ public ref struct InterpolatedName
         return str;
     }
 
-    public override string ToString() => _stringBuilder?.ToString() ?? throw new ObjectDisposedException(nameof(InterpolatedName));
+    public override string ToString() => _stringBuilder?.ToString() ?? throw new ObjectDisposedException(nameof(InterpolateDeeper));
 }

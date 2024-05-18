@@ -1,5 +1,6 @@
 ﻿using ScrubJay.Reflection.Info;
 using ScrubJay.Reflection.Runtime.Emission;
+using ScrubJay.Reflection.Runtime.Emission.Emitters;
 using ScrubJay.Reflection.Runtime.Naming;
 using ScrubJay.Reflection.Searching;
 
@@ -27,7 +28,7 @@ public static class RuntimeBuilder
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
         where TAttribute : Attribute, new()
     {
-        var ctor = Mirror.Search<TAttribute>
+        var ctor = Mirror.Search<TAttribute>()
             .TryFindMember(b => b.Instance.Constructor.NoParameters())
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, Array.Empty<object>());
@@ -36,7 +37,7 @@ public static class RuntimeBuilder
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>(params object[] ctorArgs)
         where TAttribute : Attribute
     {
-        var ctor = Mirror.Search<TAttribute>
+        var ctor = Mirror.Search<TAttribute>()
             .TryFindMember(b => b.Instance.Constructor.ParameterTypes(ctorArgs))
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
@@ -46,8 +47,8 @@ public static class RuntimeBuilder
     {
         if (!attributeType.Implements<Attribute>())
             throw new ArgumentException($"{attributeType} is not an Attribute");
-        var ctor = Mirror.Search
-            .TryFindMember(attributeType, b => b.Instance.Constructor.ParameterTypes(ctorArgs))
+        var ctor = Mirror.Search(attributeType)
+            .TryFindMember(b => b.Instance.Constructor.ParameterTypes(ctorArgs))
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
@@ -78,9 +79,9 @@ public static class RuntimeBuilder
     public static DelegateBuilder CreateDelegateBuilder(DelegateSignature signature) 
         => new DelegateBuilder(signature);
     
-    public static DelegateBuilder<TDelegate> CreateDelegateBuilder<TDelegate>()
+    public static DelegateBuilder<TDelegate> CreateDelegateBuilder<TDelegate>(string? name = null)
         where TDelegate : Delegate
-        => new DelegateBuilder<TDelegate>();
+        => new DelegateBuilder<TDelegate>(name);
 
     public static Delegate BuildDelegate(DelegateSignature signature, Action<DelegateBuilder> buildDelegate)
     {
@@ -97,6 +98,14 @@ public static class RuntimeBuilder
         return builder.CreateDelegate();
     } 
     
+    public static TDelegate BuildDelegate<TDelegate>(string? name, Action<DelegateBuilder<TDelegate>> buildDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>(name);
+        buildDelegate(builder);
+        return builder.CreateDelegate();
+    } 
+    
     public static Delegate GenerateDelegate(DelegateSignature signature, Action<ILGenerator> generateDelegate)
     {
         var builder = CreateDelegateBuilder(signature);
@@ -109,6 +118,37 @@ public static class RuntimeBuilder
     {
         var builder = CreateDelegateBuilder<TDelegate>();
         generateDelegate(builder.ILGenerator);
+        return builder.CreateDelegate();
+    } 
+    
+    public static TDelegate GenerateDelegate<TDelegate>(string? name, Action<ILGenerator> generateDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>(name);
+        generateDelegate(builder.ILGenerator);
+        return builder.CreateDelegate();
+    } 
+    
+    public static Delegate EmitDelegate(DelegateSignature signature, Action<ICleanEmitter> emitDelegate)
+    {
+        var builder = CreateDelegateBuilder(signature);
+        emitDelegate(builder.Emitter);
+        return builder.CreateDelegate();
+    } 
+    
+    public static TDelegate EmitDelegate<TDelegate>(Action<ICleanEmitter> emitDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>();
+        emitDelegate(builder.Emitter);
+        return builder.CreateDelegate();
+    } 
+    
+    public static TDelegate EmitDelegate<TDelegate>(string? name, Action<ICleanEmitter> emitDelegate)
+        where TDelegate : Delegate
+    {
+        var builder = CreateDelegateBuilder<TDelegate>(name);
+        emitDelegate(builder.Emitter);
         return builder.CreateDelegate();
     } 
 }

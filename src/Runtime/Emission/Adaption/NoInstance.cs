@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.Runtime.Emission;
+﻿namespace ScrubJay.Reflection.Runtime.Emission.Adaption;
 
 /// <summary>
 /// Represents a placeholder instance <see cref="Type"/> for accessing <see langword="static"/> methods

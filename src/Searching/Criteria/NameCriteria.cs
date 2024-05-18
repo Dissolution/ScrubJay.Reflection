@@ -17,7 +17,7 @@ public record class NameCriteria : Criteria, ICriteria<string>
     
     public static NameCriteria Create(string name, StringMatch match = StringMatch.Exact, StringComparison comparison = StringComparison.Ordinal)
     {
-        Throw.IfNull(name);
+        ThrowIf.Null(name);
         return new()
         {
             Value = name,

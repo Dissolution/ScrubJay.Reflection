@@ -40,7 +40,7 @@ public static class TypeNames
             return type.Name;
         }
 
-        using var name = new InterpolatedName();
+        using var name = new InterpolateDeeper();
         
         // Nullable<T> => T?
         Type? underType = Nullable.GetUnderlyingType(type);

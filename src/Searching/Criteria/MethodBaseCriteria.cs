@@ -68,9 +68,21 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
     protected MethodBaseCriteriaBuilder() { }
     protected MethodBaseCriteriaBuilder(TCriteria criteria) : base(criteria) { }
 
+    public TBuilder ReturnType(Type type)
+    {
+        _criteria.ReturnType = TypeCriteria.Create(type);
+        return _builder;
+    }
+    
     public TBuilder ReturnType(TypeCriteria criteria)
     {
         _criteria.ReturnType = criteria;
+        return _builder;
+    }
+
+    public TBuilder ReturnsVoid()
+    {
+        _criteria.ReturnType = TypeCriteria.Create(typeof(void));
         return _builder;
     }
 
@@ -82,19 +94,19 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
 
     public TBuilder ParameterTypes(params TypeCriteria[] criteria)
     {
-        _criteria.Parameters = Array.ConvertAll<TypeCriteria, ParameterCriteria>(criteria, static c => c);
+        _criteria.Parameters = Array.ConvertAll<TypeCriteria, ParameterCriteria>(criteria, static tc => ParameterCriteria.Create(tc));
         return _builder;
     }
     
     public TBuilder ParameterTypes(params Type[] types)
     {
-        _criteria.Parameters = Array.ConvertAll<Type, ParameterCriteria>(types, static t => t);
+        _criteria.Parameters = Array.ConvertAll<Type, ParameterCriteria>(types, static type => ParameterCriteria.Create(type));
         return _builder;
     }
 
     public TBuilder ParameterTypes(params object[] arguments)
     {
-        _criteria.Parameters = Array.ConvertAll<object, ParameterCriteria>(arguments, static o => o.GetType());
+        _criteria.Parameters = Array.ConvertAll<object, ParameterCriteria>(arguments, static obj => ParameterCriteria.Create(obj.GetType()));
         return _builder;
     }
 

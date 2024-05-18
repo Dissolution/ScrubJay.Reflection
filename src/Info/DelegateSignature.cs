@@ -14,7 +14,7 @@ public sealed record class DelegateSignature
         };
     }
 
-    public static DelegateSignature For<TDelegate>(TDelegate? _ = default)
+    public static DelegateSignature For<TDelegate>()
         where TDelegate : Delegate
     {
         var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
@@ -22,6 +22,32 @@ public sealed record class DelegateSignature
         {
             _delegateType = typeof(TDelegate),
             Name = typeof(TDelegate).Name,
+            ParameterSignatures = invokeMethod.GetParameterSignatures(),
+            ReturnSignature = invokeMethod.GetReturnSignature(),
+        };
+    }
+    
+    public static DelegateSignature For<TDelegate>(TDelegate? @delegate)
+        where TDelegate : Delegate
+    {
+        var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
+        return new DelegateSignature
+        {
+            _delegateType = typeof(TDelegate),
+            Name = @delegate?.GetType().Name ?? typeof(TDelegate).Name,
+            ParameterSignatures = invokeMethod.GetParameterSignatures(),
+            ReturnSignature = invokeMethod.GetReturnSignature(),
+        };
+    }
+    
+    public static DelegateSignature For<TDelegate>(string? name)
+        where TDelegate : Delegate
+    {
+        var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
+        return new DelegateSignature
+        {
+            _delegateType = typeof(TDelegate),
+            Name = name ?? typeof(TDelegate).Name,
             ParameterSignatures = invokeMethod.GetParameterSignatures(),
             ReturnSignature = invokeMethod.GetReturnSignature(),
         };

@@ -1,3 +1,5 @@
+using ScrubJay.Reflection.Runtime.Naming;
+
 namespace ScrubJay.Reflection.Utilities;
 
 public static class Delegates
@@ -13,4 +15,8 @@ public static class Delegates
     {
         return GetInvokeMethod(typeof(TDelegate))!;
     }
+
+    public static string Dump<TDelegate>()
+        where TDelegate : Delegate
+        => typeof(TDelegate).Dump();
 }

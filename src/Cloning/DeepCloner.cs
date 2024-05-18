@@ -1,17 +1,20 @@
 using ScrubJay.Collections;
 using ScrubJay.Reflection.Runtime;
+using ScrubJay.Reflection.Runtime.Emission;
 using ScrubJay.Reflection.Searching;
 
 namespace ScrubJay.Reflection.Cloning;
 
 public static class DeepCloner
 {
-    private static readonly ConcurrentTypeMap<Delegate> _delegateCache;
+    private static readonly ConcurrentTypeMap<Delegate> _deepCloneCache;
+    private static readonly ConcurrentTypeMap<Delegate> _objectDeepCloneCache;
+    
     private static readonly MethodInfo _deepCloneEmptyMethod;
     
     static DeepCloner()
     {
-        _delegateCache = new()
+        _deepCloneCache = new()
         {
             [typeof(DBNull)] = DbNullDeepClone,
             [typeof(object)] = ObjectDeepClone,
@@ -31,9 +34,10 @@ public static class DeepCloner
             [typeof(DateTime)] = UnmanagedDeepClone<DateTime>,
             [typeof(string)] = StringDeepClone,
         };
+        _objectDeepCloneCache = new();
 
 
-        _deepCloneEmptyMethod = Mirror.Search.TryFindMember(typeof(DeepCloner), b => b.Public.Static.Method.Generic.Name(nameof(DeepClone))).OkOrThrow();
+        _deepCloneEmptyMethod = Mirror.Search(typeof(DeepCloner)).TryFindMember(b => b.Public.Static.Method.Generic.Name(nameof(DeepClone))).OkOrThrow();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -52,32 +56,63 @@ public static class DeepCloner
         if (type == typeof(object)) // prevent infinite recursion
             return obj;
 
-        var deepCloneMethod = _deepCloneEmptyMethod.MakeGenericMethod(type);
-        
+        // Get or create our shim
+        var shim = _objectDeepCloneCache.GetOrAdd<DeepClone<object>>(type, static t => CreateDeepCloneShim(t));
+        return shim(in obj);
     }
-    private static DeepClone<object> CreateShim(object obj, Type type, MethodInfo typedDeepCloneMethod)
+    
+    private static DeepClone<object> CreateDeepCloneShim(Type type)
     {
-        //ldarg
-        //unbox
+        var deepCloneMethod = _deepCloneEmptyMethod.MakeGenericMethod(type);
+        return RuntimeBuilder.EmitDelegate<DeepClone<object>>(emitter => emitter
+            .Ldarg(0)
+            .Ldind<object>()
+            .Unbox(type)
+            .Call(deepCloneMethod)
+            .Box(type)
+            .Ret());
     }
     
     
     
     private static Delegate CreateDeepCloneDelegate(Type type)
     {
-        
+        throw new NotImplementedException();
     }
 
+    private static readonly MethodInfo _runtimeHelpers_GetUninitializedObject_Method;
+    
     private static DeepClone<T> CreateDeepCloneDelegate<T>(Type type)
     {
+        var delegateBuilder = RuntimeBuilder.CreateDelegateBuilder<DeepClone<T>>();
+        var emitter = delegateBuilder.Emitter;
         
+        // Create a place to store the result
+        emitter.DeclareLocal(type, out var clone)
+            // and fill it with an uninitialized version
+            .Ldtoken(type).Call(EmissionHelper.Type_GetTypeFromHandle_Method)
+            .Call(EmissionHelper.GetUninitializedObject_Method)
+            .Stloc(clone);
+        
+        // All instance fields
+        var instanceFields = Mirror.Search(type).FindMembers<FieldInfo>(b => b.Instance.Field).ToList();
+        foreach (var field in instanceFields)
+        {
+            // (ref clone).Field = (in obj).Field
+            emitter.Ldloca(clone)
+                .Ldarg(0)
+                .Ldfld(field)
+                .Stfld(field);
+        }
+
+        throw new NotImplementedException();
     }
     
     [return: NotNullIfNotNull(nameof(value))]
-    public static T? DeepClone<T>(this T? value)
+    public static T? DeepClone<T>(ref readonly T? value)
     {
         if (value is null) return default;
-        var del = _delegateCache.GetOrAdd<T, DeepClone<T>>(static type => CreateDeepCloneDelegate<T>(type));
+        var del = _deepCloneCache.GetOrAdd<T, DeepClone<T>>(static type => CreateDeepCloneDelegate<T>(type));
         return del(in value);
     }
 }

@@ -91,4 +91,17 @@ public static class MemberInfoExtensions
     {
         return member.ReflectedType ?? member.DeclaringType ?? member.Module.GetType();
     }
+
+    public static bool IsStatic(this MemberInfo? member)
+    {
+        return member switch
+        {
+            EventInfo eventInfo => IsStatic(eventInfo.AddMethod) || IsStatic(eventInfo.RemoveMethod) || IsStatic(eventInfo.RaiseMethod),
+            FieldInfo fieldInfo => fieldInfo.IsStatic,
+            MethodBase methodBase => methodBase.IsStatic,
+            PropertyInfo propertyInfo => IsStatic(propertyInfo.GetMethod) || IsStatic(propertyInfo.SetMethod),
+            Type type => type is { IsAbstract: true, IsSealed: true },
+            _ => false,
+        };
+    }
 }

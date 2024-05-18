@@ -1,5 +1,6 @@
 using ScrubJay.Reflection.Info;
 using ScrubJay.Reflection.Runtime.Emission;
+using ScrubJay.Reflection.Runtime.Emission.Emitters;
 
 namespace ScrubJay.Reflection.Runtime;
 
@@ -7,7 +8,7 @@ public class DelegateBuilder
 {
     protected readonly DynamicMethod _dynamicMethod;
     protected ILGenerator? _ilGenerator;
-    protected IBasicEmitter? _ilEmitter;
+    protected ICleanEmitter? _ilEmitter;
     
     public DelegateSignature Signature { get; }
     
@@ -16,9 +17,9 @@ public class DelegateBuilder
         get => _ilGenerator ??= _dynamicMethod.GetILGenerator();
     }
 
-    public IBasicEmitter BasicEmitter
+    public ICleanEmitter Emitter
     {
-        get => _ilEmitter ?? throw new NotImplementedException();
+        get => _ilEmitter ?? Emission.Emitters.Emitter.GetCleanEmitter(ILGenerator);
     }
 
     public DelegateBuilder(DelegateSignature signature)
@@ -36,7 +37,7 @@ public class DelegateBuilder
 public class DelegateBuilder<TDelegate> : DelegateBuilder
     where TDelegate : Delegate
 {
-    public DelegateBuilder() : base(DelegateSignature.For<TDelegate>())
+    public DelegateBuilder(string? name = null) : base(DelegateSignature.For<TDelegate>(name))
     {
 
     }

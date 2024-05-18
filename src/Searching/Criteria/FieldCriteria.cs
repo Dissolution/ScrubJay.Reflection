@@ -17,7 +17,7 @@ public record class FieldCriteria : MemberCriteria, ICriteria<FieldInfo>
 {
     public static FieldCriteria Create(Type fieldType, FieldModifiers modifiers = FieldModifiers.Any)
     {
-        Throw.IfNull(fieldType);
+        ThrowIf.Null(fieldType);
         return new()
         {
             Type = fieldType,

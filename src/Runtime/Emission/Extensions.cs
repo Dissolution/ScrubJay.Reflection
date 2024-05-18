@@ -15,11 +15,8 @@ public static class Extensions
         return local.LocalIndex <= byte.MaxValue;
     }
 
-    public static OpCode GetCallOpCode(this MethodBase method)
+    public static OpCode GetCallOpCode(this MethodInfo methodInfo)
     {
-        if (method.IsConstructor)
-            return OpCodes.Newobj;
-        
         /* Call is for calling non-virtual, static, or superclass methods
          *   i.e. the target of the Call is not subject to overriding
          * Callvirt is for calling virtual methods
@@ -31,14 +28,25 @@ public static class Extensions
          */
         
         // Static?
-        if (method.IsStatic) return OpCodes.Call;
+        if (methodInfo.IsStatic) 
+            return OpCodes.Call;
         // Value-Type (all methods will automatically be sealed)
-        if (method.OwnerType().IsValueType && !method.IsVirtual) return OpCodes.Call;
+        if (methodInfo.OwnerType().IsValueType && !methodInfo.IsVirtual) 
+            return OpCodes.Call;
         
         // One would think that we could now check for sealed, but as Callvirt does a null check and instance can 
         // be null from this point on, we have to use Callvirt.
         // if (method.IsSealed()) return OpCodes.Call;
         return OpCodes.Callvirt;
+    }
+    
+    public static OpCode GetCallOpCode(this MethodBase method)
+    {
+        if (method is ConstructorInfo)
+            return OpCodes.Newobj;
+        if (method is MethodInfo info)
+            return GetCallOpCode(info);
+        throw new ArgumentException("", nameof(method));
     }
 
 

@@ -18,7 +18,7 @@ public record class TypeCriteria : MemberCriteria, ICriteria<Type>
     
     public static TypeCriteria Create(Type type, TypeMatch match = TypeMatch.Exact)
     {
-        Throw.IfNull(type);
+        ThrowIf.Null(type);
         return new()
         {
             Value = type,
