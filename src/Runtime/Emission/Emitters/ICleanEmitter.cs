@@ -8,6 +8,9 @@ public interface ICleanEmitter<TEmitter> :
 {
     IDirectEmitter DirectEmitter { get; }
     ISimpleEmitter SimpleEmitter { get; }
+
+    TEmitter If(bool predicate, Action<TEmitter>? emitIfTrue, Action<TEmitter>? emitIfFalse = null);
+    TEmitter IfNotNull<T>(T? value, Action<TEmitter, T> emitIfNotNull);
 }
 
 public interface ICleanEmitter : ICleanEmitter<ICleanEmitter>;

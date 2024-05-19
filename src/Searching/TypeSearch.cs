@@ -9,7 +9,7 @@ public class TypeSearch<T> : TypeSearch
     
     public Result<TMember, Reflexception> TryFindMember<TMember>(Expression<Action<T>> memberExpression)
     {
-        var member = Expressions.Expressions.FirstMember(memberExpression);
+        var member = Expressions.Expressions.FindMembers(memberExpression).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");
@@ -17,7 +17,7 @@ public class TypeSearch<T> : TypeSearch
     
     public Result<TMember, Reflexception> TryFindMember<TMember>(Expression<Func<T, object?>> memberExpression)
     {
-        var member = Expressions.Expressions.FirstMember(memberExpression);
+        var member = Expressions.Expressions.FindMembers(memberExpression).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");

@@ -56,10 +56,10 @@ public interface ICleanOperationEmitter<TEmitter> : IOperationEmitter<TEmitter>
 #endregion
     
 #region Load Value
-    TEmitter Ldc(int value);
-    TEmitter Ldc(long value);
-    TEmitter Ldc(float value);
-    TEmitter Ldc(double value);
+    TEmitter Ldc_I4(int value);
+    TEmitter Ldc_I8(long value);
+    TEmitter Ldc_R4(float value);
+    TEmitter Ldc_R8(double value);
 #endregion
 
 #region Arrays

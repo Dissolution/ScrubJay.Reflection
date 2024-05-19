@@ -22,10 +22,7 @@ internal class ArrayBuilder<TEmitter> : BuilderBase<TEmitter>, IArrayBuilder<TEm
         
     }
 
-    public TEmitter LoadLength()
-    {
-        return _emitter.Ldlen();
-    }
+    public TEmitter LoadLength() => Emit(e => e.Ldlen());
     public TEmitter LoadItem(Type itemType, bool asAddress = false)
     {
         return asAddress ? _emitter.Ldelema(itemType) : _emitter.Ldelem(itemType);

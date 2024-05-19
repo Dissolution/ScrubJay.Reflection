@@ -16,9 +16,8 @@ public record class TypeCriteria : MemberCriteria, ICriteria<Type>
 {
     public static implicit operator TypeCriteria(Type type) => Create(type);
     
-    public static TypeCriteria Create(Type type, TypeMatch match = TypeMatch.Exact)
+    public static TypeCriteria Create(Type? type, TypeMatch match = TypeMatch.Exact)
     {
-        ThrowIf.Null(type);
         return new()
         {
             Value = type,

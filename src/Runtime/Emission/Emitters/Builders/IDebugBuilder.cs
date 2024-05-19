@@ -7,7 +7,7 @@ public interface IDebugBuilder<out TEmitter>
     where TEmitter : IILEmitter<TEmitter>
 {
     TEmitter Break();
-    
+
     TEmitter NoOperation();
 
     TEmitter WriteLine(string str);
@@ -42,62 +42,60 @@ internal static class DebugBuilder
 }
 
 internal class DebugBuilder<TEmitter> : BuilderBase<TEmitter>, IDebugBuilder<TEmitter>
-    where TEmitter : ICleanEmitter<TEmitter>
+    where TEmitter : IILEmitter<TEmitter>
 {
-    
+
     public DebugBuilder(Emitter<TEmitter> emitter) : base(emitter)
     {
     }
-    
+
     public TEmitter Break() => _emitter.Break();
     public TEmitter NoOperation() => _emitter.Nop();
 
     public TEmitter WriteLine(string str)
     {
-        return _emitter.Ldstr(str)
-            .Call(DebugBuilder.Debug_WriteLine_String_Method);
+        _emitter.Ldstr(str);
+        _emitter.Call(DebugBuilder.Debug_WriteLine_String_Method);
+        return _emitter.AsTEmitter;
     }
 
     public TEmitter WriteLine(FieldInfo field)
     {
-        if (field.IsStatic)
-        {
-            _emitter.Ldsfld(field);
-        }
-        else
-        {
-            // Have to assume we're in an instance method
-            _emitter.Ldarg(0)
-                .Ldfld(field);
-        }
-
         var writeLineMethod = DebugBuilder.FindWriteLine(field.FieldType);
-        
+
+        if (!field.IsStatic)
+        {
+            _emitter.Ldarg(0);
+        }
+        _emitter.Ldfld(field);
+
         if (writeLineMethod is not null)
         {
-            return _emitter.Call(writeLineMethod);
+            _emitter.Call(writeLineMethod);
         }
         else
         {
-            return _emitter.Call(DebugBuilder.FindToString(field.FieldType))
-                .Call(DebugBuilder.Debug_WriteLine_String_Method);
+            _emitter.Call(DebugBuilder.FindToString(field.FieldType));
+            _emitter.Call(DebugBuilder.Debug_WriteLine_String_Method);
         }
+        return _emitter.AsTEmitter;
     }
 
     public TEmitter WriteLine(EmitterLocal local)
     {
-        _emitter.Ldloc(local);
-        
         var writeLineMethod = DebugBuilder.FindWriteLine(local.LocalType);
-        
+
+        _emitter.Ldloc(local);
+
         if (writeLineMethod is not null)
         {
-            return _emitter.Call(writeLineMethod);
+            _emitter.Call(writeLineMethod);
         }
         else
         {
-            return _emitter.Call(DebugBuilder.FindToString(local.LocalType))
-                .Call(DebugBuilder.Debug_WriteLine_String_Method);
+            _emitter.Call(DebugBuilder.FindToString(local.LocalType));
+            _emitter.Call(DebugBuilder.Debug_WriteLine_String_Method);
         }
+        return _emitter.AsTEmitter;
     }
 }

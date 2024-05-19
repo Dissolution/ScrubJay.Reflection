@@ -13,10 +13,13 @@ public interface IBranchBuilder<out TEmitter>
 
     TEmitter If(CompareOp op, EmitterLabel label);
     TEmitter If(CompareOp op, out EmitterLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
+
+    TEmitter Leave(EmitterLabel label);
+    TEmitter Leave(out EmitterLabel label, [CallerArgumentExpression(nameof(label))] string labelName = "");
 }
 
 internal class BranchBuilder<TEmitter> : BuilderBase<TEmitter>, IBranchBuilder<TEmitter>
-    where TEmitter : ICleanEmitter<TEmitter>
+    where TEmitter : IILEmitter<TEmitter>
 {
     private bool _unsigned = false;
 
@@ -40,9 +43,9 @@ internal class BranchBuilder<TEmitter> : BuilderBase<TEmitter>, IBranchBuilder<T
     }
     public TEmitter To(out EmitterLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null)
     {
-        return _emitter
-            .DefineLabel(out label, labelName)
-            .Br(label);
+        _emitter.DefineLabel(out label, labelName);
+        _emitter.Br(label);
+        return _emitter.AsTEmitter;
     }
     public TEmitter If(bool boolean, EmitterLabel label)
     {
@@ -71,5 +74,13 @@ internal class BranchBuilder<TEmitter> : BuilderBase<TEmitter>, IBranchBuilder<T
     {
         _emitter.DefineLabel(out label, labelName);
         return If(op, label);
+    }
+
+    public TEmitter Leave(EmitterLabel label) => _emitter.Leave(label);
+    public TEmitter Leave(out EmitterLabel label, [CallerArgumentExpression(nameof(label))] string labelName = "")
+    {
+        _emitter.DefineLabel(out label, labelName);
+        _emitter.Leave(label);
+        return _emitter.AsTEmitter;
     }
 }

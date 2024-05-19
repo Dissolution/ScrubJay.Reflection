@@ -15,7 +15,7 @@ public static class Mirror
     
     public static Result<TMember, Reflexception> TryFindMember<TMember>(Expression memberExpression)
     {
-        var member = Expressions.Expressions.FirstMember(memberExpression);
+        var member = Expressions.Expressions.FindMembers(memberExpression).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");

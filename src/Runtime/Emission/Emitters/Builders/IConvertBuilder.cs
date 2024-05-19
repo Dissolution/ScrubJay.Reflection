@@ -28,7 +28,7 @@ public enum ConvType
 }
 
 internal class ConvertBuilder<TEmitter> : BuilderBase<TEmitter>, IConvertBuilder<TEmitter>
-    where TEmitter : ICleanEmitter<TEmitter>
+    where TEmitter : IILEmitter<TEmitter>
 {
     private bool _throwOnOverflow = false;
     private bool _unsigned = false;

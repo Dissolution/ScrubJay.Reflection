@@ -5,10 +5,9 @@ using ScrubJay.Reflection.Expressions;
 
 
 
-var member = Expressions
-    .FirstMember(() => Debug.WriteLine("ABC"));
+var members = Expressions.FindMembers<string>(str => Debug.WriteLine(str));
 
-Console.WriteLine(member);
+Console.WriteLine(members);
 
 
 Console.WriteLine("Press Enter to close");

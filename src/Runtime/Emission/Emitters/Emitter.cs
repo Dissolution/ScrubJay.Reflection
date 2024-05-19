@@ -362,7 +362,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Box(Type type) => Emit(OpCodes.Box, type);
     public TEmitter Box<T>() => Box(typeof(T));
     public TEmitter Unbox(Type type) => Emit(OpCodes.Unbox, type);
-    public TEmitter Unbox<T>() where T : struct => Unbox(typeof(T));
+    public TEmitter Unbox<T>() => Unbox(typeof(T));
     public TEmitter Unbox_Any(Type type) => Emit(OpCodes.Unbox_Any, type);
     public TEmitter Unbox_Any<T>() => Unbox_Any(typeof(T));
     public TEmitter Castclass(Type type) => Emit(OpCodes.Castclass, type);
@@ -784,7 +784,7 @@ internal partial class Emitter<TEmitter> : Emitter,
         return Emit(unsigned ? OpCodes.Clt_Un : OpCodes.Clt);
     }
 
-    public TEmitter Ldc(int value)
+    public TEmitter Ldc_I4(int value)
     {
         return value switch
         {
@@ -802,15 +802,15 @@ internal partial class Emitter<TEmitter> : Emitter,
             _ => Emit(OpCodes.Ldc_I4, value),
         };
     }
-    public TEmitter Ldc(long value)
+    public TEmitter Ldc_I8(long value)
     {
         return Emit(OpCodes.Ldc_I8, value);
     }
-    public TEmitter Ldc(float value)
+    public TEmitter Ldc_R4(float value)
     {
         return Emit(OpCodes.Ldc_R4, value);
     }
-    public TEmitter Ldc(double value)
+    public TEmitter Ldc_R8(double value)
     {
         return Emit(OpCodes.Ldc_R8, value);
     }
@@ -1121,7 +1121,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Cgt_Un() => Emit(OpCodes.Cgt_Un);
     TEmitter IDirectOperationEmitter<TEmitter>.Clt() => Emit(OpCodes.Clt);
     public TEmitter Clt_Un() => Emit(OpCodes.Clt_Un);
-    public TEmitter Ldc_I4(int value) => Emit(OpCodes.Ldc_I4, value);
+    TEmitter IDirectOperationEmitter<TEmitter>.Ldc_I4(int value) => Ldc_I4(value);
     public TEmitter Ldc_I4_S(sbyte value) => Emit(OpCodes.Ldc_I4_S, value);
     public TEmitter Ldc_I4_M1() => Emit(OpCodes.Ldc_I4_M1);
     public TEmitter Ldc_I4_0() => Emit(OpCodes.Ldc_I4_0);
@@ -1133,9 +1133,8 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Ldc_I4_6() => Emit(OpCodes.Ldc_I4_6);
     public TEmitter Ldc_I4_7() => Emit(OpCodes.Ldc_I4_7);
     public TEmitter Ldc_I4_8() => Emit(OpCodes.Ldc_I4_8);
-    public TEmitter Ldc_I8(long value) => Emit(OpCodes.Ldc_I8, value);
-    public TEmitter Ldc_R4(float value) => Emit(OpCodes.Ldc_R4, value);
-    public TEmitter Ldc_R8(double value) => Emit(OpCodes.Ldc_R8, value);
+    TEmitter IDirectOperationEmitter<TEmitter>.Ldc_I8(long value) => Ldc_I8(value);
+    TEmitter IDirectOperationEmitter<TEmitter>.Ldc_R4(float value) => Ldc_R4(value);
     TEmitter IDirectOperationEmitter<TEmitter>.Ldelem(Type type) => Emit(OpCodes.Ldelem, type);
     TEmitter IDirectOperationEmitter<TEmitter>.Ldelem<T>() => Ldelem(typeof(T));
     public TEmitter Ldelem_I() => Emit(OpCodes.Ldelem_I);
@@ -1205,25 +1204,14 @@ internal partial class Emitter<TEmitter> : Emitter,
 
 }
 
-internal partial class Emitter<TEmitter> : ISimpleEmitter<TEmitter>
-    //where TEmitter : ICleanEmitter<TEmitter>, IDirectEmitter<TEmitter>, ISimpleEmitter<TEmitter>
-{
-#region Simple
-    public IArrayBuilder<TEmitter> Array => new ArrayBuilder<TEmitter>(this);
-    public IBitwiseBuilder<TEmitter> Bitwise { get; }
-    public IBranchBuilder<TEmitter> Branch { get; }
-    public IValueInteractionBuilder<TEmitter> Value { get; }
-    public IConvertBuilder<TEmitter> Convert { get; }
-    public ICompareBuilder<TEmitter> Compare { get; }
-    public ILoadBuilder<TEmitter> Load { get; }
-    public IStoreBuilder<TEmitter> Store { get; }
-    public ILabelBuilder<TEmitter> Label { get; }
-    public ILocalBuilder<TEmitter> Local { get; }
-    public IDebugBuilder<TEmitter> Debug { get; }
-    public IExceptionBuilder<TEmitter> Exception { get; }
-    public ITryCatchFinallyBuilder<TEmitter> Try(Action<TEmitter> emitTryBlock) => throw new NotImplementedException();
-    public TEmitter Scoped(Action<TEmitter> emitScopedBlock) => throw new NotImplementedException();
-    public TEmitter PushValue<T>(T? value) => throw new NotImplementedException();
-    public TEmitter Return() => throw new NotImplementedException();
-#endregion
-}
+    public interface IFluentEmitter<TEmitter> : IILEmitter<TEmitter>
+        where TEmitter : IILEmitter<TEmitter>
+    {
+        public ITryCatchFinallyBuilder<TEmitter> Try(Action<TEmitter> emitTryBlock) => throw new NotImplementedException();
+        public TEmitter Scoped(Action<TEmitter> emitScopedBlock) => throw new NotImplementedException();
+        public TEmitter If(bool predicate, Action<TEmitter>? emitIfTrue, Action<TEmitter>? emitIfFalse = null) => throw new NotImplementedException();
+        public TEmitter IfNotNull<T>(T? value, Action<TEmitter, T> emitIfNotNull) => throw new NotImplementedException();
+
+        public Result<Ok, Reflexception> CanPush<T>(T? value) => throw new NotImplementedException();
+        public Result<TEmitter, Reflexception> TryPush<T>(T? value) => throw new NotImplementedException();
+    }

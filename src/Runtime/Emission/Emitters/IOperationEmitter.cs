@@ -248,7 +248,7 @@ public interface IOperationEmitter<TEmitter> : IILEmitter<TEmitter>
     /// </summary>
     /// <typeparam name="T">The value type that is to be unboxed.</typeparam>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.unbox"/>
-    TEmitter Unbox<T>() where T : struct;
+    TEmitter Unbox<T>();
 
     /// <summary>
     /// Converts the boxed representation (<see cref="object"/>) value to its unboxed value.

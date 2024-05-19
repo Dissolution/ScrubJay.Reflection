@@ -9,7 +9,7 @@ public interface ICompareBuilder<out TEmitter>
 }
 
 internal class CompareBuilder<TEmitter> : BuilderBase<TEmitter>, ICompareBuilder<TEmitter>
-    where TEmitter : ICleanEmitter<TEmitter>
+    where TEmitter : IILEmitter<TEmitter>
 {
     private bool _unsigned = false;
     

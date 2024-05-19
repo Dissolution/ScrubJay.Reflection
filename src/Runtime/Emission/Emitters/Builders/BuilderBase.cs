@@ -5,10 +5,14 @@ internal abstract class BuilderBase<TEmitter>
 {
     protected readonly Emitter<TEmitter> _emitter;
 
-    protected ICleanEmitter CleanEmitter => (ICleanEmitter)(ICleanEmitter<ICleanEmitter>)_emitter;
-    
     protected BuilderBase(Emitter<TEmitter> emitter)
     {
         _emitter = emitter;
+    }
+
+    protected TEmitter Emit(Action<Emitter<TEmitter>> emit)
+    {
+        emit(_emitter);
+        return (TEmitter)(IILEmitter<TEmitter>)_emitter;
     }
 }

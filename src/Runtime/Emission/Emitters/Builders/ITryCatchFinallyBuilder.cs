@@ -31,7 +31,7 @@ public interface ITryCatchFinallyBuilder<TEmitter>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="exceptionType"/> or <paramref name="emitCatchBlock"/> is <c>null</c></exception>
     /// <exception cref="ArgumentException">Thrown if <paramref name="exceptionType"/> is not a valid <see cref="Exception"/> <see cref="Type"/></exception>
-    ITryCatchFinallyBuilder<TEmitter> Catch(Type exceptionType, Action<ICatchBlockEmitter<TEmitter>> emitCatchBlock);
+    ITryCatchFinallyBuilder<TEmitter> Catch(Type exceptionType, Action<TEmitter> emitCatchBlock);
 
     /// <summary>
     /// 
@@ -40,7 +40,7 @@ public interface ITryCatchFinallyBuilder<TEmitter>
     /// <typeparam name="TException"></typeparam>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="emitCatchBlock"/> is <c>null</c></exception>
-    ITryCatchFinallyBuilder<TEmitter> Catch<TException>(Action<ICatchBlockEmitter<TEmitter>> emitCatchBlock)
+    ITryCatchFinallyBuilder<TEmitter> Catch<TException>(Action<TEmitter> emitCatchBlock)
         where TException : Exception;
 
     /// <summary>
@@ -61,43 +61,44 @@ public interface ITryCatchFinallyBuilder<TEmitter>
     TEmitter Finally(Action<TEmitter> emitFinallyBlock);
 }
 
-//internal sealed class TryCatchFinallyBuilder<TEmitter> : ITryCatchFinallyBuilder<TEmitter>
-//    where TEmitter : IILEmitter<TEmitter>
-//{
-//    private readonly TEmitter _emitter;
-//    private EmitterLabel? _endTryLabel;
-//
-//    public EmitterLabel? EndTryLabel => _endTryLabel;
-//    
-//    public TryCatchFinallyBuilder(TEmitter emitter)
-//    {
-//        _emitter = emitter;
-//    }
-//
-//    public ITryCatchFinallyBuilder<TEmitter> Try(Action<TEmitter> tryBlock)
-//    {
-//        _emitter.BeginExceptionBlock(out _endTryLabel);
-//        tryBlock(_emitter);
-//        return this;
-//    }
-//
-//    public ITryCatchFinallyBuilder<TEmitter> Catch(Type exceptionType, Action<TEmitter> catchBlock)
-//    {
-//        _emitter.BeginCatchBlock(exceptionType);
-//        catchBlock(_emitter);
-//        return this;
-//    }
-//
-//    public TEmitter Finally() => _emitter;
-//    
-//    public TEmitter Finally(Action<TEmitter>? finallyBlock)
-//    {
-//        if (finallyBlock is not null)
-//        {
-//            _emitter.BeginFinallyBlock();
-//            finallyBlock(_emitter);
-//            _emitter.EndExceptionBlock();
-//        }
-//        return _emitter;
-//    }
-//}
+internal sealed class TryCatchFinallyBuilder<TEmitter> : BuilderBase<TEmitter>, ITryCatchFinallyBuilder<TEmitter>
+    where TEmitter : IILEmitter<TEmitter>
+{
+    private EmitterLabel _endTryLabel;
+
+    public EmitterLabel? TryBlockEndLabel => _endTryLabel;
+
+    public TryCatchFinallyBuilder(Emitter<TEmitter> emitter) : base(emitter)
+    {
+
+    }
+
+    public ITryCatchFinallyBuilder<TEmitter> Try(Action<TEmitter> tryBlock)
+    {
+        _emitter.BeginExceptionBlock(out _endTryLabel).Invoke(tryBlock);
+        return this;
+    }
+
+    public ITryCatchFinallyBuilder<TEmitter> Catch(Type exceptionType, Action<TEmitter> catchBlock)
+    {
+        _emitter.BeginCatchBlock(exceptionType).Invoke(catchBlock);
+        return this;
+    }
+
+    public ITryCatchFinallyBuilder<TEmitter> Catch<TException>(Action<TEmitter> emitCatchBlock)
+        where TException : Exception
+    {
+        _emitter.BeginCatchBlock<TException>().Invoke(emitCatchBlock);
+        return this;
+    }
+
+    public TEmitter Finally() => _emitter;
+
+    public TEmitter Finally(Action<TEmitter>? finallyBlock)
+    {
+        return _emitter.IfNotNull(finallyBlock, (e, f) => e
+                .BeginFinallyBlock()
+                .Invoke(f))
+            .EndExceptionBlock();
+    }
+}
