@@ -1,6 +1,6 @@
 namespace ScrubJay.Reflection.Searching.Criteria;
 
-public sealed class PredicateCriteria<T> : ICriteria<T>
+public sealed record class PredicateCriteria<T> : Criteria<T>, ICriteria<T>
 {
     private readonly Func<T?, bool> _predicate;
 
@@ -9,5 +9,5 @@ public sealed class PredicateCriteria<T> : ICriteria<T>
         _predicate = predicate;
     }
 
-    public bool Matches(T? value) => _predicate(value);
+    public override bool Matches(T? value) => _predicate(value);
 }

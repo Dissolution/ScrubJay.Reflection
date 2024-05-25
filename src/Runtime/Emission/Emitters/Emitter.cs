@@ -26,8 +26,8 @@ internal class Emitter
 
 internal partial class Emitter<TEmitter> : Emitter,
     ICleanEmitter<TEmitter>,
-    IDirectEmitter<TEmitter>,
-    ISimpleEmitter<TEmitter>
+    IDirectEmitter<TEmitter>//,
+    //ISimpleEmitter<TEmitter>
     where TEmitter : IILEmitter<TEmitter>// ICleanEmitter<TEmitter>, IDirectEmitter<TEmitter>, ISimpleEmitter<TEmitter>
 {
     protected readonly List<EmitterLabel> _emitterLabels = new(0);
@@ -42,13 +42,13 @@ internal partial class Emitter<TEmitter> : Emitter,
 
     public IDirectEmitter DirectEmitter => (IDirectEmitter)_emitter;
 
-    public ISimpleEmitter SimpleEmitter
-    {
-        get
-        {
-            throw new NotImplementedException();
-        }
-    }
+//    public ISimpleEmitter SimpleEmitter
+//    {
+//        get
+//        {
+//            throw new NotImplementedException();
+//        }
+//    }
 
     public Emitter()
     {
@@ -1203,15 +1203,3 @@ internal partial class Emitter<TEmitter> : Emitter,
     }
 
 }
-
-    public interface IFluentEmitter<TEmitter> : IILEmitter<TEmitter>
-        where TEmitter : IILEmitter<TEmitter>
-    {
-        public ITryCatchFinallyBuilder<TEmitter> Try(Action<TEmitter> emitTryBlock) => throw new NotImplementedException();
-        public TEmitter Scoped(Action<TEmitter> emitScopedBlock) => throw new NotImplementedException();
-        public TEmitter If(bool predicate, Action<TEmitter>? emitIfTrue, Action<TEmitter>? emitIfFalse = null) => throw new NotImplementedException();
-        public TEmitter IfNotNull<T>(T? value, Action<TEmitter, T> emitIfNotNull) => throw new NotImplementedException();
-
-        public Result<Ok, Reflexception> CanPush<T>(T? value) => throw new NotImplementedException();
-        public Result<TEmitter, Reflexception> TryPush<T>(T? value) => throw new NotImplementedException();
-    }

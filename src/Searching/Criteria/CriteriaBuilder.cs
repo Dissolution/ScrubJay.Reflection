@@ -1,10 +1,5 @@
 namespace ScrubJay.Reflection.Searching.Criteria;
 
-public abstract record class Criteria
-{
-    
-}
-
 public abstract class CriteriaBuilder<TBuilder, TCriteria>
     where TBuilder : CriteriaBuilder<TBuilder, TCriteria>
     where TCriteria : Criteria, new()

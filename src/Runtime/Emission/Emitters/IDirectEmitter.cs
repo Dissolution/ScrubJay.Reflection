@@ -7,7 +7,7 @@ public interface IDirectEmitter<TEmitter> :
     where TEmitter : IILEmitter<TEmitter>
 {
     ICleanEmitter CleanEmitter { get; }
-    ISimpleEmitter SimpleEmitter { get; }
+    //ISimpleEmitter SimpleEmitter { get; }
 }
 
 public interface IDirectEmitter : IDirectEmitter<IDirectEmitter>;

@@ -1,7 +1,8 @@
 namespace ScrubJay.Reflection.Searching.Criteria;
 
-public record class ParameterCriteria : Criteria, ICriteria<ParameterInfo>
+public record class ParameterCriteria : Criteria<ParameterInfo>, ICriteria<ParameterInfo>
 {
+/*
     public static implicit operator ParameterCriteria(Type type) => Create(type);
     public static implicit operator ParameterCriteria(TypeCriteria typeCriteria) => Create(typeCriteria);
 
@@ -20,14 +21,21 @@ public record class ParameterCriteria : Criteria, ICriteria<ParameterInfo>
             Type = parameterTypeCriteria,
         };
     }
-    
-    public NameCriteria? Name { get; set; } = null;
+    */
+
+    public TextCriteria? Name { get; set; } = null;
     public TypeCriteria? Type { get; set; } = null;
     public RefKind RefKind { get; set; } = RefKind.Any;
     public bool? HasDefault { get; set; } = null;
     public ObjectCriteria? Default { get; set; } = null;
 
-    public bool Matches([NotNullWhen(true)]ParameterInfo? parameter)
+    public ParameterCriteria() : base() { }
+    public ParameterCriteria(TypeCriteria typeCriteria) : base()
+    {
+        this.Type = typeCriteria;
+    }
+    
+    public override bool Matches([NotNullWhen(true)]ParameterInfo? parameter)
     {
         if (parameter is null) return false;
         if (Name is not null && !Name.Matches(parameter.Name))
@@ -55,9 +63,9 @@ public abstract class ParameterCriteriaBuilder<TBuilder, TCriteria> : CriteriaBu
     protected ParameterCriteriaBuilder() { }
     protected ParameterCriteriaBuilder(TCriteria criteria) : base(criteria) { }
 
-    public TBuilder Name(NameCriteria nameCriteria)
+    public TBuilder Name(TextCriteria textCriteria)
     {
-        _criteria.Name = nameCriteria;
+        _criteria.Name = textCriteria;
         return _builder;
     }
 
@@ -74,13 +82,13 @@ public abstract class ParameterCriteriaBuilder<TBuilder, TCriteria> : CriteriaBu
         return _builder;
     }
 
-    public TBuilder Default(bool? has)
+    public TBuilder HasDefault(bool? has)
     {
         _criteria.HasDefault = has;
         return _builder;
     }
 
-    public TBuilder Default(ObjectCriteria defaultCriteria)
+    public TBuilder HasDefault(ObjectCriteria defaultCriteria)
     {
         _criteria.HasDefault = true;
         _criteria.Default = defaultCriteria;

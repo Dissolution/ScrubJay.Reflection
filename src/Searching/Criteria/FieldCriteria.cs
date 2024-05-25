@@ -20,7 +20,7 @@ public record class FieldCriteria : MemberCriteria, ICriteria<FieldInfo>
         ThrowIf.Null(fieldType);
         return new()
         {
-            Type = fieldType,
+            Type = new(fieldType),
             Modifiers = modifiers,
         };
     }
@@ -75,7 +75,7 @@ public abstract class FieldCriteriaBuilder<TBuilder, TCriteria> : MemberCriteria
 
     public TBuilder FieldType<TField>()
     {
-        _criteria.Type = typeof(TField);
+        _criteria.Type = new(typeof(TField));
         return _builder;
     }
 

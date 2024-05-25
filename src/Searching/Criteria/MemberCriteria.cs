@@ -5,18 +5,18 @@ namespace ScrubJay.Reflection.Searching.Criteria;
 
 public record class MemberCriteria : Criteria, ICriteria<MemberInfo>
 {
-    public static MemberCriteria Create(MemberCriteria criteria)
-    {
-        return new()
-        {
-            Name = criteria.Name,
-            Visibility = criteria.Visibility,
-            Access = criteria.Access,
-            MemberType = criteria.MemberType,
-        };
-    }
+//    public static MemberCriteria Create(MemberCriteria criteria)
+//    {
+//        return new()
+//        {
+//            Name = criteria.Name,
+//            Visibility = criteria.Visibility,
+//            Access = criteria.Access,
+//            MemberType = criteria.MemberType,
+//        };
+//    }
     
-    public NameCriteria? Name { get; set; } = null;
+    public TextCriteria? Name { get; set; } = null;
     public Vis Visibility { get; set; } = Vis.Any;
     public Acc Access { get; set; } = Acc.Any;
     public virtual MemberTypes MemberType { get; set; } = MemberTypes.All;
@@ -26,17 +26,17 @@ public record class MemberCriteria : Criteria, ICriteria<MemberInfo>
         get
         {
             BindingFlags flags = default;
-            if (Visibility.HasFlag(Vis.Private))
+            if (Visibility.HasFlags(Vis.Private))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Vis.Protected))
+            if (Visibility.HasFlags(Vis.Protected))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Vis.Internal))
+            if (Visibility.HasFlags(Vis.Internal))
                 flags |= BindingFlags.NonPublic;
-            if (Visibility.HasFlag(Vis.Public))
+            if (Visibility.HasFlags(Vis.Public))
                 flags |= BindingFlags.Public;
-            if (Access.HasFlag(Acc.Static))
+            if (Access.HasFlags(Acc.Static))
                 flags |= BindingFlags.Static;
-            if (Access.HasFlag(Acc.Instance))
+            if (Access.HasFlags(Acc.Instance))
                 flags |= BindingFlags.Instance;
             return flags;
         }
@@ -70,14 +70,14 @@ public abstract class MemberCriteriaBuilder<TBuilder, TCriteria> : CriteriaBuild
     public MethodBaseCriteriaBuilder MethodBase => new(MethodBaseCriteria.Create(_criteria));
     public MethodCriteriaBuilder Method => new(MethodCriteria.Create(_criteria));
     public ConstructorCriteriaBuilder Constructor => new(ConstructorCriteria.Create(_criteria));
-    public TypeCriteriaBuilder Type => new(TypeCriteria.Create(_criteria));
+    public TypeCriteriaBuilder Type => throw new NotImplementedException();//new TypeCriteria((TypeCriteria)_criteria));
 
     protected MemberCriteriaBuilder() { }
     protected MemberCriteriaBuilder(TCriteria criteria) : base(criteria) { }
 
-    public TBuilder Name(NameCriteria nameCriteria)
+    public TBuilder Name(TextCriteria textCriteria)
     {
-        _criteria.Name = nameCriteria;
+        _criteria.Name = textCriteria;
         return _builder;
     }
 

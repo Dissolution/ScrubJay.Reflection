@@ -60,6 +60,7 @@ public interface ITryCatchFinallyBuilder<TEmitter>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="emitFinallyBlock"/> is <c>null</c></exception>
     TEmitter Finally(Action<TEmitter> emitFinallyBlock);
 }
+/*
 
 internal sealed class TryCatchFinallyBuilder<TEmitter> : BuilderBase<TEmitter>, ITryCatchFinallyBuilder<TEmitter>
     where TEmitter : IILEmitter<TEmitter>
@@ -101,4 +102,4 @@ internal sealed class TryCatchFinallyBuilder<TEmitter> : BuilderBase<TEmitter>, 
                 .Invoke(f))
             .EndExceptionBlock();
     }
-}
+}*/

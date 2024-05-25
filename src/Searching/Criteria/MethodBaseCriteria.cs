@@ -27,14 +27,14 @@ public record class MethodBaseCriteria : MemberCriteria, ICriteria<MethodBase>
             Visibility = criteria.Visibility,
         };
     }
-    
-    
+
+
     public TypeCriteria? ReturnType { get; set; } = null;
     public ParameterCriteria[]? Parameters { get; set; } = null;
     public GenericTypesCriteria? GenericTypes { get; set; } = null;
 
     public override MemberTypes MemberType => MemberTypes.Method | MemberTypes.Constructor;
-    
+
     public bool Matches(MethodBase? method)
     {
         if (!base.Matches(method))
@@ -70,10 +70,10 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
 
     public TBuilder ReturnType(Type type)
     {
-        _criteria.ReturnType = TypeCriteria.Create(type);
+        _criteria.ReturnType = new(type);
         return _builder;
     }
-    
+
     public TBuilder ReturnType(TypeCriteria criteria)
     {
         _criteria.ReturnType = criteria;
@@ -82,7 +82,7 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
 
     public TBuilder ReturnsVoid()
     {
-        _criteria.ReturnType = TypeCriteria.Create(typeof(void));
+        _criteria.ReturnType = new(typeof(void));
         return _builder;
     }
 
@@ -94,19 +94,19 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
 
     public TBuilder ParameterTypes(params TypeCriteria[] criteria)
     {
-        _criteria.Parameters = Array.ConvertAll<TypeCriteria, ParameterCriteria>(criteria, static tc => ParameterCriteria.Create(tc));
+        _criteria.Parameters = Array.ConvertAll<TypeCriteria, ParameterCriteria>(criteria, static tc => new(tc));
         return _builder;
     }
-    
+
     public TBuilder ParameterTypes(params Type[] types)
     {
-        _criteria.Parameters = Array.ConvertAll<Type, ParameterCriteria>(types, static type => ParameterCriteria.Create(type));
+        _criteria.Parameters = Array.ConvertAll<Type, ParameterCriteria>(types, static type => new(new(type)));
         return _builder;
     }
 
     public TBuilder ParameterTypes(params object[] arguments)
     {
-        _criteria.Parameters = Array.ConvertAll<object, ParameterCriteria>(arguments, static obj => ParameterCriteria.Create(obj.GetType()));
+        _criteria.Parameters = Array.ConvertAll<object, ParameterCriteria>(arguments, static obj => new(new(obj.GetType())));
         return _builder;
     }
 
@@ -115,8 +115,8 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
         _criteria.Parameters = Array.Empty<ParameterCriteria>();
         return _builder;
     }
-    
-    
+
+
     public TBuilder Generic
     {
         get
@@ -145,7 +145,7 @@ public abstract class MethodBaseCriteriaBuilder<TBuilder, TCriteria> : MemberCri
         return _builder;
     }
 
-    public TBuilder GenericTypes(params Type[] types) => GenericTypes(types.ConvertAll(static type => TypeCriteria.Create(type)));
+    public TBuilder GenericTypes(params Type[] types) => GenericTypes(types.ConvertAll(static type => new TypeCriteria(type)));
 }
 
 public sealed class MethodBaseCriteriaBuilder : MethodBaseCriteriaBuilder<MethodBaseCriteriaBuilder, MethodBaseCriteria>, ICriteria<MethodBase>
@@ -159,4 +159,3 @@ public sealed class MethodBaseCriteriaBuilder : MethodBaseCriteriaBuilder<Method
 
     public bool Matches(MethodBase? method) => _criteria.Matches(method);
 }
-

@@ -1,4 +1,4 @@
-namespace ScrubJay.Reflection.Comparison;
+﻿namespace ScrubJay.Reflection.Comparison;
 
 public class ModuleEqualityComparer : EqualityComparer<Module>
 {
@@ -8,6 +8,7 @@ public class ModuleEqualityComparer : EqualityComparer<Module>
         if (x is null || y is null) return false;
         return x.MetadataToken == y.MetadataToken;
     }
+    
     public override int GetHashCode(Module? module)
     {
         if (module is null) return 0;

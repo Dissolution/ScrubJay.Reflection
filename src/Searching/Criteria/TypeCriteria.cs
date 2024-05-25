@@ -14,34 +14,40 @@ public enum TypeMatch
 
 public record class TypeCriteria : MemberCriteria, ICriteria<Type>
 {
-    public static implicit operator TypeCriteria(Type type) => Create(type);
-    
-    public static TypeCriteria Create(Type? type, TypeMatch match = TypeMatch.Exact)
-    {
-        return new()
-        {
-            Value = type,
-            Match = match,
-        };
-    }
-    
-    public static new TypeCriteria Create(MemberCriteria criteria)
-    {
-        return new()
-        {
-            Access = criteria.Access,
-            MemberType = criteria.MemberType,
-            Name = criteria.Name,
-            Visibility = criteria.Visibility,
-        };
-    }
+//    public static implicit operator TypeCriteria(Type type) => Create(type);
+//    
+//    public static TypeCriteria Create(Type? type, TypeMatch match = TypeMatch.Exact)
+//    {
+//        return new()
+//        {
+//            Value = type,
+//            Match = match,
+//        };
+//    }
+//    
+//    public static new TypeCriteria Create(MemberCriteria criteria)
+//    {
+//        return new()
+//        {
+//            Access = criteria.Access,
+//            MemberType = criteria.MemberType,
+//            Name = criteria.Name,
+//            Visibility = criteria.Visibility,
+//        };
+//    }
 
-    public Type? Value { get; set; } = null;
+    public Type? Type { get; set; } = null;
     public TypeMatch Match { get; set; } = TypeMatch.Exact;
     public GenericTypesCriteria? GenericTypes { get; set; } = null;
     
     public override MemberTypes MemberType => MemberTypes.TypeInfo;
 
+    public TypeCriteria() : base() { }
+    public TypeCriteria(Type type) : base()
+    {
+        this.Type = type;
+    }
+    
     public bool Matches(Type? type)
     {
         if (!base.Matches(type))
@@ -50,15 +56,15 @@ public record class TypeCriteria : MemberCriteria, ICriteria<Type>
         if (GenericTypes is not null && !GenericTypes.Matches(type))
             return false;
 
-        if (Value is not null)
+        if (Type is not null)
         {
-            if (type == Value)
+            if (type == Type)
                 return Match.HasFlags(TypeMatch.Exact);
 
-            if (Match.HasFlags(TypeMatch.Implements) && type.Implements(Value))
+            if (Match.HasFlags(TypeMatch.Implements) && type.Implements(Type))
                 return true;
 
-            if (Match.HasFlags(TypeMatch.ImplementedBy) && Value.Implements(type))
+            if (Match.HasFlags(TypeMatch.ImplementedBy) && Type.Implements(type))
                 return true;
             
             return false;
@@ -77,7 +83,7 @@ public abstract class TypeCriteriaBuilder<TBuilder, TCriteria> : MemberCriteriaB
 
     public TBuilder IsType(Type type, TypeMatch match = TypeMatch.Exact)
     {
-        _criteria.Value = type;
+        _criteria.Type = type;
         _criteria.Match = match;
         return _builder;
     }
@@ -110,7 +116,7 @@ public abstract class TypeCriteriaBuilder<TBuilder, TCriteria> : MemberCriteriaB
         return _builder;
     }
 
-    public TBuilder GenericTypes(params Type[] types) => GenericTypes(types.ConvertAll(static type => TypeCriteria.Create(type)));
+    public TBuilder GenericTypes(params Type[] types) => GenericTypes(types.ConvertAll(static type => new TypeCriteria(type)));
 }
 
 public sealed class TypeCriteriaBuilder : TypeCriteriaBuilder<TypeCriteriaBuilder, TypeCriteria>, ICriteria<Type>
