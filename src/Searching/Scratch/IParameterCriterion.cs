@@ -2,6 +2,48 @@
 
 namespace ScrubJay.Reflection.Searching.Scratch;
 
+public record class ParameterTypeMatchCriterion : ICriterion<ParameterInfo>
+{
+    public Type? Type { get; set; } = null;
+    public TypeMatch TypeMatch { get; set; } = TypeMatch.Exact;
+
+    public ParameterTypeMatchCriterion() { }
+    public ParameterTypeMatchCriterion(Type type)
+    {
+        this.Type = type;
+    }
+    public ParameterTypeMatchCriterion(Type type, TypeMatch typeMatch)
+    {
+        this.Type = type;
+        this.TypeMatch = typeMatch;
+    }
+    
+    public bool Matches(ParameterInfo? parameter)
+    {
+        if (Type is null || parameter is null)
+            return Type is null && parameter is null && TypeMatch.HasFlags(TypeMatch.Exact);
+
+        var paramType = parameter.ParameterType;
+        
+        if (TypeMatch.HasFlags(TypeMatch.Exact))
+        {
+            if (Type == paramType) return true;
+        }
+        if (TypeMatch.HasFlags(TypeMatch.Implements))
+        {
+            if (paramType.Implements(Type)) return true;
+        }
+        if (TypeMatch.HasFlags(TypeMatch.ImplementedBy))
+        {
+            if (Type.Implements(paramType)) return true;
+        }
+
+        return false;
+    }
+}
+
+
+
 public interface IParameterCriterion : ICriterion<ParameterInfo>,
     IAttributesCriterion
 {

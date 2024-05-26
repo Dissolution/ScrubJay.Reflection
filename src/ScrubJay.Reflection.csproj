@@ -64,6 +64,10 @@
     <!-- Project References -->
     <ItemGroup>
         <ProjectReference Include="..\..\Scrubjay.Core\src\ScrubJay.Core.csproj" />
+
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(MSBuildProjectName).ConsoleApp</_Parameter1>
+        </AssemblyAttribute>
     </ItemGroup>
     
     <!-- NuGet Packages -->

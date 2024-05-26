@@ -8,10 +8,7 @@ using ScrubJay.Reflection.Searching.Scratch;
 
 //var ctors = typeof((int, string)).AllMembers().OfType<ConstructorInfo>().ToList();
 
-
-IMemberCriterionBuilderImpl builder = new MemberCriterionBuilderImpl();
-builder.Instance.NonPublic.IsType.
-
+FieldInfo thing = Tester.Thing(b => b.Instance.IsField.Name("blah"));
 
 /*
 
@@ -23,3 +20,17 @@ Console.WriteLine(members);*/
 
 Console.WriteLine("Press Enter to close");
 Console.ReadLine();
+
+
+static class Tester
+{
+    public static TMember Thing<TMember>(Func<IMemberCriterionBuilderImpl, ICriterion<TMember>> build)
+        where TMember : MemberInfo
+    {
+        IMemberCriterionBuilderImpl builder = new MemberCriterionBuilderImpl();
+        ICriterion<TMember> criterion = build(builder);
+        
+        Debugger.Break();
+        throw new NotImplementedException();
+    }
+}

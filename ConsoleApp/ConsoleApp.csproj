@@ -6,6 +6,9 @@
         <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        
+        <AssemblyName>ScrubJay.Reflection.ConsoleApp</AssemblyName>
+        <RootNamespace>ScrubJay.Reflection.ConsoleApp</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

@@ -1,9 +1,7 @@
 ﻿namespace ScrubJay.Reflection.Searching.Scratch;
 
-public interface ITypeCriterion : 
-    IMemberCriterion<Type>, 
-    IGenericTypesCriterion,
-    ICriterion<Type>
+public interface ITypeCriterion : IMemberCriterion<Type>, 
+    IGenericTypesCriterion
 {
     ICriterion<Type>? NestedType { get; set; }
 }
@@ -13,11 +11,9 @@ public record class TypeCriterion : MemberCriterion<Type>, ITypeCriterion
     public ICriterion<Type>[]? GenericTypes { get; set; }
     public ICriterion<Type>? NestedType { get; set; }
 
-    internal TypeCriterion(IMemberCriterion<MemberInfo> criterion) : base(criterion)
-    {
-        
-    }
-    internal TypeCriterion(ITypeCriterion criterion) : base(criterion)
+    public TypeCriterion() : base() { }
+    public TypeCriterion(IMemberCriterion criterion) : base(criterion) { }
+    public TypeCriterion(ITypeCriterion criterion) : base(criterion)
     {
         this.GenericTypes = criterion.GenericTypes;
         this.NestedType = criterion.NestedType;
@@ -47,7 +43,8 @@ public record class TypeCriterion : MemberCriterion<Type>, ITypeCriterion
     }
 }
 
-public interface ITypeCriterionBuilder<out TBuilder> : IMemberCriterionBuilder<TBuilder, ITypeCriterion, Type>
+public interface ITypeCriterionBuilder<out TBuilder> : 
+    IMemberCriterionBuilder<TBuilder, ITypeCriterion, Type>
     where TBuilder : ITypeCriterionBuilder<TBuilder>
 {
     TBuilder NestedType(ICriterion<Type> nestedType);
@@ -62,13 +59,8 @@ internal class TypeCriterionBuilder<TBuilder> : MemberCriterionBuilder<TBuilder,
     ITypeCriterionBuilder<TBuilder>
     where TBuilder : ITypeCriterionBuilder<TBuilder>
 {
-    public TypeCriterionBuilder() : base()
+    protected TypeCriterionBuilder(ITypeCriterion criterion) : base(criterion)
     {
-        
-    }
-    public TypeCriterionBuilder(ITypeCriterion typeCriterion) : base(typeCriterion)
-    {
-        
     }
 
     public TBuilder NestedType(ICriterion<Type> nestedType)
@@ -101,10 +93,7 @@ public interface ITypeCriterionBuilderImpl : ITypeCriterionBuilder<ITypeCriterio
 internal class TypeCriterionBuilderImpl : TypeCriterionBuilder<ITypeCriterionBuilderImpl>,
     ITypeCriterionBuilderImpl
 {
-    public TypeCriterionBuilderImpl()
-    {
-    }
-    public TypeCriterionBuilderImpl(ITypeCriterion criterion) : base(criterion)
-    {
-    }
+    public TypeCriterionBuilderImpl() : base(new TypeCriterion()) { }
+    public TypeCriterionBuilderImpl(IMemberCriterion criterion) : base(new TypeCriterion(criterion)) { }
+    public TypeCriterionBuilderImpl(ITypeCriterion criterion) : base(criterion) { }
 }

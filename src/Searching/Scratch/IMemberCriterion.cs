@@ -1,25 +1,21 @@
-﻿using System.CodeDom;
-using Vis = ScrubJay.Reflection.Visibility;
+﻿using Vis = ScrubJay.Reflection.Visibility;
 using Acc = ScrubJay.Reflection.Access;
-
 using ScrubJay.Collections;
-using ScrubJay.Validation;
 
 namespace ScrubJay.Reflection.Searching.Scratch;
 
 public interface IMemberCriterion : IAttributesCriterion
 {
-    
-}
-
-public interface IMemberCriterion<in TMember> : IMemberCriterion,
-    ICriterion<TMember>
-    where TMember : MemberInfo
-{
     Vis Visibility { get; set; }
     Acc Access { get; set; }
     MemberTypes MemberTypes { get; set; }
     ICriterion<string>? Name { get; set; }
+}
+
+public interface IMemberCriterion<in TMember> : IMemberCriterion, ICriterion<TMember>
+    where TMember : MemberInfo
+{
+
 }
 
 public record class MemberCriterion<TMember> : IMemberCriterion<TMember>
@@ -50,14 +46,15 @@ public record class MemberCriterion<TMember> : IMemberCriterion<TMember>
     }
 
     public MemberCriterion() : base() { }
-    internal MemberCriterion(IMemberCriterion<TMember> criterion)
+    
+    internal MemberCriterion(IMemberCriterion criterion)
     {
         this.Visibility = criterion.Visibility;
         this.Access = criterion.Access;
         this.MemberTypes = criterion.MemberTypes;
         this.Name = criterion.Name;
     }
-    
+
     public virtual bool Matches([NotNullWhen(true)] TMember? member)
     {
         // By default, we do not pass on null
@@ -87,7 +84,7 @@ public record class MemberCriterion<TMember> : IMemberCriterion<TMember>
     }
 }
 
-public interface IMemberCriterionBuilder<out TBuilder, TCriterion, TMember>
+public interface IMemberCriterionBuilder<out TBuilder, TCriterion, in TMember> : ICriterion<TMember>
     where TBuilder : IMemberCriterionBuilder<TBuilder, TCriterion, TMember>
     where TCriterion : IMemberCriterion<TMember>
     where TMember : MemberInfo
@@ -95,30 +92,30 @@ public interface IMemberCriterionBuilder<out TBuilder, TCriterion, TMember>
     TBuilder Visibility(Vis visibility);
     TBuilder Public { get; }
     TBuilder NonPublic { get; }
-    
+
     TBuilder Access(Acc access);
     TBuilder Instance { get; }
     TBuilder Static { get; }
-    
+
     TBuilder Name(ICriterion<string> nameCriterion);
     TBuilder Name(string name, StringMatch nameName = StringMatch.Exact, StringComparison nameComparison = StringComparison.Ordinal);
-    
+
     TBuilder MemberTypes(MemberTypes memberTypes);
-    
+
     /* Individual member types
      * named with 'is' to avoid .Type conflicts
      */
-    TBuilder IsField { get; }
-    TBuilder IsProperty { get; }
-    TBuilder IsEvent { get; }
-    TBuilder IsConstructor { get; }
-    TBuilder IsMethodBase { get; }
-    TBuilder IsMethod { get; }
+    IFieldCriterionBuilderImpl IsField { get; }
+    IPropertyCriterionBuilderImpl IsProperty { get; }
+    IEventCriterionBuilderImpl IsEvent { get; }
+    IConstructorCriterionBuilderImpl IsConstructor { get; }
+    IMethodBaseCriterionBuilderImpl IsMethodBase { get; }
+    IMethodCriterionBuilderImpl IsMethod { get; }
     ITypeCriterionBuilderImpl IsType { get; }
 
 }
 
-internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> : 
+internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> :
     IMemberCriterionBuilder<TBuilder, TCriterion, TMember>
     where TBuilder : IMemberCriterionBuilder<TBuilder, TCriterion, TMember>
     where TCriterion : IMemberCriterion<TMember>
@@ -128,17 +125,14 @@ internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> :
     protected TCriterion _criterion;
 
     internal TCriterion GetCriterion() => _criterion;
-    
-    protected MemberCriterionBuilder()
-    {
-        _builder = (TBuilder)(IMemberCriterionBuilder<TBuilder, TCriterion, TMember>)this;
-        _criterion = (TCriterion)(IMemberCriterion<TMember>)new MemberCriterion<TMember>();
-    }
+
     protected MemberCriterionBuilder(TCriterion criterion)
     {
         _builder = (TBuilder)(IMemberCriterionBuilder<TBuilder, TCriterion, TMember>)this;
         _criterion = criterion;
     }
+
+    public bool Matches(TMember? member) => _criterion.Matches(member);
 
     public TBuilder Visibility(Vis visibility)
     {
@@ -147,7 +141,7 @@ internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> :
     }
     public TBuilder Public => Visibility(Vis.Public);
     public TBuilder NonPublic => Visibility(Vis.NonPublic);
-    
+
     public TBuilder Access(Acc access)
     {
         _criterion.Access = access;
@@ -155,7 +149,7 @@ internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> :
     }
     public TBuilder Instance => Access(Acc.Instance);
     public TBuilder Static => Access(Acc.Static);
-    
+
     public TBuilder Name(ICriterion<string> nameCriterion)
     {
         _criterion.Name = nameCriterion;
@@ -163,31 +157,32 @@ internal class MemberCriterionBuilder<TBuilder, TCriterion, TMember> :
     }
     public TBuilder Name(string name, StringMatch nameName = StringMatch.Exact, StringComparison nameComparison = StringComparison.Ordinal)
         => Name(new StringMatchCriterion { String = name, StringMatch = nameName, StringComparison = nameComparison });
-    
+
     public TBuilder MemberTypes(MemberTypes memberTypes)
     {
         _criterion.MemberTypes = memberTypes;
         return _builder;
     }
 
-    public TBuilder IsField => throw new NotImplementedException();
-    public TBuilder IsProperty => throw new NotImplementedException();
-    public TBuilder IsEvent => throw new NotImplementedException();
-    public TBuilder IsConstructor => throw new NotImplementedException();
-    public TBuilder IsMethodBase => throw new NotImplementedException();
-    public TBuilder IsMethod => throw new NotImplementedException();
-    public ITypeCriterionBuilderImpl IsType => new TypeCriterionBuilderImpl(new TypeCriterion((IMemberCriterion<MemberInfo>)_criterion));
+    public IFieldCriterionBuilderImpl IsField => new FieldCriterionBuilderImpl(_criterion);
+    public IPropertyCriterionBuilderImpl IsProperty => new PropertyCriterionBuilderImpl(_criterion);
+    public IEventCriterionBuilderImpl IsEvent => new EventCriterionBuilderImpl(_criterion);
+    public IConstructorCriterionBuilderImpl IsConstructor => new ConstructorCriterionBuilderImpl(_criterion);
+    public IMethodBaseCriterionBuilderImpl IsMethodBase => new MethodBaseCriterionBuilderImpl(_criterion);
+    public IMethodCriterionBuilderImpl IsMethod => new MethodCriterionBuilderImpl(_criterion);
+    public ITypeCriterionBuilderImpl IsType => new TypeCriterionBuilderImpl(_criterion);
 }
 
-
-
-
-public interface IMemberCriterionBuilderImpl : 
+public interface IMemberCriterionBuilderImpl :
     IMemberCriterionBuilder<IMemberCriterionBuilderImpl, IMemberCriterion<MemberInfo>, MemberInfo>;
 
-public class MemberCriterionBuilderImpl : 
+internal class MemberCriterionBuilderImpl :
     MemberCriterionBuilder<IMemberCriterionBuilderImpl, IMemberCriterion<MemberInfo>, MemberInfo>,
     IMemberCriterionBuilderImpl
 {
-    
+    public MemberCriterionBuilderImpl()
+        : base(new MemberCriterion<MemberInfo>())
+    {
+        
+    }
 }

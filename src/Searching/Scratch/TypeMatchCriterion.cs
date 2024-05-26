@@ -28,22 +28,22 @@ public record class TypeMatchCriterion : ICriterion<Type>
         this.TypeMatch = typeMatch;
     }
     
-    public bool Matches(Type? str)
+    public bool Matches(Type? type)
     {
-        if (Type is null || str is null)
-            return Type is null && str is null && TypeMatch.HasFlags(TypeMatch.Exact);
+        if (Type is null || type is null)
+            return Type is null && type is null && TypeMatch.HasFlags(TypeMatch.Exact);
         
         if (TypeMatch.HasFlags(TypeMatch.Exact))
         {
-            if (Type == str) return true;
+            if (Type == type) return true;
         }
         if (TypeMatch.HasFlags(TypeMatch.Implements))
         {
-            if (str.Implements(Type)) return true;
+            if (type.Implements(Type)) return true;
         }
         if (TypeMatch.HasFlags(TypeMatch.ImplementedBy))
         {
-            if (Type.Implements(str)) return true;
+            if (Type.Implements(type)) return true;
         }
 
         return false;
