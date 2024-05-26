@@ -37,7 +37,7 @@ public static class DeepCloner
         _objectDeepCloneCache = new();
 
 
-        _deepCloneEmptyMethod = Mirror.Search(typeof(DeepCloner)).TryFindMember(b => b.Public.Static.Method.Generic.Name(nameof(DeepClone))).OkOrThrow();
+        _deepCloneEmptyMethod = Mirror.Search(typeof(DeepCloner)).TryFindMember(b => b.Public.Static.IsMethod.IsGeneric().Name(nameof(DeepClone))).OkOrThrow();
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -73,15 +73,6 @@ public static class DeepCloner
             .Ret());
     }
     
-    
-    
-    private static Delegate CreateDeepCloneDelegate(Type type)
-    {
-        throw new NotImplementedException();
-    }
-
-    private static readonly MethodInfo _runtimeHelpers_GetUninitializedObject_Method;
-    
     private static DeepClone<T> CreateDeepCloneDelegate<T>(Type type)
     {
         var delegateBuilder = RuntimeBuilder.CreateDelegateBuilder<DeepClone<T>>();
@@ -95,7 +86,7 @@ public static class DeepCloner
             .Stloc(clone);
         
         // All instance fields
-        var instanceFields = Mirror.Search(type).FindMembers<FieldInfo>(b => b.Instance.Field).ToList();
+        var instanceFields = Mirror.Search(type).FindMembers<FieldInfo>(b => b.Instance.IsField).ToList();
         foreach (var field in instanceFields)
         {
             // (ref clone).Field = (in obj).Field
@@ -119,37 +110,3 @@ public static class DeepCloner
 
 [return: NotNullIfNotNull(nameof(value))]
 public delegate T? DeepClone<T>(ref readonly T? value);
-
-
-internal class DeepCloneBuilder
-{
-    // The ultimate base types
-    
-
-    
-    public bool DeepClone(ref readonly bool boolean)
-    {
-        return boolean;
-    }
-    
-    public char DeepClone(ref readonly char character)
-    {
-        return character;
-    }
-}
-
-internal class DeepCloneBuilder<TInstance> : DeepCloneBuilder
-{
-
-
-
-
-
-    public DeepClone<TInstance> BuildDelegate()
-    {
-        var delegateBuilder = RuntimeBuilder.CreateDelegateBuilder<DeepClone<TInstance>>();
-        
-        // 
-        throw new NotImplementedException();
-    }
-}

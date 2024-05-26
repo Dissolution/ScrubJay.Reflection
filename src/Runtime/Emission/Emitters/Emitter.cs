@@ -1,4 +1,3 @@
-using ScrubJay.Reflection.Runtime.Emission.Emitters.Builders;
 using ScrubJay.Reflection.Runtime.Emission.Instructions;
 using ScrubJay.Text;
 using ScrubJay.Validation;
@@ -421,6 +420,26 @@ internal partial class Emitter<TEmitter> : Emitter,
             return Emit(OpCodes.Ldarga_S, (byte)index);
         return Emit(OpCodes.Ldarga, (short)index);
     }
+
+    public TEmitter LoadArgs(Range range)
+    {
+        if (range.Start.IsFromEnd || range.End.IsFromEnd)
+            throw new ArgumentException(null, nameof(range));
+        for (var i = range.Start.Value; i < range.End.Value; i++)
+        {
+            this.Ldarg(i);
+        }
+        return _emitter;
+    }
+    public TEmitter LoadArgs(params int[] indices)
+    {
+        foreach (var index in indices)
+        {
+            this.Ldarg(index);
+        }
+        return _emitter;
+    }
+
     public TEmitter Starg(int index)
     {
         ThrowIf.NotBetween(index, 0, short.MaxValue);

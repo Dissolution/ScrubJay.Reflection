@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using ScrubJay.Reflection.Comparison;
 
 namespace ScrubJay.Reflection.Expressions;

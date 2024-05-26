@@ -1,5 +1,4 @@
-﻿using ScrubJay.Comparison;
-using ScrubJay.Reflection.Runtime.Naming;
+﻿using ScrubJay.Reflection.Runtime.Naming;
 
 namespace ScrubJay.Reflection.Runtime.Emission;
 

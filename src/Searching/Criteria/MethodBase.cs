@@ -1,8 +1,8 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IMethodBaseCriterion : IGenericTypesCriterion, IMemberCriterion
 {
-    ICriterion<ParameterInfo>[]? Parameters { get; set; }
+    ICriterion<ParameterInfo[]> Parameters { get; set; }
 }
 
 public interface IMethodBaseCriterion<in TMember> : IMethodBaseCriterion,
@@ -17,8 +17,8 @@ public record class MethodBaseCriterion<TMethod> :
     IMethodBaseCriterion<TMethod>
     where TMethod : MethodBase
 {
-    public ICriterion<Type>[]? GenericTypes { get; set; }
-    public ICriterion<ParameterInfo>[]? Parameters { get; set; }
+    public ICriterion<Type[]> GenericTypes { get; set; } = Criterion.Pass<Type[]>();
+    public ICriterion<ParameterInfo[]> Parameters { get; set; } = Criterion.Pass<ParameterInfo[]>();
 
     public MethodBaseCriterion() : base () { }
     public MethodBaseCriterion(IMemberCriterion criterion) : base(criterion) { }
@@ -33,42 +33,35 @@ public record class MethodBaseCriterion<TMethod> :
         if (!base.Matches(method))
             return false;
 
-        if (Parameters is not null)
-        {
-            var paramz = method.GetParameters();
-            if (paramz.Length != Parameters.Length)
-                return false;
-            for (var i = 0; i < paramz.Length; i++)
-            {
-                if (!Parameters[i].Matches(paramz[i]))
-                    return false;
-            }
-        }
-        if (GenericTypes is not null)
-        {
-            var methodGenericTypes = method.GetGenericArguments();
-            if (methodGenericTypes.Length != GenericTypes.Length)
-                return false;
-            for (var i = 0; i < methodGenericTypes.Length; i++)
-            {
-                if (!GenericTypes[i].Matches(methodGenericTypes[i]))
-                    return false;
-            }
-        }
+        if (!Parameters.Matches(method.GetParameters()))
+            return false;
+        
+        var methodGenericTypes = method.GetGenericArguments();
+        if (!GenericTypes.Matches(methodGenericTypes))
+            return false;
+        
         return true;
     }
 }
 
 public interface IMethodBaseCriterionBuilder<out TBuilder, TCriterion, in TMember> :
-    IMemberCriterionBuilder<TBuilder, TCriterion, TMember>
+    IMemberBaseCriterionBuilder<TBuilder, TCriterion, TMember>
     where TBuilder : IMethodBaseCriterionBuilder<TBuilder, TCriterion, TMember>
     where TCriterion : IMethodBaseCriterion<TMember>
     where TMember : MethodBase
 {
+    TBuilder IsGeneric();
+    TBuilder GenericTypes(ICriterion<Type[]> types);
     TBuilder GenericTypes(params ICriterion<Type>[] types);
-    TBuilder GenericTypes(params Type[] genericTypes);
+    TBuilder GenericTypes(params Type[] types);
+
+    TBuilder NoParameters();
+    TBuilder Parameters(ICriterion<ParameterInfo[]> parameters);
     TBuilder Parameters(params ICriterion<ParameterInfo>[] parameters);
     TBuilder Parameters(params Type[] parameterTypes);
+    TBuilder Parameters(params object?[] arguments);
+    
+    TBuilder Like(MethodBase method);
 }
 
 internal class MethodBaseCriterionBuilder<TBuilder, TCriterion, TMember> :
@@ -82,27 +75,65 @@ internal class MethodBaseCriterionBuilder<TBuilder, TCriterion, TMember> :
     {
     }
 
-    public TBuilder GenericTypes(params ICriterion<Type>[] types)
+    public TBuilder IsGeneric()
+    {
+        _criterion.GenericTypes = new FuncCriterion<Type[]>(static types => types is not null && types.Length > 0);
+        return _builder;
+    }
+
+    public TBuilder GenericTypes(ICriterion<Type[]> types)
     {
         _criterion.GenericTypes = types;
+        return _builder;
+    }
+    
+    public TBuilder GenericTypes(params ICriterion<Type>[] types)
+    {
+        _criterion.GenericTypes = Criterion.Combine(types);
         return _builder;
     }
 
     public TBuilder GenericTypes(params Type[] genericTypes)
     {
-        _criterion.GenericTypes = genericTypes.ConvertAll<Type, ICriterion<Type>>(static t => new TypeMatchCriterion(t));
+        return GenericTypes(genericTypes.ConvertAll<Type, ICriterion<Type>>(static t => Criterion.Match(t)));
+    }
+
+    public TBuilder NoParameters()
+    {
+        _criterion.GenericTypes = new FuncCriterion<Type[]>(static types => types is null || types.Length == 0);
         return _builder;
     }
 
-    public TBuilder Parameters(params ICriterion<ParameterInfo>[] parameters)
+    public TBuilder Parameters(ICriterion<ParameterInfo[]> parameters)
     {
         _criterion.Parameters = parameters;
+        return _builder;
+    }
+    public TBuilder Parameters(params ICriterion<ParameterInfo>[] parameters)
+    {
+        _criterion.Parameters = Criterion.Combine(parameters);
         return _builder;
     }
 
     public TBuilder Parameters(params Type[] parameterTypes)
     {
-        _criterion.Parameters = parameterTypes.ConvertAll<Type, ICriterion<ParameterInfo>>(static t => new ParameterTypeMatchCriterion(t));
+        return Parameters(parameterTypes.ConvertAll<Type, ICriterion<ParameterInfo>>(static t => ParameterCriterion.Create(TypeMatchCriterion.Create(t))));
+    }
+
+    public TBuilder Parameters(params object?[] arguments)
+    {
+        _criterion.Parameters = Mirror.GetParameterCriteria(arguments);
+        return _builder;
+    }
+
+    public TBuilder Like(MethodBase method)
+    {
+        base.Like(method);
+
+        _criterion.GenericTypes = Criterion.Combine(method.GetGenericArguments()
+            .ConvertAll(static type => Criterion.Match(type)));
+        _criterion.Parameters = Criterion.Combine(method.GetParameters()
+            .ConvertAll<ParameterInfo, ICriterion<ParameterInfo>>(static p => new ParameterCriterionBuilder().Like(p)));
         return _builder;
     }
 }

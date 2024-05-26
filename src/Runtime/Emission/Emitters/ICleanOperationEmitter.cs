@@ -7,6 +7,9 @@ public interface ICleanOperationEmitter<TEmitter> : IOperationEmitter<TEmitter>
     TEmitter Ldarg(int index);
     TEmitter Ldarga(int index);
     
+    TEmitter LoadArgs(Range range);
+    TEmitter LoadArgs(params int[] indices);
+    
     TEmitter Starg(int index);
 
     TEmitter Ldloc(int index);

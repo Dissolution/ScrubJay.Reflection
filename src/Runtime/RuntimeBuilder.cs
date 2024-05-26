@@ -29,7 +29,7 @@ public static class RuntimeBuilder
         where TAttribute : Attribute, new()
     {
         var ctor = Mirror.Search<TAttribute>()
-            .TryFindMember(b => b.Instance.Constructor.NoParameters())
+            .TryFindMember(b => b.Instance.IsConstructor.NoParameters())
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, Array.Empty<object>());
     }
@@ -38,7 +38,7 @@ public static class RuntimeBuilder
         where TAttribute : Attribute
     {
         var ctor = Mirror.Search<TAttribute>()
-            .TryFindMember(b => b.Instance.Constructor.ParameterTypes(ctorArgs))
+            .TryFindMember(b => b.Instance.IsConstructor.Parameters(ctorArgs))
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
@@ -48,7 +48,7 @@ public static class RuntimeBuilder
         if (!attributeType.Implements<Attribute>())
             throw new ArgumentException($"{attributeType} is not an Attribute");
         var ctor = Mirror.Search(attributeType)
-            .TryFindMember(b => b.Instance.Constructor.ParameterTypes(ctorArgs))
+            .TryFindMember(b => b.Instance.IsConstructor.Parameters(ctorArgs))
             .OkOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }

@@ -1,5 +1,6 @@
 ﻿using Vis = ScrubJay.Reflection.Visibility;
 using Acc = ScrubJay.Reflection.Access;
+using BF = System.Reflection.BindingFlags;
 
 namespace ScrubJay.Reflection.Extensions;
 
@@ -86,6 +87,60 @@ public static class MemberInfoExtensions
                 return acc;
         }
     }
+
+    public static BF BindingFlags(this MemberInfo? member)
+    {
+        BF flags = BF.Default;
+//        if (member.DeclaringType == member.ReflectedType)
+//            flags |= BF.DeclaredOnly;
+        switch (member)
+        {
+            case EventInfo eventInfo:
+                flags |= BindingFlags(eventInfo.AddMethod);
+                flags |= BindingFlags(eventInfo.RemoveMethod);
+                flags |= BindingFlags(eventInfo.RaiseMethod);
+                return flags;
+            case FieldInfo fieldInfo:
+                if (fieldInfo.IsPrivate || fieldInfo.IsFamily || fieldInfo.IsAssembly ||
+                    fieldInfo.IsFamilyOrAssembly || fieldInfo.IsFamilyAndAssembly)
+                {
+                    flags |= BF.NonPublic;
+                }
+                if (fieldInfo.IsPublic)
+                {
+                    flags |= BF.Public;
+                }
+                flags |= fieldInfo.IsStatic ? BF.Static : BF.Instance;
+                return flags;
+            case MethodBase methodBase:
+                if (methodBase.IsPrivate || methodBase.IsFamily || methodBase.IsAssembly ||
+                    methodBase.IsFamilyOrAssembly || methodBase.IsFamilyAndAssembly)
+                {
+                    flags |= BF.NonPublic;
+                }
+                if (methodBase.IsPublic)
+                {
+                    flags |= BF.Public;
+                }
+                flags |= methodBase.IsStatic ? BF.Static : BF.Instance;
+                return flags;
+            case PropertyInfo propertyInfo:
+                flags |= BindingFlags(propertyInfo.GetMethod);
+                flags |= BindingFlags(propertyInfo.SetMethod);
+                return flags;
+            case Type type:
+                if (type.IsPublic)
+                    flags |= BF.Public;
+                if (type.IsNotPublic)
+                    flags |= BF.NonPublic;
+                flags |= type.IsStatic() ? BF.Static : BF.Instance;
+                return flags;
+            case null:
+            default:
+                return flags;
+        }
+    }
+
 
     public static Type OwnerType(this MemberInfo member)
     {

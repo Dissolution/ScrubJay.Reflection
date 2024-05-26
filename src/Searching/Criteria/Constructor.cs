@@ -1,13 +1,13 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IConstructorCriterion : IMethodBaseCriterion<ConstructorInfo>
 {
-    ICriterion<Type>? Type { get; set; }
+    ICriterion<Type> Type { get; set; }
 }
 
 public record class ConstructorCriterion : MethodBaseCriterion<ConstructorInfo>, IConstructorCriterion
 {
-    public ICriterion<Type>? Type { get; set; }
+    public ICriterion<Type> Type { get; set; } = Criterion.Pass<Type>();
 
     public ConstructorCriterion() : base() { }
     public ConstructorCriterion(IMemberCriterion criterion) : base(criterion) { }
@@ -22,7 +22,7 @@ public record class ConstructorCriterion : MethodBaseCriterion<ConstructorInfo>,
         if (!base.Matches(ctor))
             return false;
 
-        if (Type is not null && !Type.Matches(ctor.DeclaringType))
+        if (!Type.Matches(ctor.DeclaringType))
             return false;
 
         return true;
@@ -35,8 +35,10 @@ public interface IConstructorCriterionBuilder<out TBuilder> :
     where TBuilder : IConstructorCriterionBuilder<TBuilder>
 {
     TBuilder Type(ICriterion<Type> criterion);
-    TBuilder Type(Type instanceType, TypeMatch typeMatch = TypeMatch.Exact);
-    TBuilder Type<TInstance>(TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder Type<T>(TypeMatch typeMatch = TypeMatch.Exact);
+    
+    TBuilder Like(ConstructorInfo ctor);
 }
 
 internal class ConstructorCriterionBuilder<TBuilder> :
@@ -55,11 +57,18 @@ internal class ConstructorCriterionBuilder<TBuilder> :
     }
     public TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact)
     {
-        return Type(new TypeMatchCriterion(type, typeMatch));
+        return Type(Criterion.Match(type, typeMatch));
     }
     public TBuilder Type<TInstance>(TypeMatch typeMatch = TypeMatch.Exact)
     {
-        return Type(new TypeMatchCriterion(typeof(TInstance), typeMatch));
+        return Type(Criterion.Match(typeof(TInstance), typeMatch));
+    }
+
+    public TBuilder Like(ConstructorInfo ctor)
+    {
+        base.Like(ctor);
+        _criterion.Type = Criterion.Match(ctor.DeclaringType!);
+        return _builder;
     }
 }
 

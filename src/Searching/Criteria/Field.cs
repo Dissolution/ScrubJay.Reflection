@@ -1,14 +1,14 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IFieldCriterion : IMemberCriterion<FieldInfo>
 {
-    ICriterion<Type>? Type { get; set; }
+    ICriterion<Type> Type { get; set; }
     FieldModifiers Modifiers { get; set; }
 }
 
 public record class FieldCriterion : MemberCriterion<FieldInfo>, IFieldCriterion
 {
-    public ICriterion<Type>? Type { get; set; }
+    public ICriterion<Type> Type { get; set; } = Criterion<Type>.Pass;
     public FieldModifiers Modifiers { get; set; }
 
     public FieldCriterion() : base() { }
@@ -25,8 +25,9 @@ public record class FieldCriterion : MemberCriterion<FieldInfo>, IFieldCriterion
         if (!base.Matches(field))
             return false;
 
-        if (Type is not null && !Type.Matches(field.FieldType))
+        if (!Type.Matches(field.FieldType))
             return false;
+        
         if (!Modifiers.HasAnyFlags(field.Modifiers()))
             return false;
 
@@ -35,14 +36,16 @@ public record class FieldCriterion : MemberCriterion<FieldInfo>, IFieldCriterion
 }
 
 public interface IFieldCriterionBuilder<out TBuilder> : 
-    IMemberCriterionBuilder<TBuilder, IFieldCriterion, FieldInfo>
+    IMemberBaseCriterionBuilder<TBuilder, IFieldCriterion, FieldInfo>
     where TBuilder : IFieldCriterionBuilder<TBuilder>
 {
-    TBuilder Type(ICriterion<Type> criterion);
-    TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact);
-    TBuilder Type<TField>(TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder Type(ICriterion<Type> type);
+    TBuilder Type(Type type, TypeMatch match = TypeMatch.Exact);
+    TBuilder Type<TField>(TypeMatch match = TypeMatch.Exact);
     
     TBuilder Modifiers(FieldModifiers modifiers);
+    
+    TBuilder Like(FieldInfo field);
 }
 
 internal class FieldCriterionBuilder<TBuilder> :
@@ -54,18 +57,25 @@ internal class FieldCriterionBuilder<TBuilder> :
     {
     }
 
-    public TBuilder Type(ICriterion<Type> criterion)
+    public TBuilder Type(ICriterion<Type> type)
     {
-        _criterion.Type = criterion;
+        _criterion.Type = type;
         return _builder;
     }
-    public TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact)
-        => Type(new TypeMatchCriterion(type, typeMatch));
-    public TBuilder Type<TField>(TypeMatch typeMatch = TypeMatch.Exact)
-        => Type(new TypeMatchCriterion(typeof(TField), typeMatch));
+    public TBuilder Type(Type type, TypeMatch match = TypeMatch.Exact)
+        => Type(Criterion.Match(type, match));
+    public TBuilder Type<TField>(TypeMatch match = TypeMatch.Exact)
+        => Type(Criterion.Match(typeof(TField), match));
     public TBuilder Modifiers(FieldModifiers modifiers)
     {
         _criterion.Modifiers = modifiers;
+        return _builder;
+    }
+
+    public TBuilder Like(FieldInfo field)
+    {
+        base.Like(field);
+        _criterion.Type = Criterion.Match(field.FieldType);
         return _builder;
     }
 }

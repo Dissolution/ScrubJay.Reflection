@@ -1,13 +1,13 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IEventCriterion : IMemberCriterion<EventInfo>
 {
-    ICriterion<Type>? HandlerType { get; set; }
+    ICriterion<Type> HandlerType { get; set; }
 }
 
 public record class EventCriterion : MemberCriterion<EventInfo>, IEventCriterion
 {
-    public ICriterion<Type>? HandlerType { get; set; }
+    public ICriterion<Type> HandlerType { get; set; } = Criterion.Pass<Type>();
 
     public EventCriterion() : base() { }
     public EventCriterion(IMemberCriterion criterion) : base(criterion) { }
@@ -21,7 +21,7 @@ public record class EventCriterion : MemberCriterion<EventInfo>, IEventCriterion
         if (!base.Matches(vent))
             return false;
 
-        if (HandlerType is not null && !HandlerType.Matches(vent.EventHandlerType))
+        if (!HandlerType.Matches(vent.EventHandlerType))
             return false;
 
         return true;
@@ -29,12 +29,14 @@ public record class EventCriterion : MemberCriterion<EventInfo>, IEventCriterion
 }
 
 public interface IEventCriterionBuilder<out TBuilder> : 
-    IMemberCriterionBuilder<TBuilder, IEventCriterion, EventInfo>
+    IMemberBaseCriterionBuilder<TBuilder, IEventCriterion, EventInfo>
     where TBuilder : IEventCriterionBuilder<TBuilder>
 {
-    TBuilder HandlerType(ICriterion<Type> criterion);
-    TBuilder HandlerType(Type type, TypeMatch typeMatch = TypeMatch.Exact);
-    TBuilder HandlerType<TEvent>(TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder HandlerType(ICriterion<Type> type);
+    TBuilder HandlerType(Type type, TypeMatch match = TypeMatch.Exact);
+    TBuilder HandlerType<TEvent>(TypeMatch match = TypeMatch.Exact);
+    
+    TBuilder Like(EventInfo eventInfo);
 }
 
 internal class EventCriterionBuilder<TBuilder> :
@@ -46,15 +48,22 @@ internal class EventCriterionBuilder<TBuilder> :
     {
     }
 
-    public TBuilder HandlerType(ICriterion<Type> criterion)
+    public TBuilder HandlerType(ICriterion<Type> type)
     {
-        _criterion.HandlerType = criterion;
+        _criterion.HandlerType = type;
         return _builder;
     }
-    public TBuilder HandlerType(Type type, TypeMatch typeMatch = TypeMatch.Exact) 
-        => HandlerType(new TypeMatchCriterion(type, typeMatch));
-    public TBuilder HandlerType<TField>(TypeMatch typeMatch = TypeMatch.Exact) 
-        => HandlerType(new TypeMatchCriterion(typeof(TField), typeMatch));
+    public TBuilder HandlerType(Type type, TypeMatch match = TypeMatch.Exact) 
+        => HandlerType(Criterion.Match(type, match));
+    public TBuilder HandlerType<TEvent>(TypeMatch match = TypeMatch.Exact) 
+        => HandlerType(Criterion.Match(typeof(TEvent), match));
+
+    public TBuilder Like(EventInfo eventInfo)
+    {
+        base.Like(eventInfo);
+        _criterion.HandlerType = Criterion.Match(eventInfo.EventHandlerType);
+        return _builder;
+    }
 }
 
 public interface IEventCriterionBuilderImpl : 

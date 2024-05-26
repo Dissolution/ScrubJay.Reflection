@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using ScrubJay.Collections;
 
@@ -39,6 +40,43 @@ public static class DelegateMapExtensions
         where TDelegate : Delegate
     {
         var del = typeDelegateMap.GetOrAdd(key, createDelegate);
+        if (del is TDelegate)
+            return (TDelegate)del;
+        Debug.Fail("Should not get here");
+        return createDelegate(key);
+    }
+    
+    
+    
+    
+    public static bool TryGet<TKey, TDelegate>(
+        this ConcurrentDictionary<TKey, Delegate> delegateDict,
+        TKey key,
+        [NotNullWhen(true), MaybeNullWhen(false)]
+        out TDelegate? tDelegate)
+        where TKey : notnull
+        where TDelegate : Delegate
+    {
+        if (delegateDict.TryGetValue(key, out var @delegate))
+        {
+            if (@delegate is TDelegate)
+            {
+                tDelegate = (TDelegate)@delegate;
+                return true;
+            }
+        }
+        tDelegate = default;
+        return false;
+    }
+
+    public static TDelegate GetOrAdd<TKey, TDelegate>(
+        this ConcurrentDictionary<TKey, Delegate> delegateDict,
+        TKey key,
+        Func<TKey, TDelegate> createDelegate)
+    where TKey : notnull
+        where TDelegate : Delegate
+    {
+        var del = delegateDict.GetOrAdd(key, createDelegate);
         if (del is TDelegate)
             return (TDelegate)del;
         Debug.Fail("Should not get here");

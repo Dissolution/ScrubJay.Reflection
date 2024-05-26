@@ -1,7 +1,6 @@
 #if NET481 || NETSTANDARD2_0
 using System.Runtime.Serialization;
 #endif
-using ScrubJay.Reflection.Runtime.Emission.Emitters;
 using ScrubJay.Reflection.Searching;
 
 namespace ScrubJay.Reflection.Runtime.Emission;
@@ -19,24 +18,24 @@ public static class EmissionHelper
         {
             generator.Emit(OpCodes.Ldarg_0);
             var ctor = Mirror.Search<Label>()
-                .TryFindMember(b => b.Internal.Instance.Constructor.ParameterTypes(typeof(int)))
+                .TryFindMember(b => b.Internal.Instance.IsConstructor.Parameters(typeof(int)))
                 .OkOrThrow();
             generator.Emit(OpCodes.Call, ctor);
             generator.Emit(OpCodes.Ret);
         });
 
         Type_GetTypeFromHandle_Method = Mirror.Search<Type>()
-            .TryFindMember(b => b.Public.Static.Method.Name(nameof(Type.GetTypeFromHandle)))
+            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(Type.GetTypeFromHandle)))
             .OkOrThrow();
 
 #if NET481 || NETSTANDARD2_0
         GetUninitializedObject_Method = Mirror.Search(typeof(FormatterServices))
-            .TryFindMember(b => b.Public.Static.Method.Name(nameof(FormatterServices.GetUninitializedObject)))
+            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(FormatterServices.GetUninitializedObject)))
             .OkOrThrow();
 #else
         
         GetUninitializedObject_Method = Mirror.Search(typeof(RuntimeHelpers))
-            .TryFindMember(b => b.Public.Static.Method.Name(nameof(RuntimeHelpers.GetUninitializedObject)))
+            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(RuntimeHelpers.GetUninitializedObject)))
             .OkOrThrow();
 #endif
     }

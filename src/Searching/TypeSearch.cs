@@ -33,9 +33,9 @@ public class TypeSearch
         _type = type;
     }
 
-    public IEnumerable<MemberInfo> FindMembers(MemberCriteria criteria)
+    public IEnumerable<MemberInfo> FindMembers(IMemberCriterion<MemberInfo> criteria)
     {
-        var members = _type.GetMembers(criteria.BindingFlags);
+        var members = _type.GetMembers(criteria.BindingFlags());
         foreach (MemberInfo member in members)
         {
             if (criteria.Matches(member))
@@ -43,13 +43,13 @@ public class TypeSearch
         }
     }
 
-    public MemberInfo? FindMember(MemberCriteria criteria) => FindMembers(criteria).OneOrDefault();
-
-    public IEnumerable<TMember> FindMembers<TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+    public MemberInfo? FindMember(IMemberCriterion<MemberInfo> criteria) => FindMembers(criteria).OneOrDefault();
+    
+    public IEnumerable<TMember> FindMembers<TMember>(Func<IMemberCriterionBuilderImpl, ICriterion<TMember>> buildCriteria)
         where TMember : MemberInfo
     {
-        var builder = new MemberCriteriaBuilder();
-        ICriteria<TMember> memberCriteria = buildCriteria(builder);
+        var builder = new MemberCriterionBuilderImpl();
+        var memberCriteria = buildCriteria(builder);
         var members = _type
             .AllMembers()
             .OfType<TMember>();
@@ -60,15 +60,15 @@ public class TypeSearch
         }
     }
 
-    public TMember? FindMember<TMember>(Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+    public TMember? FindMember<TMember>(Func<IMemberCriterionBuilderImpl, ICriterion<TMember>> buildCriteria)
         where TMember : MemberInfo
         => FindMembers<TMember>(buildCriteria).OneOrDefault();
 
     public Result<TMember, MemberAccessException> TryFindMember<TMember>(
-        Func<MemberCriteriaBuilder, ICriteria<TMember>> buildCriteria)
+        Func<IMemberCriterionBuilderImpl, ICriterion<TMember>> buildCriteria)
         where TMember : MemberInfo
     {
-        var mcBuilder = new MemberCriteriaBuilder();
+        var mcBuilder = new MemberCriterionBuilderImpl();
         var criteria = buildCriteria(mcBuilder);
         var member = _type
             .AllMembers()

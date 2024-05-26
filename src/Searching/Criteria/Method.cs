@@ -1,21 +1,21 @@
 ﻿
-namespace ScrubJay.Reflection.Searching.Scratch;
+namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IMethodCriterion : IMethodBaseCriterion<MethodInfo>
 {
-    ICriterion<ParameterInfo>? ReturnType { get; set; }
+    ICriterion<ParameterInfo> Return { get; set; }
 }
 
 public record class MethodCriterion : MethodBaseCriterion<MethodInfo>, IMethodCriterion
 {
-    public ICriterion<ParameterInfo>? ReturnType { get; set; }
+    public ICriterion<ParameterInfo> Return { get; set; } = Criterion.Pass<ParameterInfo>();
 
     public MethodCriterion() : base() { }
     public MethodCriterion(IMemberCriterion criterion) : base(criterion) { }
     public MethodCriterion(IMethodBaseCriterion criterion) : base(criterion) { }
     public MethodCriterion(IMethodCriterion criterion) : base(criterion)
     {
-        this.ReturnType = criterion.ReturnType;
+        this.Return = criterion.Return;
     }
     
     public override bool Matches([NotNullWhen(true)] MethodInfo? method)
@@ -23,11 +23,8 @@ public record class MethodCriterion : MethodBaseCriterion<MethodInfo>, IMethodCr
         if (!base.Matches(method))
             return false;
 
-        if (ReturnType is not null)
-        {
-            if (!ReturnType.Matches(method.ReturnParameter))
-                return false;
-        }
+        if (!Return.Matches(method.ReturnParameter))
+            return false;
 
         return true;
     }
@@ -35,16 +32,18 @@ public record class MethodCriterion : MethodBaseCriterion<MethodInfo>, IMethodCr
 
 
 public interface IMethodCriterionBuilder<out TBuilder> : 
-    IMemberCriterionBuilder<TBuilder, IMethodCriterion, MethodInfo>
+    IMethodBaseCriterionBuilder<TBuilder, IMethodCriterion, MethodInfo>
     where TBuilder : IMethodCriterionBuilder<TBuilder>
 {
-    TBuilder ReturnType(ICriterion<ParameterInfo> criterion);
-    TBuilder ReturnType(Type type, TypeMatch typeMatch = TypeMatch.Exact);
-    TBuilder ReturnType<TReturn>(TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder Returns(ICriterion<ParameterInfo> parameter);
+    TBuilder Returns(Type type, TypeMatch match = TypeMatch.Exact);
+    TBuilder Returns<TReturn>(TypeMatch match = TypeMatch.Exact);
+    
+    TBuilder Like(MethodInfo method);
 }
 
 internal class MethodCriterionBuilder<TBuilder> :
-    MemberCriterionBuilder<TBuilder, IMethodCriterion, MethodInfo>,
+    MethodBaseCriterionBuilder<TBuilder, IMethodCriterion, MethodInfo>,
     IMethodCriterionBuilder<TBuilder>
     where TBuilder : IMethodCriterionBuilder<TBuilder>
 {
@@ -52,15 +51,22 @@ internal class MethodCriterionBuilder<TBuilder> :
     {
     }
 
-    public TBuilder ReturnType(ICriterion<ParameterInfo> criterion)
+    public TBuilder Returns(ICriterion<ParameterInfo> parameter)
     {
-        _criterion.ReturnType = criterion;
+        _criterion.Return = parameter;
         return _builder;
     }
-    public TBuilder ReturnType(Type type, TypeMatch typeMatch = TypeMatch.Exact)
-        => ReturnType(new ParameterTypeMatchCriterion(type, typeMatch));
-    public TBuilder ReturnType<TReturn>(TypeMatch typeMatch = TypeMatch.Exact)
-        => ReturnType(new ParameterTypeMatchCriterion(typeof(TReturn), typeMatch));
+    public TBuilder Returns(Type type, TypeMatch match = TypeMatch.Exact)
+        => Returns(ParameterCriterion.Create(Criterion.Match(type, match)));
+    public TBuilder Returns<TReturn>(TypeMatch match = TypeMatch.Exact)
+        => Returns(ParameterCriterion.Create(Criterion.Match(typeof(TReturn), match)));
+
+    public TBuilder Like(MethodInfo method)
+    {
+        base.Like(method);
+        _criterion.Return = ParameterCriterion.Create(Criterion.Match(method.ReturnType));
+        return _builder;
+    }
 }
 
 public interface IMethodCriterionBuilderImpl : 

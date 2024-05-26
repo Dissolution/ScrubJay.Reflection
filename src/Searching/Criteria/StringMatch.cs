@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 [Flags]
 public enum StringMatch
@@ -16,21 +16,11 @@ public record class StringMatchCriterion : ICriterion<string>
     public StringMatch StringMatch { get; set; } = StringMatch.Exact;
 
     public StringMatchCriterion() { }
-    
     public StringMatchCriterion(string str)
     {
         this.String = str;
     }
-    public StringMatchCriterion(string str, StringComparison stringComparison)
-    {
-        this.String = str;
-        this.StringComparison = stringComparison;
-    }
-    public StringMatchCriterion(string str, StringMatch stringMatch)
-    {
-        this.String = str;
-        this.StringMatch = stringMatch;
-    }
+ 
 
     public bool Matches(string? str)
     {

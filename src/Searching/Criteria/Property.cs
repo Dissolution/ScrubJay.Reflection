@@ -1,17 +1,17 @@
-﻿namespace ScrubJay.Reflection.Searching.Scratch;
+﻿namespace ScrubJay.Reflection.Searching.Criteria;
 
 public interface IPropertyCriterion : IMemberCriterion<PropertyInfo>
 {
-    ICriterion<Type>? Type { get; set; }
-    ICriterion<MethodInfo>? Getter { get; set; }
-    ICriterion<MethodInfo>? Setter { get; set; }
+    ICriterion<Type> Type { get; set; }
+    ICriterion<MethodInfo> Getter { get; set; }
+    ICriterion<MethodInfo> Setter { get; set; }
 }
 
 public record class PropertyCriterion : MemberCriterion<PropertyInfo>, IPropertyCriterion
 {
-    public ICriterion<Type>? Type { get; set; }
-    public ICriterion<MethodInfo>? Getter { get; set; }
-    public ICriterion<MethodInfo>? Setter { get; set; }
+    public ICriterion<Type> Type { get; set; } = Criterion.Pass<Type>();
+    public ICriterion<MethodInfo> Getter { get; set; } = Criterion.Pass<MethodInfo>();
+    public ICriterion<MethodInfo> Setter { get; set; } = Criterion.Pass<MethodInfo>();
 
     public PropertyCriterion() : base() { }
     public PropertyCriterion(IMemberCriterion criterion) : base(criterion) { }
@@ -27,41 +27,31 @@ public record class PropertyCriterion : MemberCriterion<PropertyInfo>, IProperty
         if (!base.Matches(property))
             return false;
 
-        if (Type is not null && !Type.Matches(property.PropertyType))
+        if (!Type.Matches(property.PropertyType))
             return false;
 
-        if (Getter is not null)
-        {
-            var getMethod = property.GetMethod;
-            if (getMethod is null)
-                return false;
-            if (!Getter.Matches(getMethod))
-                return false;
-        }
+        if (!Getter.Matches(property.GetMethod))
+            return false;
 
-        if (Setter is not null)
-        {
-            var setMethod = property.SetMethod;
-            if (setMethod is null) 
-                return false;
-            if (!Setter.Matches(setMethod)) 
-                return false;
-        }
-
+        if (!Setter.Matches(property.SetMethod)) 
+            return false;
+        
         return true;
     }
 }
 
 public interface IPropertyCriterionBuilder<out TBuilder> : 
-    IMemberCriterionBuilder<TBuilder, IPropertyCriterion, PropertyInfo>
+    IMemberBaseCriterionBuilder<TBuilder, IPropertyCriterion, PropertyInfo>
     where TBuilder : IPropertyCriterionBuilder<TBuilder>
 {
     TBuilder Type(ICriterion<Type> criterion);
-    TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact);
-    TBuilder Type<TProperty>(TypeMatch typeMatch = TypeMatch.Exact);
+    TBuilder Type(Type type, TypeMatch match = TypeMatch.Exact);
+    TBuilder Type<TProperty>(TypeMatch match = TypeMatch.Exact);
 
     TBuilder Getter(ICriterion<MethodInfo> getter);
     TBuilder Setter(ICriterion<MethodInfo> setter);
+    
+    TBuilder Like(PropertyInfo property);
 }
 
 internal class PropertyCriterionBuilder<TBuilder> :
@@ -78,13 +68,13 @@ internal class PropertyCriterionBuilder<TBuilder> :
         _criterion.Type = criterion;
         return _builder;
     }
-    public TBuilder Type(Type type, TypeMatch typeMatch = TypeMatch.Exact)
+    public TBuilder Type(Type type, TypeMatch match = TypeMatch.Exact)
     {
-        return Type(new TypeMatchCriterion(type, typeMatch));
+        return Type(Criterion.Match(type, match));
     }
-    public TBuilder Type<TField>(TypeMatch typeMatch = TypeMatch.Exact)
+    public TBuilder Type<TProperty>(TypeMatch match = TypeMatch.Exact)
     {
-        return Type(new TypeMatchCriterion(typeof(TField), typeMatch));
+        return Type(Criterion.Match(typeof(TProperty), match));
     }
 
     public TBuilder Getter(ICriterion<MethodInfo> getter)
@@ -95,6 +85,15 @@ internal class PropertyCriterionBuilder<TBuilder> :
     public TBuilder Setter(ICriterion<MethodInfo> setter)
     {
         _criterion.Setter = setter;
+        return _builder;
+    }
+
+    public TBuilder Like(PropertyInfo property)
+    {
+        base.Like(property);
+        _criterion.Type = Criterion.Match(property.PropertyType);
+        _criterion.Getter = property.GetMethod is null ? Criterion.IsNull<MethodInfo>() : Criterion.NotNull<MethodInfo>();
+        _criterion.Setter = property.SetMethod is null ? Criterion.IsNull<MethodInfo>() : Criterion.NotNull<MethodInfo>();
         return _builder;
     }
 }

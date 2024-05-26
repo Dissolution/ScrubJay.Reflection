@@ -1,5 +1,4 @@
 using ScrubJay.Reflection.Searching;
-using ScrubJay.Reflection.Searching.Criteria;
 
 namespace ScrubJay.Reflection.Extensions;
 
@@ -20,19 +19,7 @@ public static class EventInfoExtensions
         if (eventInfo is null)
             return null;
 
-        MemberCriteria mc = new MemberCriteria();
-        
-        
-        BindingFlags flags = BindingFlags.DeclaredOnly | BindingFlags.Public | BindingFlags.NonPublic;
-        
-        if (eventInfo.IsStatic())
-        {
-            flags |= BindingFlags.Static;
-        }
-        else
-        {
-            flags |= BindingFlags.Instance;
-        }
-        return eventInfo.DeclaringType?.GetField(eventInfo.Name, flags);
+        return Mirror.Search(eventInfo.DeclaringType!)
+            .TryFindMember(b => b.IsField.Name(eventInfo).Access(eventInfo)).OkOrThrow();
     }
 }

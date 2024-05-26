@@ -1,7 +1,5 @@
 using ScrubJay.Reflection.Runtime;
 using static ScrubJay.GlobalHelper;
-
-using ScrubJay.Reflection.Runtime.Emission;
 using ScrubJay.Reflection.Runtime.Emission.Adaption;
 using ScrubJay.Reflection.Runtime.Naming;
 
