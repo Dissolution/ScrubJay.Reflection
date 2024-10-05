@@ -11,13 +11,13 @@ public static class Mirror
     
     public static TypeSearch Search(Type type)
     {
-        ThrowIf.Null(type);
+        Validate.ThrowIfNull(type);
         return new(type);
     }
     
     public static Result<TMember, Reflexception> TryFindMember<TMember>(Expression memberExpression)
     {
-        var member = Expressions.Expressions.FindMembers(memberExpression).FirstOrDefault();
+        var member = Expressions.ExpressionHelper.FindMembers(memberExpression).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");

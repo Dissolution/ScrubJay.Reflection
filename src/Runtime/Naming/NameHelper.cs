@@ -1,49 +1,54 @@
-﻿using System.Globalization;
+﻿#pragma warning disable MA0002
+
+using System.Globalization;
 using Microsoft.CodeAnalysis.CSharp;
-using ScrubJay.Text;
+using Polyfills;
 
 namespace ScrubJay.Reflection.Runtime.Naming;
 
 /// <summary>
-/// Methods to assist with the naming of <see cref="dynamic"/> and Runtime members
+/// Methods to assist with the naming of <c>dynamic</c> and Runtime members
 /// </summary>
-/// <see href="https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names"/>
-/// <see href="https://stackoverflow.com/questions/950616/what-characters-are-allowed-in-c-sharp-class-name"/>
+/// <seealso href="https://learn.microsoft.com/en-us/dotnet/csharp/fundamentals/coding-style/identifier-names"/>
+/// <seealso href="https://stackoverflow.com/questions/950616/what-characters-are-allowed-in-c-sharp-class-name"/>
 public static class NameHelper
 {
     private const char REPLACE_CHAR = '_';
-    private static long _nameCount;
+    private static long _nameCount = 0L;
 
 #if NET481 || NETSTANDARD2_0_OR_GREATER
-    public static HashSet<string> Keywords { get; }
+    public static IReadOnlyCollection<string> Keywords { get; }
 #else
     public static IReadOnlySet<string> Keywords { get; }
 #endif
 
     static NameHelper()
     {
-        _nameCount = 0L;
+        // Load up all known keywords
         Keywords = SyntaxFacts.GetKeywordKinds()
             .Select(static kind => SyntaxFacts.GetText(kind))
-            .ToHashSet();
+            .ToHashSet(StringComparer.Ordinal);
     }
-
+    
+    /// <summary>
+    /// Is the specified <see cref="string"/> a reserved language keyword?
+    /// </summary>
     public static bool IsKeyword(string? str)
     {
         return str is not null && Keywords.Contains(str);
     }
 
-
-
-
     /// <summary>
-    /// Is the given <paramref name="ch"/> a valid <see cref="MemberInfo"/> Name <see cref="char"/>?
+    /// Is the given <see cref="char"/> valid for use in a <see cref="MemberInfo"/> Name?
     /// </summary>
-    /// <param name="ch">The <see cref="char"/> to validate</param>
-    /// <param name="firstChar"><i>optional</i>, defaults to <c>false</c><br/>
-    /// Whether or not you're validating the first or subsequent character in a Member Name</param>
+    /// <param name="ch">
+    /// The <see cref="char"/> to validate
+    /// </param>
+    /// <param name="firstChar"><i>optional (false)</i><br/>
+    /// Is the <see cref="char"/> being validated the first in the Name?
+    /// </param>
     /// <returns>
-    /// <c>true</c> if <paramref name="ch"/> is valid; otherwise <c>false</c>
+    /// <c>true</c> if the <see cref="char"/> is valid for a <see cref="MemberInfo"/> Name; otherwise, <c>false</c>
     /// </returns>
     public static bool IsValidMemberNameCharacter(char ch, bool firstChar = false)
     {
@@ -104,7 +109,7 @@ public static class NameHelper
             return $"{memberType}_{nameId}";
         }
 
-        using var _ = StringBuilderPool.Borrow(out var builder);
+        using var builder = new TextBuilder();
         char ch = name[0];
         bool appendedBadChar = false;
         if (!IsValidMemberNameCharacter(ch, true))

@@ -21,10 +21,10 @@ public class InstructionStream : List<InstructionLine>
     
     public override string ToString()
     {
-        using var _ = StringBuilderPool.Borrow(out var sb);
+        using var sb = new TextBuilder();
         foreach (var line in this)
         {
-            sb.Append(line).AppendLine();
+            sb.Append(line).NewLine();
         }
         return sb.ToString();
     }

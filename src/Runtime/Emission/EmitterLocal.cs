@@ -77,6 +77,6 @@ public sealed class EmitterLocal : LocalVariableInfo,
     
     public override string ToString()
     {
-        return InterpolateDeeper.Resolve($"[{LocalIndex}]: {(IsPinned ? "fixed " : "")}{LocalType} {Name ?? "???"}");
+        return $"[{LocalIndex}]: {(IsPinned ? "fixed " : "")}{LocalType} {Name ?? "???"}";
     }
 }

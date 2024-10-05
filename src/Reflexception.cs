@@ -7,7 +7,7 @@ using ScrubJay.Reflection.Searching;
 namespace ScrubJay.Reflection;
 
 /// <summary>
-/// An <see cref="Exception"/> thrown during Jayflect operations
+/// An <see cref="Exception"/> thrown during Reflection operations
 /// </summary>
 public class Reflexception : Exception
 {
@@ -50,6 +50,7 @@ public class Reflexception : Exception
     private sealed record class ExceptionCtorKey(Type ExceptionType, Type[] CtorArgTypes)
     {
         public static ExceptionCtorKey Create(Type exType, params Type[] argTypes) => new(exType, argTypes);
+        
         public static ExceptionCtorKey Create<TException>(params Type[] argTypes)
             where TException : Exception
             => new(typeof(TException), argTypes);
@@ -71,25 +72,25 @@ public class Reflexception : Exception
         return del;
     }
     
-    public static TException Create<TException>(ref InterpolateDeeper message)
-        where TException : Exception
-    {
-        string msg = message.ToStringAndDispose();
-        var construct = _exceptionCtorCache.GetOrAdd<ExceptionCtorKey, Func<string, TException>>(
-            ExceptionCtorKey.Create<TException>(typeof(string)),
-            CreateCtr<Func<string, TException>>);
-        return construct(msg);
-    }
-    
-    public static TException Create<TException>(ref InterpolateDeeper message, string? paramName)
-        where TException : Exception
-    {
-        string msg = message.ToStringAndDispose();
-        var construct = _exceptionCtorCache.GetOrAdd<ExceptionCtorKey, Func<string, string?, TException>>(
-            ExceptionCtorKey.Create<TException>(typeof(string), typeof(string)),
-            static key => CreateCtr<Func<string, string?, TException>>(key));
-        return construct(msg, paramName);
-    }
+    // public static TException Create<TException>(ref InterpolateDeeper message)
+    //     where TException : Exception
+    // {
+    //     string msg = message.ToStringAndDispose();
+    //     var construct = _exceptionCtorCache.GetOrAdd<ExceptionCtorKey, Func<string, TException>>(
+    //         ExceptionCtorKey.Create<TException>(typeof(string)),
+    //         CreateCtr<Func<string, TException>>);
+    //     return construct(msg);
+    // }
+    //
+    // public static TException Create<TException>(ref InterpolateDeeper message, string? paramName)
+    //     where TException : Exception
+    // {
+    //     string msg = message.ToStringAndDispose();
+    //     var construct = _exceptionCtorCache.GetOrAdd<ExceptionCtorKey, Func<string, string?, TException>>(
+    //         ExceptionCtorKey.Create<TException>(typeof(string), typeof(string)),
+    //         static key => CreateCtr<Func<string, string?, TException>>(key));
+    //     return construct(msg, paramName);
+    // }
     
     
     
@@ -114,7 +115,7 @@ public class Reflexception : Exception
 
     public Reflexception(string? message) : base(message) { }
 
-    public Reflexception(ref InterpolateDeeper message) : base(message.ToStringAndDispose()) { }
+    // public Reflexception(ref InterpolateDeeper message) : base(message.ToStringAndDispose()) { }
 
     public override string ToString()
     {

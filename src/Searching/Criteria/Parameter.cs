@@ -38,7 +38,7 @@ public record class ParameterCriterion : IParameterCriterion
         if (!Type.Matches(parameterType))
             return false;
 
-        Option<object?> defaultValue = parameter.HasDefaultValue ? Option<object?>.Some(parameter.DefaultValue) : Option<object?>.None;
+        Option<object?> defaultValue = parameter.HasDefaultValue ? Option<object?>.Some(parameter.DefaultValue) : Option<object?>.None();
         if (!Default.Matches(defaultValue))
             return false;
         

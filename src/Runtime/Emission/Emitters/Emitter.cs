@@ -99,14 +99,14 @@ internal partial class Emitter<TEmitter> : Emitter,
 
     public TEmitter Invoke(Action<TEmitter> emission)
     {
-        Validation.ThrowIf.Null(emission);
+        Validate.ThrowIfNull(emission);
         emission(_emitter);
         return _emitter;
     }
 
     public TEmitter Invoke(Func<TEmitter, TEmitter> emission)
     {
-        Validation.ThrowIf.Null(emission);
+        Validate.ThrowIfNull(emission);
         return emission(_emitter);
     }
 
@@ -127,7 +127,7 @@ internal partial class Emitter<TEmitter> : Emitter,
 
     public virtual TEmitter BeginCatchBlock(Type exceptionType)
     {
-        Validation.ThrowIf.Null(exceptionType);
+        Validate.ThrowIfNull(exceptionType);
         if (!exceptionType.Implements<Exception>())
             throw new ArgumentException($"{exceptionType} is not a valid Exception Type", nameof(exceptionType));
         AddInstruction(new BeginCatchBlockInstruction(exceptionType));
@@ -402,7 +402,7 @@ internal partial class Emitter<TEmitter> : Emitter,
 #region Clean
     public TEmitter Ldarg(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         return index switch
         {
             0 => Emit(OpCodes.Ldarg_0),
@@ -415,7 +415,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     }
     public TEmitter Ldarga(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         if (index <= byte.MaxValue)
             return Emit(OpCodes.Ldarga_S, (byte)index);
         return Emit(OpCodes.Ldarga, (short)index);
@@ -442,14 +442,14 @@ internal partial class Emitter<TEmitter> : Emitter,
 
     public TEmitter Starg(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         if (index <= byte.MaxValue)
             return Emit(OpCodes.Starg_S, (byte)index);
         return Emit(OpCodes.Starg, (short)index);
     }
     public TEmitter Ldloc(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         return index switch
         {
             0 => Emit(OpCodes.Ldloc_0),
@@ -463,7 +463,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Ldloc(EmitterLocal local)
     {
         int index = local.LocalIndex;
-        ThrowIf.NotBetween(index, 0, short.MaxValue, nameof(local));
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue), nameof(local)).OkOrThrow();
         return index switch
         {
             0 => Emit(OpCodes.Ldloc_0),
@@ -476,7 +476,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     }
     public TEmitter Ldloca(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         return index switch
         {
             <= byte.MaxValue => Emit(OpCodes.Ldloca_S, (byte)index),
@@ -486,7 +486,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Ldloca(EmitterLocal local)
     {
         int index = local.LocalIndex;
-        ThrowIf.NotBetween(index, 0, short.MaxValue, nameof(local));
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue), nameof(local)).OkOrThrow();
         return index switch
         {
             <= byte.MaxValue => Emit(OpCodes.Ldloca_S, local),
@@ -495,7 +495,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     }
     public TEmitter Stloc(int index)
     {
-        ThrowIf.NotBetween(index, 0, short.MaxValue);
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue)).OkOrThrow();
         return index switch
         {
             0 => Emit(OpCodes.Stloc_0),
@@ -509,7 +509,7 @@ internal partial class Emitter<TEmitter> : Emitter,
     public TEmitter Stloc(EmitterLocal local)
     {
         int index = local.LocalIndex;
-        ThrowIf.NotBetween(index, 0, short.MaxValue, nameof(local));
+        Validate.InBounds(index, Bound<int>.Inclusive(0), Bound<int>.Inclusive(short.MaxValue), nameof(local)).OkOrThrow();
         return index switch
         {
             0 => Emit(OpCodes.Stloc_0),
@@ -1212,13 +1212,10 @@ internal partial class Emitter<TEmitter> : Emitter,
 
     public override string ToString()
     {
-        var text = StringBuilderPool.Rent();
-        foreach (var line in this.Instructions)
-        {
-            text.Append(line).AppendLine();
-        }
-        text.Append($"IL_{this.Offset:X4}: <- Current Stream Position");
-        return text.ToStringAndReturn();
+        return new TextBuilder()
+            .Enumerate(this.Instructions, (tb, inst) => tb.Append(inst).NewLine())
+            .Append($"IL_{this.Offset:X4}: <- Current Stream Position")
+            .ToStringAndDispose();
     }
 
 }

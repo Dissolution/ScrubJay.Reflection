@@ -40,7 +40,7 @@ public static class TypeNames
             return type.Name;
         }
 
-        using var name = new InterpolateDeeper();
+        var name = new DefaultInterpolatedStringHandler();
         
         // Nullable<T> => T?
         Type? underType = Nullable.GetUnderlyingType(type);
@@ -48,7 +48,7 @@ public static class TypeNames
         {
             // c# Nullable alias
             name.AppendFormatted(underType);
-            name.AppendLiteral('?');
+            name.AppendLiteral("?");
             return name.ToString();
         }
 
@@ -57,7 +57,7 @@ public static class TypeNames
         {
             underType = type.GetElementType().ThrowIfNull();
             name.AppendFormatted(underType);
-            name.AppendLiteral('*');
+            name.AppendLiteral("*");
             return name.ToString();
         }
 
@@ -83,7 +83,7 @@ public static class TypeNames
         if (type.IsNested && !type.IsGenericParameter)
         {
             name.AppendFormatted(type.DeclaringType);
-            name.AppendLiteral('.');
+            name.AppendLiteral(".");
         }
 
         // If non-generic
@@ -113,15 +113,15 @@ public static class TypeNames
         var i = typeName.IndexOf('`');
         if (i >= 0)
         {
-            name.AppendLiteral(typeName[..i]);
+            name.AppendFormatted(typeName[..i]);
         }
         else
         {
-            name.AppendLiteral(typeName);
+            name.AppendFormatted(typeName);
         }
         
         // Add our generic types
-        name.AppendLiteral('<');
+        name.AppendLiteral("<");
         var argTypes = type.GetGenericArguments();
         Debug.Assert(argTypes.Length > 0);
         // the first
@@ -132,7 +132,7 @@ public static class TypeNames
             name.AppendLiteral(", ");
             name.AppendFormatted(argTypes[1]);
         }
-        name.AppendLiteral('>');
+        name.AppendLiteral(">");
 
         return name.ToString();
     }

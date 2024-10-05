@@ -9,9 +9,9 @@ public static class DeepCloner
 {
     private static readonly ConcurrentTypeMap<Delegate> _deepCloneCache;
     private static readonly ConcurrentTypeMap<Delegate> _objectDeepCloneCache;
-    
+
     private static readonly MethodInfo _deepCloneEmptyMethod;
-    
+
     static DeepCloner()
     {
         _deepCloneCache = new()
@@ -35,7 +35,6 @@ public static class DeepCloner
             [typeof(string)] = StringDeepClone,
         };
         _objectDeepCloneCache = new();
-
 
         _deepCloneEmptyMethod = Mirror.Search(typeof(DeepCloner)).TryFindMember(b => b.Public.Static.IsMethod.IsGeneric().Name(nameof(DeepClone))).OkOrThrow();
     }

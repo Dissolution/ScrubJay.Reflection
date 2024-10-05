@@ -12,7 +12,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Scrubjay.Core\src\ScrubJay.Core.csproj" />
       <ProjectReference Include="..\src\ScrubJay.Reflection.csproj" />
     </ItemGroup>
 

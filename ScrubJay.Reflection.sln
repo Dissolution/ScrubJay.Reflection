@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrubJay.Reflection", "src\ScrubJay.Reflection.csproj", "{BAA89E9A-6ED6-4F5B-860D-80F86F1544DF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrubJay.Core", "..\Scrubjay.Core\src\ScrubJay.Core.csproj", "{4C7D0C9A-6114-47F2-A6E8-1C953BCDDF00}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "ConsoleApp\ConsoleApp.csproj", "{68ECCC8C-683E-4149-941C-24DD2F41CE95}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		{BAA89E9A-6ED6-4F5B-860D-80F86F1544DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BAA89E9A-6ED6-4F5B-860D-80F86F1544DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BAA89E9A-6ED6-4F5B-860D-80F86F1544DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4C7D0C9A-6114-47F2-A6E8-1C953BCDDF00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4C7D0C9A-6114-47F2-A6E8-1C953BCDDF00}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4C7D0C9A-6114-47F2-A6E8-1C953BCDDF00}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4C7D0C9A-6114-47F2-A6E8-1C953BCDDF00}.Release|Any CPU.Build.0 = Release|Any CPU
 		{68ECCC8C-683E-4149-941C-24DD2F41CE95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{68ECCC8C-683E-4149-941C-24DD2F41CE95}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68ECCC8C-683E-4149-941C-24DD2F41CE95}.Release|Any CPU.ActiveCfg = Release|Any CPU

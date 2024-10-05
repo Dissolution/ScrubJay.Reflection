@@ -6,9 +6,9 @@ public static class ExpressionHelper
     public class ExpressionInfo
     {
         public ExpressionType ExpressionType { get; init; }
-        
+
         public string Symbol { get; init; }
-        
+
         public bool Checked { get; init; } = false;
 
         public bool Numeric { get; init; } = false;
@@ -20,16 +20,16 @@ public static class ExpressionHelper
         public Type? InterfaceType { get; set; } = null;
 
         public DelegateInfo? DelegateInfo { get; set; } = null;
-        
+
         public ExpressionInfo(ExpressionType expressionType)
         {
             this.ExpressionType = expressionType;
         }
     }
-    
+
 
     internal static Type GenericType = typeof(IList<>).GenericTypeArguments[0];
-    
+
     public static ExpressionInfo GetInfo(ExpressionType expressionType)
     {
         switch (expressionType)
@@ -252,8 +252,8 @@ public static class ExpressionHelper
             case ExpressionType.Unbox:
                 break;
 
-            
-            
+
+
 
             case ExpressionType.DivideAssign:
                 break;
@@ -301,3 +301,67 @@ public static class ExpressionHelper
         throw new NotImplementedException();
     }
 }*/
+
+using System.Linq.Expressions;
+
+namespace ScrubJay.Reflection.Expressions;
+
+public static partial class ExpressionHelper
+{
+    public static Func<TValue, TResult> CompileUnaryExpression<TValue, TResult>(
+        Func<Expression, UnaryExpression> body)
+    {
+        ParameterExpression arg = Expression.Parameter(typeof(TValue), "arg");
+        try
+        {
+            var lambda = Expression.Lambda<Func<TValue, TResult>>(body(arg), arg);
+            return lambda.Compile();
+        }
+        catch (Exception ex)
+        {
+            // Return a function that throws the exception
+            return _ => throw new InvalidOperationException(ex.Message);
+        }
+    }
+
+    public static Func<T1, T2, TResult> CompileBinaryExpression<T1, T2, TResult>(Func<Expression, Expression, BinaryExpression> body)
+    {
+        ParameterExpression arg1 = Expression.Parameter(typeof(T1), "arg1");
+        ParameterExpression arg2 = Expression.Parameter(typeof(T2), "arg2");
+        try
+        {
+            var lambda = Expression.Lambda<Func<T1, T2, TResult>>(body(arg1, arg2), arg1, arg2);
+            return lambda.Compile();
+        }
+        catch (Exception ex)
+        {
+            // Return a function that throws the exception
+            return (_, _) => throw new InvalidOperationException(ex.Message);
+        }
+    }
+}
+
+partial class ExpressionHelper
+{
+    public static IReadOnlyCollection<MemberInfo> FindMembers(Expression expression)
+    {
+        var members = new ExpressionMembers();
+        members.AddFrom(expression);
+        return members;
+    }
+    
+    public static IReadOnlyCollection<MemberInfo> FindMembers<T>(Expression<Action<T>> expression)
+    {
+        return FindMembers((Expression)expression);
+    }
+
+    public static IReadOnlyCollection<MemberInfo> FindMembers<T>(Expression<Func<T>> expression)
+    {
+        return FindMembers((Expression)expression);
+    }
+
+    public static IReadOnlyCollection<MemberInfo> FindMembers<T>(Expression<Func<T, object?>> expression)
+    {
+        return FindMembers((Expression)expression);
+    }
+}

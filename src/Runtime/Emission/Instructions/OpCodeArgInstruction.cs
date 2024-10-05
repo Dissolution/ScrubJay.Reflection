@@ -62,7 +62,7 @@ public record class OpCodeArgInstruction<T> : OpCodeInstruction
         this.Arg = arg;
     }
 
-    public override string ToString() => InterpolateDeeper.Resolve($"{OpCode} {Arg}");
+    public override string ToString() => $"{OpCode} {Arg}";
 }
 /*
 public record class OpCodeWithUInt8Instruction : OpCodeInstruction

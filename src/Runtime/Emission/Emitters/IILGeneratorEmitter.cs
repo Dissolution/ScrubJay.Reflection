@@ -80,7 +80,7 @@ internal class GeneratorEmitter<TEmitter> :
 
     public virtual TEmitter BeginCatchBlock(Type exceptionType)
     {
-        Validation.ThrowIf.Null(exceptionType);
+        Validate.ThrowIfNull(exceptionType);
         if (!exceptionType.Implements<Exception>())
             throw new ArgumentException($"{exceptionType} is not a valid Exception Type", nameof(exceptionType));
         AddInstruction(new BeginCatchBlockInstruction(exceptionType));

@@ -24,4 +24,11 @@ public static class TypeExtensions
         nonRefType = type;
         return RK.None;
     }
+
+    public static MemberInfo[] AllMembers(this Type? type)
+    {
+        if (type is null)
+            return [];
+        return type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.IgnoreCase);
+    }
 }
