@@ -16,6 +16,8 @@ var members = Expressions.FindMembers<string>(str => Debug.WriteLine(str));
 Console.WriteLine(members);*/
 
 
+
+
 Console.WriteLine("Press Enter to close");
 Console.ReadLine();
 

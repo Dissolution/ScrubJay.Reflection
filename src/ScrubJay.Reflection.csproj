@@ -75,6 +75,7 @@
         <Using Include="System.Reflection"/>
         <Using Include="System.Reflection.Emit"/>
         
+        <Using Include="ScrubJay.Comparison"/>
         <Using Include="ScrubJay.Enums"/>
         <Using Include="ScrubJay.Extensions"/>
         <Using Include="ScrubJay.Utilities"/>
