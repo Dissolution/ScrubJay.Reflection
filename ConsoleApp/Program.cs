@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Reflection;
 using ScrubJay.Reflection.Searching;
-using ScrubJay.Reflection.Searching.Criteria;
 
 
 //var ctors = typeof((int, string)).AllMembers().OfType<ConstructorInfo>().ToList();

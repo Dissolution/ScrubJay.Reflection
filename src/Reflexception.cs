@@ -22,7 +22,7 @@ public class Reflexception : Exception
                 .NonPublic
                 .Instance
                 .Name("_message")
-                .Type<string>())
+                .ValueType<string>())
             .OkOrThrow();
 
         _setExceptionMessage = RuntimeBuilder.EmitDelegate<Action<Exception, string?>>(emitter => emitter
@@ -37,7 +37,7 @@ public class Reflexception : Exception
                 .NonPublic
                 .Instance
                 .Name("_innerException")
-                .Type<Exception>())
+                .ValueType<Exception>())
             .OkOrThrow();
 
         _setExceptionInnerException = RuntimeBuilder.EmitDelegate<Action<Exception, Exception?>>(emitter => emitter

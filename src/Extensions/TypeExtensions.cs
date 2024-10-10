@@ -25,10 +25,9 @@ public static class TypeExtensions
         return RK.None;
     }
 
-    public static MemberInfo[] AllMembers(this Type? type)
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static MemberInfo[] AllMembers(this Type type)
     {
-        if (type is null)
-            return [];
         return type.GetMembers(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.IgnoreCase);
     }
 }
