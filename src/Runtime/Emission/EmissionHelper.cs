@@ -18,24 +18,24 @@ public static class EmissionHelper
         {
             generator.Emit(OpCodes.Ldarg_0);
             var ctor = Mirror.Search<Label>()
-                .TryFindMember(b => b.Internal.Instance.IsConstructor.Parameters(typeof(int)))
+                .TryFindMember(b => b.Internal.Instance.IsConstructor.Parameters<int>())
                 .OkOrThrow();
             generator.Emit(OpCodes.Call, ctor);
             generator.Emit(OpCodes.Ret);
         });
 
-        Type_GetTypeFromHandle_Method = Mirror.Search<Type>()
-            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(Type.GetTypeFromHandle)))
+        Type_GetTypeFromHandle_Method = Mirror
+            .TryFindMember<MethodInfo>((RuntimeTypeHandle handle) => Type.GetTypeFromHandle(handle))
             .OkOrThrow();
 
 #if NET481 || NETSTANDARD2_0
-        GetUninitializedObject_Method = Mirror.Search(typeof(FormatterServices))
-            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(FormatterServices.GetUninitializedObject)))
+        GetUninitializedObject_Method = Mirror
+            .TryFindMember<MethodInfo>((Type type) => FormatterServices.GetUninitializedObject(type))
             .OkOrThrow();
 #else
         
-        GetUninitializedObject_Method = Mirror.Search(typeof(RuntimeHelpers))
-            .TryFindMember(b => b.Public.Static.IsMethod.Name(nameof(RuntimeHelpers.GetUninitializedObject)))
+        GetUninitializedObject_Method = Mirror
+            .TryFindMember<MethodInfo>((Type type) => RuntimeHelpers.GetUninitializedObject(type))
             .OkOrThrow();
 #endif
     }

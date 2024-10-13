@@ -32,6 +32,6 @@
 //    }
 //    public override string ToString()
 //    {
-//        return Dump(_local);
+//        return NameOf(_local);
 //    }
 //}

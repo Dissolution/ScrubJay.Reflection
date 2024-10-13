@@ -1,7 +1,10 @@
 ﻿namespace ScrubJay.Reflection.Comparison;
 
-public class ModuleEqualityComparer : EqualityComparer<Module>
+[PublicAPI]
+public sealed class ModuleEqualityComparer : EqualityComparer<Module>
 {
+    public static ModuleEqualityComparer Instance { get; } = new();
+    
     public override bool Equals(Module? x, Module? y)
     {
         if (ReferenceEquals(x, y)) return true;

@@ -63,7 +63,7 @@ public static class RuntimeBuilder
             attributes: MethodAttributes.Public | MethodAttributes.Static, // only valid value
             callingConvention: CallingConventions.Standard, // only valid value
             returnType: returnSig.Type,
-            parameterTypes: signature.GetParameterTypes(),
+            parameterTypes: signature.GetOrCreateParameterTypes(),
             m: ModuleBuilder,
             skipVisibility: true);
 

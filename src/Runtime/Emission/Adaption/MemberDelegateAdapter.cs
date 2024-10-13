@@ -1,17 +1,4 @@
-namespace ScrubJay.Reflection.Runtime.Emission.Adaption;
-
-public sealed record class MemberDelegate<TMember, TDelegate>
-{
-    public TMember Member { get; }
-    
-    public TDelegate Delegate { get; }
-
-    public MemberDelegate(TMember member, TDelegate @delegate)
-    {
-        this.Member = member;
-        this.Delegate = @delegate;
-    }
-}
+﻿namespace ScrubJay.Reflection.Runtime.Emission.Adaption;
 
 public abstract class MemberDelegateAdapter<TMember, TDelegate>
     where TMember : MemberInfo
@@ -54,32 +41,5 @@ public abstract class MemberDelegateAdapter<TMember, TDelegate>
 
 
         return false;
-    }
-}
-
-
-
-public delegate TValue Getter<TInstance, out TValue>(ref TInstance? instance);
-
-public class FieldGetterAdapter<TInstance, TValue> : MemberDelegateAdapter<FieldInfo, Getter<TInstance, TValue>>
-{
-    public override Result<Getter<TInstance, TValue>, Exception> TryAdapt(FieldInfo field)
-    {
-        if (field is null)
-            return new ArgumentNullException(nameof(field));
-        
-        // static fields
-        if (field.IsStatic)
-        {
-            // has to have a 'static' instance type
-            if (!IsStaticInstanceType<TInstance>())
-                return GetArgAdaptException(field);
-            
-            // return type has to be compat
-            //if (CanConvert(new Variable.Field(field), new Variable.Stack(typeof(TValue))))
-                
-        }
-
-        throw new NotImplementedException();
     }
 }

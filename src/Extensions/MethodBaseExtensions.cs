@@ -1,5 +1,4 @@
 using ScrubJay.Reflection.Info;
-using ScrubJay.Validation;
 
 namespace ScrubJay.Reflection.Extensions;
 
@@ -15,11 +14,14 @@ public static class MethodBaseExtensions
     
     public static bool IsSealed(this MethodBase method) => !IsOverridable(method);
     
+    /// <summary>
+    /// Get the <see cref="Type">Types</see> of the parameters in this <see cref="MethodBase"/>
+    /// </summary>
     public static Type[] GetParameterTypes(this MethodBase method)
     {
         var parameters = method.GetParameters();
         Type[] types = new Type[parameters.Length];
-        for (var i = 0; i < parameters.Length; i++)
+        for (var i = parameters.Length - 1; i >= 0; i--)
         {
             types[i] = parameters[i].ParameterType;
         }
@@ -37,6 +39,12 @@ public static class MethodBaseExtensions
         return signatures;
     }
 
+    /// <summary>
+    /// Gets the <see cref="Type"/> returned by this <see cref="MethodBase"/>
+    /// </summary>
+    /// <param name="method"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
     public static Type ReturnType(this MethodBase method)
     {
         return method switch

@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
+using ScrubJay.Reflection.Expressions;
 using ScrubJay.Reflection.Searching.Predication;
 using ScrubJay.Reflection.Searching.Predication.Members;
-using ScrubJay.Validation;
 using ParameterInfo = System.Reflection.ParameterInfo;
 
 namespace ScrubJay.Reflection.Searching;
@@ -18,7 +18,7 @@ public static class Mirror
     
     public static Result<TMember, Reflexception> TryFindMember<TMember>(Expression memberExpression)
     {
-        var member = Expressions.ExpressionHelper.FindMembers(memberExpression).FirstOrDefault();
+        var member = ExpressionTree.EnumerateMembers(memberExpression, Scope.Self | Scope.Children).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");

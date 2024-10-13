@@ -48,7 +48,7 @@
 //    {
 //        JayflectException GetNotImplementedEx() => new JayflectException
 //        {
-//            Message = Dump($"Cannot load {this} as a {destArg}"),
+//            Message = NameOf($"Cannot load {this} as a {destArg}"),
 //            InnerException = new NotImplementedException("This may be implemented in the future"),
 //            Data =
 //            {
@@ -149,7 +149,7 @@
 //    {
 //        JayflectException GetNotImplementedEx() => new JayflectException
 //        {
-//            Message = Dump($"Cannot load {this} as a {destArg}"),
+//            Message = NameOf($"Cannot load {this} as a {destArg}"),
 //            InnerException = new NotImplementedException("This may be implemented in the future"),
 //            Data =
 //            {

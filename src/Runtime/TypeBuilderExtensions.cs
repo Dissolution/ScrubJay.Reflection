@@ -7,7 +7,7 @@
 //    public static DynamicMethod CreateDynamicMethod(this TypeBuilder typeBuilder, MethodSignature signature)
 //    {
 //        // Fix name
-//        string name = NameHelper.CreateMemberName(MemberTypes.Method, signature.Name);
+//        string name = NameHelper.CreateMemberName(MemberTypes.Method, signature.NameFrom);
 //        return new DynamicMethod(
 //            name: name,
 //            attributes: MethodAttributes.Public | MethodAttributes.Static, // only valid value

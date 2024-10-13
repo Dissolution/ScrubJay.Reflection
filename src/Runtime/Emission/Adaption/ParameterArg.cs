@@ -40,6 +40,6 @@
 //
 //    public override string ToString()
 //    {
-//        return Dump(_parameterInfo);
+//        return NameOf(_parameterInfo);
 //    }
 //}

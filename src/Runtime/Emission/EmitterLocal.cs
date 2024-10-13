@@ -1,7 +1,9 @@
-﻿using ScrubJay.Reflection.Runtime.Naming;
+﻿namespace ScrubJay.Reflection.Runtime.Emission;
 
-namespace ScrubJay.Reflection.Runtime.Emission;
-
+/// <summary>
+/// A local variable managed by an Emitter
+/// </summary>
+[PublicAPI]
 public sealed class EmitterLocal : LocalVariableInfo,
 #if NET7_0_OR_GREATER
     IEqualityOperators<EmitterLocal, EmitterLocal, bool>,
@@ -24,11 +26,11 @@ public sealed class EmitterLocal : LocalVariableInfo,
         return left.Equals(right);
     }
     public static bool operator !=(EmitterLocal? left, LocalVariableInfo? right) => !(left == right);
-
+    
     
     public string? Name { get; }
     public override int LocalIndex { get; }
-    public override Type LocalType { get; }
+    public override Type? LocalType { get; }
     public override bool IsPinned { get; }
     public bool IsShortForm => LocalIndex <= byte.MaxValue;
 
@@ -77,6 +79,6 @@ public sealed class EmitterLocal : LocalVariableInfo,
     
     public override string ToString()
     {
-        return $"[{LocalIndex}]: {(IsPinned ? "fixed " : "")}{LocalType} {Name ?? "???"}";
+        return $"[{LocalIndex}]: {(IsPinned ? "fixed " : "")}{LocalType.NameOf()} {Name ?? "???"}";
     }
 }

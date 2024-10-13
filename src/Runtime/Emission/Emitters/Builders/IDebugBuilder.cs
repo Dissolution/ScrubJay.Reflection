@@ -29,14 +29,14 @@
 //    public static MethodInfo? FindWriteLine(Type type)
 //    {
 //        return Mirror.Search(typeof(Debug))
-//            .TryFindMember<MethodInfo>(b => b.Public.Static.Method.Name("WriteLine").ReturnsVoid().ParameterTypes(type))
+//            .TryFindMember<MethodInfo>(b => b.Public.Static.Method.NameFrom("WriteLine").ReturnsVoid().ParameterTypes(type))
 //            .OkOrFallback(null!);
 //    }
 //
 //    public static MethodInfo FindToString(Type type)
 //    {
 //        return Mirror.Search(type)
-//            .TryFindMember<MethodInfo>(b => b.Public.Instance.Method.Name(nameof(ToString)).NoParameters().ReturnType(typeof(string)))
+//            .TryFindMember<MethodInfo>(b => b.Public.Instance.Method.NameFrom(nameof(ToString)).NoParameters().ReturnType(typeof(string)))
 //            .OkOrThrow();
 //    }
 //}

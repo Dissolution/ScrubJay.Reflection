@@ -1,6 +1,6 @@
 using ScrubJay.Reflection.Runtime.Emission.Instructions;
-using ScrubJay.Text;
-using ScrubJay.Validation;
+using ScrubJay.Text.Builders;
+
 // ReSharper disable IdentifierTypo
 // ReSharper disable IdentifierTypo
 

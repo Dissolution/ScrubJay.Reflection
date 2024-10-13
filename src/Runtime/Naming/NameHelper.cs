@@ -2,7 +2,10 @@
 
 using System.Globalization;
 using Microsoft.CodeAnalysis.CSharp;
+using ScrubJay.Text.Builders;
+#if NETSTANDARD2_0
 using Polyfills;
+#endif
 
 namespace ScrubJay.Reflection.Runtime.Naming;
 
@@ -39,16 +42,16 @@ public static class NameHelper
     }
 
     /// <summary>
-    /// Is the given <see cref="char"/> valid for use in a <see cref="MemberInfo"/> Name?
+    /// Is the given <see cref="char"/> valid for use in a <see cref="MemberInfo"/> NameFrom?
     /// </summary>
     /// <param name="ch">
     /// The <see cref="char"/> to validate
     /// </param>
     /// <param name="firstChar"><i>optional (false)</i><br/>
-    /// Is the <see cref="char"/> being validated the first in the Name?
+    /// Is the <see cref="char"/> being validated the first in the NameFrom?
     /// </param>
     /// <returns>
-    /// <c>true</c> if the <see cref="char"/> is valid for a <see cref="MemberInfo"/> Name; otherwise, <c>false</c>
+    /// <c>true</c> if the <see cref="char"/> is valid for a <see cref="MemberInfo"/> NameFrom; otherwise, <c>false</c>
     /// </returns>
     public static bool IsValidMemberNameCharacter(char ch, bool firstChar = false)
     {
@@ -100,8 +103,10 @@ public static class NameHelper
 
     public static string CreateMemberName(MemberTypes memberType, string? suggestedName = null)
     {
-        ReadOnlySpan<char> name = suggestedName.AsSpan();
-        name = name.Trim();
+        if (memberType.FlagCount() != 1)
+            throw new ArgumentException("Only one member type may be passed", nameof(memberType));
+        
+        ReadOnlySpan<char> name = suggestedName.AsSpan().Trim();
         if (name.Length == 0)
         {
             // No good name passed, return semi-random name
@@ -144,7 +149,7 @@ public static class NameHelper
         var name = property.Name;
         Span<char> buffer = stackalloc char[name.Length + 1];
         buffer[0] = '_';
-        buffer[1] = char.ToLower(name[0]);
+        buffer[1] = char.ToLower(name[0], CultureInfo.InvariantCulture);
         name.AsSpan(1).CopyTo(buffer[2..]);
         return buffer.ToString();
 #else
@@ -153,7 +158,7 @@ public static class NameHelper
             (span, name) =>
             {
                 span[0] = '_';
-                span[1] = char.ToLower(name[0]);
+                span[1] = char.ToLower(name[0], CultureInfo.InvariantCulture);
                 name.AsSpan(1).CopyTo(span[2..]);
             });
 #endif

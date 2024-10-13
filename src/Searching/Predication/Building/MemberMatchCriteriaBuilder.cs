@@ -62,7 +62,7 @@ public class MemberMatchCriteriaBuilder<TBuilder, TCriteria, TMember> :
 
     public TBuilder Private => Visibility(Reflection.Visibility.Private);
 
-    public TBuilder Access(MemberInfo member)
+    public TBuilder AccessFrom(MemberInfo member)
     {
         _criteria.Access = member.Access();
         return _builder;
@@ -85,7 +85,7 @@ public class MemberMatchCriteriaBuilder<TBuilder, TCriteria, TMember> :
         return _builder;
     }
 
-    public TBuilder Name(MemberInfo member)
+    public TBuilder NameFrom(MemberInfo member)
     {
         _criteria.Name = Criteria.Equals(member.Name);
         return _builder;

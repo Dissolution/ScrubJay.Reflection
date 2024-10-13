@@ -52,7 +52,7 @@
 //             Data =
 //             {
 //                 ["Member"] = member,
-//                 ["DelegateType"] = typeof(TDelegate).Dump(),
+//                 ["DelegateType"] = typeof(TDelegate).NameOf(),
 //             },
 //         };
 //     }
@@ -64,8 +64,8 @@
 //             Data =
 //             {
 //                 ["Member"] = member,
-//                 ["InstanceType"] = typeof(TInstance).Dump(),
-//                 ["ValueType"] = typeof(TValue).Dump(),
+//                 ["InstanceType"] = typeof(TInstance).NameOf(),
+//                 ["ValueType"] = typeof(TValue).NameOf(),
 //             },
 //         };
 //     }
@@ -85,7 +85,7 @@
 //         if (ValidateReturn<TValue>(field.FieldType).IsError(out var returnError))
 //             return GetException<GetValue<TInstance, TValue>>(field, returnError);
 //
-//         var builder = RuntimeBuilder.CreateDelegateBuilder<GetValue<TInstance, TValue>>(InterpolateDeeper.Resolve($"get_{typeof(TInstance)}_{field.Name}"));
+//         var builder = RuntimeBuilder.CreateDelegateBuilder<GetValue<TInstance, TValue>>(InterpolateDeeper.Resolve($"get_{typeof(TInstance)}_{field.NameFrom}"));
 //         var emitter = builder.Emitter;
 //
 //         if (!field.IsStatic)

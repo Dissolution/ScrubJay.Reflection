@@ -1,4 +1,4 @@
-﻿using ScrubJay.Reflection.Runtime.Naming;
+﻿
 // ReSharper disable IdentifierTypo
 
 namespace ScrubJay.Reflection.Runtime.Emission.Instructions;

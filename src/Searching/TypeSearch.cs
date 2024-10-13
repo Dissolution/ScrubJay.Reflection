@@ -1,4 +1,5 @@
 ﻿using System.Linq.Expressions;
+using ScrubJay.Reflection.Expressions;
 using ScrubJay.Reflection.Searching.Predication;
 using ScrubJay.Reflection.Searching.Predication.Building;
 
@@ -10,7 +11,7 @@ public class TypeSearch<T> : TypeSearch
     
     public Result<TMember, Reflexception> TryFindMember<TMember>(Expression<Action<T>> memberExpression)
     {
-        var member = Expressions.ExpressionHelper.FindMembers(memberExpression).FirstOrDefault();
+        var member = ExpressionTree.EnumerateMembers(memberExpression, Scope.Self | Scope.Children).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");
@@ -18,7 +19,7 @@ public class TypeSearch<T> : TypeSearch
     
     public Result<TMember, Reflexception> TryFindMember<TMember>(Expression<Func<T, object?>> memberExpression)
     {
-        var member = Expressions.ExpressionHelper.FindMembers(memberExpression).FirstOrDefault();
+        var member = ExpressionTree.EnumerateMembers(memberExpression, Scope.Self | Scope.Children).FirstOrDefault();
         if (member is TMember tMember)
             return tMember;
         return new Reflexception($"Could not find a member in {memberExpression}");
@@ -83,5 +84,13 @@ public class TypeSearch
             {criteria}
             Matched non-1 members
             """);
+    }
+    
+    public Result<TMember, Reflexception> TryFindMember<TMember>(Expression memberExpression)
+    {
+        var member = ExpressionTree.EnumerateMembers(memberExpression, Scope.Self | Scope.Children).FirstOrDefault();
+        if (member is TMember tMember)
+            return tMember;
+        return new Reflexception($"Could not find a member in {memberExpression}");
     }
 }

@@ -1,46 +1,47 @@
-﻿using System.Diagnostics;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 public static class ParameterInfoExtensions
 {
-    public static RefKind RefKind(this ParameterInfo parameter)
+    public static ReferenceType RefKind(this ParameterInfo parameter)
     {
         var parameterType = parameter.ParameterType;
         if (parameterType.IsByRef)
         {
             if (parameter.IsIn)
-                return Reflection.RefKind.In;
+                return Reflection.ReferenceType.In;
             if (parameter.IsOut)
-                return Reflection.RefKind.Out;
-            return Reflection.RefKind.Ref;
+                return Reflection.ReferenceType.Out;
+            return Reflection.ReferenceType.Ref;
         }
         Debug.Assert(!parameter.IsIn && !parameter.IsOut);
-        return Reflection.RefKind.None;
+        return Reflection.ReferenceType.Default;
     }
     
-    public static RefKind RefKind(this ParameterInfo parameter, out Type parameterType)
+    public static ReferenceType RefKind(this ParameterInfo parameter, out Type parameterType)
     {
         parameterType = parameter.ParameterType;
         if (parameterType.IsByRef)
         {
             parameterType = parameterType.GetElementType()!;
             if (parameter.IsIn)
-                return Reflection.RefKind.In;
+                return Reflection.ReferenceType.In;
             if (parameter.IsOut)
-                return Reflection.RefKind.Out;
-            return Reflection.RefKind.Ref;
+                return Reflection.ReferenceType.Out;
+            return Reflection.ReferenceType.Ref;
         }
         Debug.Assert(!parameter.IsIn && !parameter.IsOut);
-        return Reflection.RefKind.None;
+        return Reflection.ReferenceType.Default;
     }
 
+    /// <summary>
+    /// Is this <see cref="ParameterInfo"/> declared as <c>params</c>?
+    /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool IsParams(this ParameterInfo parameter) 
-        => Attribute.IsDefined(parameter, typeof(ParamArrayAttribute), true);
+    public static bool IsParams(this ParameterInfo parameter)
+        => Attribute.IsDefined(parameter, typeof(ParamArrayAttribute), inherit: true);
 
     /// <summary>
-    /// Is this <see cref="ParameterInfo"/> for an <see cref="object"/> <see cref="Array"/>?
+    /// Is this <see cref="ParameterInfo"/>'s <see cref="ParameterInfo.ParameterType"/> <see cref="Array">object[]</see>?
     /// </summary>
     public static bool IsObjectArray(this ParameterInfo parameter)
     {

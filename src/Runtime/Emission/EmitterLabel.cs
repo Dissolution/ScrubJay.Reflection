@@ -1,5 +1,9 @@
 ﻿namespace ScrubJay.Reflection.Runtime.Emission;
 
+/// <summary>
+/// A label managed by an Emitter
+/// </summary>
+[PublicAPI]
 public readonly struct EmitterLabel :
 #if NET7_0_OR_GREATER
     IEqualityOperators<EmitterLabel, EmitterLabel, bool>,

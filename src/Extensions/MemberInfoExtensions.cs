@@ -7,8 +7,12 @@ namespace ScrubJay.Reflection.Extensions;
 /// <summary>
 /// Extensions on <see cref="MemberInfo"/>
 /// </summary>
+[PublicAPI]
 public static class MemberInfoExtensions
 {
+    /// <summary>
+    /// Gets the <see cref="Vis"/> of this <see cref="MemberInfo"/>
+    /// </summary>
     public static Vis Visibility(this MemberInfo? member)
     {
         Vis vis = Vis.None;
@@ -59,6 +63,9 @@ public static class MemberInfoExtensions
         }
     }
 
+    /// <summary>
+    /// Gets the <see cref="Acc"/> of this <see cref="MemberInfo"/>
+    /// </summary>
     public static Acc Access(this MemberInfo? member)
     {
         Acc acc = Acc.None;
@@ -80,7 +87,7 @@ public static class MemberInfoExtensions
                 acc |= Access(propertyInfo.SetMethod);
                 return acc;
             case Type type:
-                acc |= (type.IsAbstract && type.IsSealed) ? Acc.Static : Acc.Instance;
+                acc |= type.IsStatic() ? Acc.Static : Acc.Instance;
                 return acc;
             case null:
             default:
@@ -88,11 +95,12 @@ public static class MemberInfoExtensions
         }
     }
 
+    /// <summary>
+    /// Gets the <see cref="BF"/> for this <see cref="MemberInfo"/>
+    /// </summary>
     public static BF BindingFlags(this MemberInfo? member)
     {
         BF flags = BF.Default;
-//        if (member.DeclaringType == member.ReflectedType)
-//            flags |= BF.DeclaredOnly;
         switch (member)
         {
             case EventInfo eventInfo:
@@ -142,11 +150,19 @@ public static class MemberInfoExtensions
     }
 
 
+    /// <summary>
+    /// Gets the <see cref="Type"/> that owns this <see cref="MemberInfo"/>
+    /// </summary>
+    /// <param name="member"></param>
+    /// <returns></returns>
     public static Type OwnerType(this MemberInfo member)
     {
         return member.ReflectedType ?? member.DeclaringType ?? member.Module.GetType();
     }
 
+    /// <summary>
+    /// Is this <see cref="MemberInfo"/> <c>static</c>?
+    /// </summary>
     public static bool IsStatic(this MemberInfo? member)
     {
         return member switch

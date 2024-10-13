@@ -33,6 +33,6 @@
 //
 //    public override string ToString()
 //    {
-//        return Dump(_type);
+//        return NameOf(_type);
 //    }
 //}

@@ -1,5 +1,3 @@
-using ScrubJay.Reflection.Runtime.Naming;
-
 namespace ScrubJay.Reflection.Runtime.Emission.Instructions;
 
 public record class OpCodeInstruction : Instruction
@@ -22,5 +20,5 @@ public record class OpCodeInstruction : Instruction
         this.OpCode = opCode;
     }
 
-    public override string ToString() => OpCode.Name ?? OpCode.GetType().Dump();
+    public override string ToString() => OpCode.Name ?? OpCode.GetType().NameOf();
 }

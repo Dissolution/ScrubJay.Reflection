@@ -23,7 +23,7 @@ public sealed class StringEqualityCriteria : EqualityCriteria<string?>
 
         if (StringMatchType.HasFlags(StringMatchType.Contains))
         {
-            if (str.Contains(this.Value, this.StringComparison))
+            if (str.AsSpan().Contains(this.Value.AsSpan(), this.StringComparison))
                 return true;
         }
         else

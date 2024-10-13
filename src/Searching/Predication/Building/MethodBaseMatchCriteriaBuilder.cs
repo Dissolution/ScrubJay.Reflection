@@ -31,7 +31,7 @@ public class MethodBaseMatchCriteriaBuilder<TBuilder, TCriteria, TMethod> :
         _criteria.GenericTypes = types;
         return _builder;
     }
-    
+
     public TBuilder GenericTypes(params ICriteria<Type>[] types)
     {
         _criteria.GenericTypes = Criteria<Type>.ArrayOfCriteriaToCriteriaOfArray(types);
@@ -54,6 +54,7 @@ public class MethodBaseMatchCriteriaBuilder<TBuilder, TCriteria, TMethod> :
         _criteria.Parameters = parameters;
         return _builder;
     }
+
     public TBuilder Parameters(params ICriteria<ParameterInfo>[] parameters)
     {
         _criteria.Parameters = Criteria<ParameterInfo>.ArrayOfCriteriaToCriteriaOfArray(parameters);
@@ -76,13 +77,62 @@ public class MethodBaseMatchCriteriaBuilder<TBuilder, TCriteria, TMethod> :
         return _builder;
     }
 
+    public TBuilder Parameters<T1>()
+    {
+        _criteria.Parameters = new FuncCriteria<ParameterInfo[]>(parameters => parameters.Length == 1 && parameters[0].ParameterType == typeof(T1));
+        return _builder;
+    }
+
+    public TBuilder Parameters<T1, T2>()
+    {
+        _criteria.Parameters = new FuncCriteria<ParameterInfo[]>(
+            parameters => parameters.Length == 2 &&
+                parameters[0].ParameterType == typeof(T1) &&
+                parameters[1].ParameterType == typeof(T2));
+        return _builder;
+    }
+
+    public TBuilder Parameters<T1, T2, T3>()
+    {
+        _criteria.Parameters = new FuncCriteria<ParameterInfo[]>(
+            parameters => parameters.Length == 3 &&
+                parameters[0].ParameterType == typeof(T1) &&
+                parameters[1].ParameterType == typeof(T2) &&
+                parameters[2].ParameterType == typeof(T3));
+        return _builder;
+    }
+
+    public TBuilder Parameters<T1, T2, T3, T4>()
+    {
+        _criteria.Parameters = new FuncCriteria<ParameterInfo[]>(
+            parameters => parameters.Length == 4 &&
+                parameters[0].ParameterType == typeof(T1) &&
+                parameters[1].ParameterType == typeof(T2) &&
+                parameters[2].ParameterType == typeof(T3) &&
+                parameters[3].ParameterType == typeof(T4));
+        return _builder;
+    }
+
+    public TBuilder Parameters<T1, T2, T3, T4, T5>()
+    {
+        _criteria.Parameters = new FuncCriteria<ParameterInfo[]>(
+            parameters => parameters.Length == 5 &&
+                parameters[0].ParameterType == typeof(T1) &&
+                parameters[1].ParameterType == typeof(T2) &&
+                parameters[2].ParameterType == typeof(T3) &&
+                parameters[3].ParameterType == typeof(T4) &&
+                parameters[4].ParameterType == typeof(T5));
+        return _builder;
+    }
+
     public TBuilder InheritFrom(MethodBase method)
     {
         base.InheritFrom(method);
 
         _criteria.GenericTypes = new ArrayEqualityCriteria<Type>(method.GetGenericArguments());
-        _criteria.Parameters = Criteria<ParameterInfo>.ArrayOfCriteriaToCriteriaOfArray(method.GetParameters()
-            .ConvertAll<ParameterInfo, ICriteria<ParameterInfo>>(static p => new ParameterMatchCriteriaBuilder().InheritFrom(p)));
+        _criteria.Parameters = Criteria<ParameterInfo>.ArrayOfCriteriaToCriteriaOfArray(
+            method.GetParameters()
+                .ConvertAll<ParameterInfo, ICriteria<ParameterInfo>>(static p => new ParameterMatchCriteriaBuilder().InheritFrom(p)));
         return _builder;
     }
 }

@@ -1,4 +1,4 @@
-﻿using ScrubJay.Text;
+﻿using ScrubJay.Text.Builders;
 
 namespace ScrubJay.Reflection.Runtime.Emission.Instructions;
 

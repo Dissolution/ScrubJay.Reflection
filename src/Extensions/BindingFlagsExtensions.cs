@@ -4,6 +4,10 @@ using BF = System.Reflection.BindingFlags;
 
 namespace ScrubJay.Reflection.Extensions;
 
+/// <summary>
+/// Extensions on <see cref="BindingFlags"/>
+/// </summary>
+[PublicAPI]
 public static class BindingFlagsExtensions
 {
     public static Acc Access(this BF bindingFlags)

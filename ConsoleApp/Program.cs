@@ -1,18 +1,12 @@
 ﻿using System.Diagnostics;
-using System.Reflection;
-using ScrubJay.Reflection.Searching;
 
+Delegate del = () => 4;
+Func<int> func = () => 5;
 
-//var ctors = typeof((int, string)).AllMembers().OfType<ConstructorInfo>().ToList();
+var delType = del.GetType();
+var funcType = func.GetType();
 
-
-
-/*
-
-
-var members = Expressions.FindMembers<string>(str => Debug.WriteLine(str));
-
-Console.WriteLine(members);*/
+Debugger.Break();
 
 
 

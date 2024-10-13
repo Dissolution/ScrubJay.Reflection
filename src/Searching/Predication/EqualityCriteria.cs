@@ -36,22 +36,3 @@ public class EqualityCriteria<T> : ICriteria<T?>, IEquatable<T>
         return $"Value = {Value}";
     }
 }
-
-public class ArrayEqualityCriteria<T> : EqualityCriteria<T[]>
-{
-    public IEqualityComparer<T>? ValueComparer { get; set; }
-
-    public ArrayEqualityCriteria()
-    {
-    }
-
-    [SetsRequiredMembers]
-    public ArrayEqualityCriteria(T[]? value) : base(value)
-    {
-    }
-
-    public override bool Matches(T[]? value)
-    {
-        return Equate.Sequence(Value, value, ValueComparer);
-    }
-}

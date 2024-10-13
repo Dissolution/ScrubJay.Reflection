@@ -2,17 +2,6 @@
 
 namespace ScrubJay.Reflection.Searching.Predication.Building;
 
-public sealed class ParameterMatchCriteriaBuilder : ParameterMatchCriteriaBuilder<ParameterMatchCriteriaBuilder>
-{
-    public ParameterMatchCriteriaBuilder() : base()
-    {
-    }
-
-    public ParameterMatchCriteriaBuilder(ParameterMatchCriteria criteria) : base(criteria)
-    {
-    }
-}
-
 public class ParameterMatchCriteriaBuilder<TBuilder> : MatchCriteriaBuilder<TBuilder, ParameterMatchCriteria, ParameterInfo?>
     where TBuilder : ParameterMatchCriteriaBuilder<TBuilder>
 {
@@ -55,16 +44,16 @@ public class ParameterMatchCriteriaBuilder<TBuilder> : MatchCriteriaBuilder<TBui
         return _builder;
     }
     
-    public TBuilder RefKind(RefKind kind)
+    public TBuilder RefKind(ReferenceType type)
     {
-        _criteria.RefKind = kind;
+        _criteria.RefKind = type;
         return _builder;
     }
     
-    public TBuilder In => RefKind(Reflection.RefKind.In);
-    public TBuilder Out => RefKind(Reflection.RefKind.Out);
-    public TBuilder Ref => RefKind(Reflection.RefKind.Ref);
-    public TBuilder NonRef => RefKind(Reflection.RefKind.None);
+    public TBuilder In => RefKind(Reflection.ReferenceType.In);
+    public TBuilder Out => RefKind(Reflection.ReferenceType.Out);
+    public TBuilder Ref => RefKind(Reflection.ReferenceType.Ref);
+    public TBuilder NonRef => RefKind(Reflection.ReferenceType.Default);
 
     // public TBuilder NoDefault
     // {

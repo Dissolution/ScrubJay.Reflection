@@ -1,4 +1,3 @@
-using ScrubJay.Collections;
 using ScrubJay.Reflection.Runtime;
 using ScrubJay.Reflection.Runtime.Emission;
 using ScrubJay.Reflection.Searching;
@@ -106,6 +105,3 @@ public static class DeepCloner
         return del(in value);
     }
 }
-
-[return: NotNullIfNotNull(nameof(value))]
-public delegate T? DeepClone<T>(ref readonly T? value);

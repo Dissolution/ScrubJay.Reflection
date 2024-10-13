@@ -17,7 +17,7 @@ public sealed record class DelegateSignature
     public static DelegateSignature For<TDelegate>()
         where TDelegate : Delegate
     {
-        var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
+        var invokeMethod = DelegateHelper.GetInvokeMethod<TDelegate>();
         return new DelegateSignature
         {
             _delegateType = typeof(TDelegate),
@@ -30,7 +30,7 @@ public sealed record class DelegateSignature
     public static DelegateSignature For<TDelegate>(TDelegate? @delegate)
         where TDelegate : Delegate
     {
-        var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
+        var invokeMethod = DelegateHelper.GetInvokeMethod<TDelegate>();
         return new DelegateSignature
         {
             _delegateType = typeof(TDelegate),
@@ -43,7 +43,7 @@ public sealed record class DelegateSignature
     public static DelegateSignature For<TDelegate>(string? name)
         where TDelegate : Delegate
     {
-        var invokeMethod = Delegates.GetInvokeMethod<TDelegate>();
+        var invokeMethod = DelegateHelper.GetInvokeMethod<TDelegate>();
         return new DelegateSignature
         {
             _delegateType = typeof(TDelegate),
@@ -57,7 +57,7 @@ public sealed record class DelegateSignature
     {
         if (!delegateType.Implements<Delegate>())
             throw new ArgumentException("Not a valid Delegate Type", nameof(delegateType));
-        var invokeMethod = Delegates.GetInvokeMethod(delegateType)!;
+        var invokeMethod = DelegateHelper.GetInvokeMethod(delegateType)!;
         return new DelegateSignature
         {
             _delegateType = delegateType,
@@ -69,6 +69,7 @@ public sealed record class DelegateSignature
     
     
     private Type? _delegateType;
+    private Type[]? _parameterTypes;
 
     public required string Name { get; init; } = "Invoke";
     
@@ -94,7 +95,7 @@ public sealed record class DelegateSignature
         return _delegateType ??= CreateDelegateType();
     }
 
-    public Type[] GetParameterTypes()
+    private Type[] CreateParameterTypes()
     {
         var paramSigs = this.ParameterSignatures;
         var types = new Type[paramSigs.Count];
@@ -103,5 +104,10 @@ public sealed record class DelegateSignature
             types[i] = paramSigs[i].Type;
         }
         return types;
+    }
+
+    public Type[] GetOrCreateParameterTypes()
+    {
+        return _parameterTypes ??= CreateParameterTypes();
     }
 }

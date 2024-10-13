@@ -4,7 +4,7 @@ public sealed record class ParameterMatchCriteria : MatchCriteria<ParameterInfo?
 {
     public ICriteria<string?>? Name { get; set; }
     public ICriteria<Type>? ValueType { get; set; }
-    public RefKind? RefKind { get; set; } 
+    public ReferenceType? RefKind { get; set; } 
     public ICriteria<Option<object?>>? Default { get; set; }
     public ICriteria<Attribute[]>? Attributes { get; set; }
 

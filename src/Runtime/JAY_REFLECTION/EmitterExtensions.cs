@@ -33,7 +33,7 @@
 //            .Ldc_I4(length)
 //            .Beq(out var lenEqual)
 //            .Ldstr($"{length} parameters are required in the params array")
-//            .Ldstr(paramsParameter.Name)
+//            .Ldstr(paramsParameter.NameFrom)
 //            .Newobj(Searching.MemberSearch.FindConstructor<ArgumentException>(typeof(string), typeof(string)))
 //            .Throw()
 //            .MarkLabel(lenEqual);

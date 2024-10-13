@@ -31,7 +31,7 @@ public static class Extensions
         if (methodInfo.IsStatic) 
             return OpCodes.Call;
         // Value-Type (all methods will automatically be sealed)
-        if (methodInfo.OwnerType().IsValueType && !methodInfo.IsVirtual) 
+        if (methodInfo.OwnerType().IsValueType && !methodInfo.IsVirtual)
             return OpCodes.Call;
         
         // One would think that we could now check for sealed, but as Callvirt does a null check and instance can 
