@@ -1,0 +1,301 @@
+﻿using ScrubJay.Sigil.Extensions;
+using ScrubJay.Sigil.Utilities;
+
+namespace ScrubJay.Sigil.Emission.Generic;
+
+public partial class Emit<TDelegateType>
+{
+    private void InjectTailCall()
+    {
+        for (var i = 0; i < _il.Index; i++)
+        {
+            var instr = _il[i];
+            BufferedILInstruction call = null;
+
+            if (instr.IsInstruction == OpCodes.Ret)
+            {
+                int callIx = -1;
+
+                for (var j = i - 1; j >= 0; j--)
+                {
+                    var atJ = _il[j];
+
+                    if (atJ.MarksSigilLabel != null)
+                    {
+                        break;
+                    }
+
+                    if (atJ.IsInstruction.HasValue)
+                    {
+                        if (atJ.IsInstruction.Value.IsTailableCall())
+                        {
+                            callIx = j;
+                            call = atJ;
+                        }
+
+                        break;
+                    }
+                }
+
+                if (callIx == -1) continue;
+                if (call.TakesManagedPointer()) continue;
+                // TODO: see https://github.com/dotnet/corefx/issues/4543 item 4
+#if !NETSTANDARD
+                if( call.TakesTypedReference()) continue;
+#endif
+                if( call.TakesByRefArgs()) continue;
+
+                var callReturns = call.MethodReturnType;
+                var delegateReturns = _returnType.Type;
+
+                // the method's return types not matching
+                //   means we can't just turn the call into a jump
+                //   since _something_ has to preceed or survive the call to
+                //   make the ret legal
+                if (!ExtensionMethods.IsAssignableFrom(delegateReturns, callReturns)) continue;
+
+                // there's one case not being handled explicitly here,
+                //   which is the call must consume the _entire_ stack.
+                // we don't have to asset it because the return type
+                //   comparison is sufficient:
+                //     - if the types match, the stack must be empty
+                //         or the following ret will fail to verify (since
+                //         there's an extra item of the corret type on the stack)
+                //     - if the types _don't_ match, we've already bailed on the
+                //         tail injection
+
+                InsertInstruction(callIx, OpCodes.Tailcall);
+                i++;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calls the method being constructed by the given emit.  Emits so used must have been constructed with BuildMethod or related methods.
+    ///
+    /// Pops its arguments in reverse order (left-most deepest in the stack), and pushes the return value if it is non-void.
+    ///
+    /// If the given method is an instance method, the `this` reference should appear before any parameters.
+    ///
+    /// Call does not respect overrides, the implementation defined by the given MethodInfo is what will be called at runtime.
+    ///
+    /// To call overrides of instance methods, use CallVirtual.
+    ///
+    /// Recursive calls can only be performed with DynamicMethods, other passed in Emits must already have their methods created.
+    ///
+    /// When calling VarArgs methods, arglist should be set to the types of the extra parameters to be passed.
+    /// </summary>
+    public Emit<TDelegateType> Call<TMethodEmit>(Emit<TMethodEmit> emit, Type[] arglist = null)
+    {
+        if (emit == null)
+        {
+            throw new ArgumentNullException("emit");
+        }
+
+        MethodInfo methodInfo = emit.MtdBuilder ?? (MethodInfo)emit.DynMethod;
+        if (methodInfo == null)
+        {
+            throw new InvalidOperationException("emit must be building a method");
+        }
+
+        if (HasFlag(emit._callingConventions, CallingConventions.VarArgs) && !HasFlag(emit._callingConventions, CallingConventions.Standard))
+        {
+            if (arglist == null)
+            {
+                throw new InvalidOperationException("When calling a VarArgs method, arglist must be set");
+            }
+        }
+
+        var expectedParams = emit._parameterTypes.Select(s => TypeOnStack.Get(s)).ToList();
+
+        if (arglist != null)
+        {
+            expectedParams.AddRange(arglist.Select(t => TypeOnStack.Get(t)));
+        }
+
+        // Instance methods expect this to preceed parameters
+        var declaring = methodInfo.DeclaringType;
+        if (declaring != null)
+        {
+            if (HasFlag(emit._callingConventions, CallingConventions.HasThis))
+            {
+
+                if (declaring.IsValueType)
+                {
+                    declaring = declaring.MakePointerType();
+                }
+
+                expectedParams.Insert(0, TypeOnStack.Get(declaring));
+            }
+        }
+
+        var resultType = emit._returnType == TypeOnStack.Get(typeof(void)) ? null : emit._returnType;
+
+        var firstParamIsThis =
+            HasFlag(emit._callingConventions, CallingConventions.HasThis) ||
+            HasFlag(emit._callingConventions, CallingConventions.ExplicitThis);
+
+        IEnumerable<StackTransition> transitions;
+        if (resultType != null)
+        {
+            transitions =
+                new[]
+                {
+                    new StackTransition(expectedParams.Reversed(), new [] { resultType }),
+                };
+        }
+        else
+        {
+            transitions =
+                new[]
+                {
+                    new StackTransition(expectedParams.Reversed(), new TypeOnStack[0]),
+                };
+        }
+
+        UpdateState(OpCodes.Call, methodInfo, emit._parameterTypes, Wrap(transitions, "Call"), firstParamIsThis: firstParamIsThis, arglist: arglist);
+
+        return this;
+    }
+
+    /// <summary>
+    /// Calls the given method.  Pops its arguments in reverse order (left-most deepest in the stack), and pushes the return value if it is non-void.
+    ///
+    /// If the given method is an instance method, the `this` reference should appear before any parameters.
+    ///
+    /// Call does not respect overrides, the implementation defined by the given MethodInfo is what will be called at runtime.
+    ///
+    /// To call overrides of instance methods, use CallVirtual.
+    ///
+    /// When calling VarArgs methods, arglist should be set to the types of the extra parameters to be passed.
+    /// </summary>
+    public Emit<TDelegateType> Call(MethodInfo method, Type[] arglist = null)
+    {
+        if (method == null)
+        {
+            throw new ArgumentNullException("method");
+        }
+
+        if (HasFlag(method.CallingConvention, CallingConventions.VarArgs) && !HasFlag(method.CallingConvention, CallingConventions.Standard))
+        {
+            if (arglist == null)
+            {
+                throw new InvalidOperationException("When calling a VarArgs method, arglist must be set");
+            }
+        }
+
+        var expectedParams = (method.GetParameters()).Select(s => TypeOnStack.Get(s.ParameterType)).ToList();
+
+        if (arglist != null)
+        {
+            expectedParams.AddRange((arglist).Select(t => TypeOnStack.Get(t)));
+        }
+
+        // Instance methods expect this to preceed parameters
+        if (HasFlag(method.CallingConvention, CallingConventions.HasThis))
+        {
+            var declaring = method.DeclaringType;
+
+            if (declaring.IsValueType)
+            {
+                declaring = declaring.MakePointerType();
+            }
+
+            expectedParams.Insert(0, TypeOnStack.Get(declaring));
+        }
+
+        var resultType = method.ReturnType == typeof(void) ? null : TypeOnStack.Get(method.ReturnType);
+
+        var firstParamIsThis =
+            HasFlag(method.CallingConvention, CallingConventions.HasThis) ||
+            HasFlag(method.CallingConvention, CallingConventions.ExplicitThis);
+
+        IEnumerable<StackTransition> transitions;
+        if (resultType != null)
+        {
+            transitions =
+                new[]
+                {
+                    new StackTransition(expectedParams.Reversed(), new [] { resultType }),
+                };
+        }
+        else
+        {
+            transitions =
+                new[]
+                {
+                    new StackTransition(expectedParams.Reversed(), new TypeOnStack[0]),
+                };
+        }
+
+        UpdateState(OpCodes.Call, method, (method.GetParameters()).Select(s => s.ParameterType), Wrap(transitions, "Call"), firstParamIsThis: firstParamIsThis, arglist: arglist);
+
+        return this;
+    }
+
+    private bool IsLegalConstructoCall(ConstructorInfo cons)
+    {
+        var consDeclaredIn = cons.DeclaringType;
+
+        var curType = ConstructorDefinedInType ?? (ConstrBuilder.DeclaringType);
+#if NETSTANDARD
+            var baseType = curType.GetTypeInfo().BaseType;
+#else
+        var baseType = curType.BaseType;
+#endif
+
+        var inCurrentType = curType == consDeclaredIn;
+        var inBaseType = baseType != null && consDeclaredIn == baseType;
+
+        return inCurrentType || inBaseType;
+    }
+
+    /// <summary>
+    /// Calls the given constructor.  Pops its arguments in reverse order (left-most deepest in the stack).
+    ///
+    /// The `this` reference should appear before any parameters.
+    /// </summary>
+    public Emit<TDelegateType> Call(ConstructorInfo cons)
+    {
+        if (cons == null)
+        {
+            throw new ArgumentNullException("cons");
+        }
+
+        if (HasFlag(cons.CallingConvention, CallingConventions.VarArgs) && !HasFlag(cons.CallingConvention, CallingConventions.Standard))
+        {
+            throw new NotSupportedException("Calling constructors with VarArgs is currently not supported.");
+        }
+
+        if (!IsBuildingConstructor)
+        {
+            throw new SigilVerificationException("Constructors may only be called directly from within a constructor, use NewObject to allocate a new object with a specific constructor.", _il.Instructions(_allLocals));
+        }
+
+        if (!IsLegalConstructoCall(cons))
+        {
+            throw new SigilVerificationException("Only constructors defined in the current class or it's base class may be called", _il.Instructions(_allLocals));
+        }
+
+        var expectedParams = (cons.GetParameters()).Select(s => TypeOnStack.Get(s.ParameterType)).ToList();
+
+        var declaring = cons.DeclaringType;
+
+        if (declaring.IsValueType)
+        {
+            declaring = declaring.MakePointerType();
+        }
+
+        expectedParams.Insert(0, TypeOnStack.Get(declaring));
+
+        var transitions =
+            new[]
+            {
+                new StackTransition(expectedParams.Reversed(), new TypeOnStack[0]),
+            };
+
+        UpdateState(OpCodes.Call, cons, (cons.GetParameters()).Select(s => s.ParameterType), Wrap(transitions, "Call"));
+
+        return this;
+    }
+}

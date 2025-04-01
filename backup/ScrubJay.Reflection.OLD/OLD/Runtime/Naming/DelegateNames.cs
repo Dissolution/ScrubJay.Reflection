@@ -1,0 +1,8 @@
+namespace ScrubJay.Reflection.OLD.OLD.Runtime.Naming;
+
+public static class DelegateNames
+{
+    public static string Get<TDelegate>()
+        where TDelegate : Delegate
+        => TypeNames.NameOf(typeof(TDelegate));
+}
