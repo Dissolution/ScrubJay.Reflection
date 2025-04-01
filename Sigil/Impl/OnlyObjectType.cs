@@ -1,2 +1,0 @@
-﻿namespace ScrubJay.Sigil.Impl;
-
