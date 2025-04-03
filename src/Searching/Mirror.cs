@@ -7,6 +7,7 @@ public class Mirror
     protected readonly MemberInfo[] _allMembers;
     
     public Type Type { get; }
+    public IReadOnlyList<MemberInfo> AllMembers => _allMembers;
 
     internal Mirror(Type type)
     {

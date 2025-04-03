@@ -5,7 +5,7 @@ namespace ScrubJay.Reflection;
 /// </summary>
 [PublicAPI]
 [Flags]
-public enum ParameterReferenceKind
+public enum TypeRefKind
 {
     /// <summary>
     /// Default referencing (copy value, ref class)
@@ -28,15 +28,15 @@ public enum ParameterReferenceKind
     Any = Default | Ref | In | Out,
 }
 
-public static class ReferenceKindExtensions
+public static class TypeRefKindExtensions
 {
-    public static string AsString(this ParameterReferenceKind kind)
+    public static string AsString(this TypeRefKind kind)
     {
         return kind switch
         {
-            ParameterReferenceKind.In => "in ",
-            ParameterReferenceKind.Out => "out ",
-            ParameterReferenceKind.Ref => "ref ",
+            TypeRefKind.In => "in ",
+            TypeRefKind.Out => "out ",
+            TypeRefKind.Ref => "ref ",
             _ => string.Empty,
         };
     }

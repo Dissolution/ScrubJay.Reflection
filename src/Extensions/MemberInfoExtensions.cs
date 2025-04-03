@@ -6,27 +6,6 @@
 [PublicAPI]
 public static class MemberInfoExtensions
 {
-    private static readonly NullabilityInfoContext _nullabilityInfoContext = new();
-
-    [return: NotNullIfNotNull(nameof(parameter))]
-    public static NullabilityInfo? NullabilityInfo(this ParameterInfo? parameter)
-    {
-        if (parameter is null)
-            return null;
-        return _nullabilityInfoContext.Create(parameter);
-    }
-
-    public static NullabilityInfo? NullabilityInfo(this MemberInfo? member)
-    {
-        return member switch
-        {
-            FieldInfo field => _nullabilityInfoContext.Create(field),
-            PropertyInfo property => _nullabilityInfoContext.Create(property),
-            EventInfo @event => _nullabilityInfoContext.Create(@event),
-            _ => null,
-        };
-    }
-
     public static Viz Visibility(this MemberInfo? member)
     {
         switch (member)
@@ -78,13 +57,7 @@ public static class MemberInfoExtensions
             }
             case Type type:
             {
-                Viz visibility = default;
-                if (type.IsPublic)
-                    visibility |= Viz.Public;
-                if (type.IsNotPublic)
-                    visibility |= Viz.NonPublic;
-                visibility |= IsStatic(type) ? Viz.Static : Viz.Instance;
-                return visibility;
+                return TypeExtensions.Visibility(type);
             }
             default:
                 throw new ArgumentOutOfRangeException(nameof(member));

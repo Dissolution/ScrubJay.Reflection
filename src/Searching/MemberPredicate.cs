@@ -10,6 +10,6 @@ public class MemberFilterBuilder<B, M> : FilterBuilder<B, M>
     {
     }
 
-    public B Visibility(Visibility visibility)
+    public B Visibility(Viz visibility)
         => Where(m => visibility.HasAnyFlags(m.Visibility()));
 }

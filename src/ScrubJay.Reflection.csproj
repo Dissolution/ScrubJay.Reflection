@@ -35,6 +35,7 @@
         <Using Include="System.Diagnostics.CodeAnalysis"/>
         <Using Include="System.Numerics"/>
         <Using Include="System.Reflection"/>
+        <Using Include="System.Reflection.Emit"/>
         <Using Include="System.Runtime.CompilerServices"/>
         <Using Include="System.Runtime.InteropServices"/>
         

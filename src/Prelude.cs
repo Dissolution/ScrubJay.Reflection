@@ -1,5 +1,6 @@
 ﻿global using BF = System.Reflection.BindingFlags;
 global using Viz = ScrubJay.Reflection.Visibility;
+global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
 
 using ScrubJay.Reflection.Searching;
 

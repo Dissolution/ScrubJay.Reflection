@@ -11,36 +11,36 @@ public static class ParameterInfoExtensions
 
     /// <summary>
     /// Deconstruct this <see cref="ParameterInfo"/> into a
-    /// <see cref="ParameterReferenceKind"/> and a <see cref="Type"/>
+    /// <see cref="TypeRefKind"/> and a <see cref="Type"/>
     /// </summary>
     /// <param name="parameter"></param>
     /// <param name="paramRef"></param>
     /// <param name="paramType"></param>
     public static void Deconstruct(
         this ParameterInfo parameter,
-        out ParameterReferenceKind paramRef,
+        out TypeRefKind paramRef,
         out Type paramType)
     {
         paramType = parameter.ParameterType;
         if (paramType.IsByRef)
         {
-            paramRef = ParameterReferenceKind.Ref;
+            paramRef = TypeRefKind.Ref;
             paramType = paramType.GetElementType()
                 .ThrowIfNull("Could not get element type of ByRef Parameter");
             
             if (parameter.IsIn)
             {
-                paramRef |= ParameterReferenceKind.In;
+                paramRef |= TypeRefKind.In;
             }
             
             if (parameter.IsOut)
             {
-                paramRef |= ParameterReferenceKind.Out;
+                paramRef |= TypeRefKind.Out;
             }
         }
         else
         {
-            paramRef = ParameterReferenceKind.Default;
+            paramRef = TypeRefKind.Default;
         }
     }
    
