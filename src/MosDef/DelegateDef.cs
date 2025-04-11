@@ -3,6 +3,8 @@ using TextBuilder = ScrubJay.Text.TextBuilder;
 
 namespace ScrubJay.Reflection.MosDef;
 
+
+
 public class DelegateDefinition
 {
     public static DelegateDefinition Create<D>()
@@ -15,10 +17,10 @@ public class DelegateDefinition
             ParameterTypes = invoke.GetParameterTypes(),
         };
     }
-    
-    internal Type? _returnType;
+
+    internal Type?   _returnType;
     internal Type[]? _parameterTypes;
-    
+
     [AllowNull, NotNull]
     public Type ReturnType
     {
@@ -35,8 +37,8 @@ public class DelegateDefinition
 
     public override string ToString()
     {
-        using var text = new TextBuilder(); 
-        
+        using var text = new TextBuilder();
+
         if (ReturnType.IsNullOrVoid())
         {
             text.Append("action<")
@@ -52,11 +54,22 @@ public class DelegateDefinition
         }
         return text.ToString();
     }
-    
 }
 
 public class MethodDefinition : DelegateDefinition
 {
+    public static MethodDefinition Create<D>(string? name)
+        where D : Delegate
+    {
+        var invoke = DelegateHelper.GetInvokeMethod<D>();
+        return new()
+        {
+            Name = name,
+            ReturnType = invoke.ReturnType,
+            ParameterTypes = invoke.GetParameterTypes(),
+        };
+    }
+    
     private string? _name;
 
     [AllowNull, NotNull]

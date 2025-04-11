@@ -18,6 +18,15 @@ public static class MethodBaseExtensions
     /// <returns></returns>
     public static bool IsSealed(this MethodBase method) => method.IsFinal || !method.IsVirtual;
 
+    public static bool IsAsync(this MethodBase? method)
+    {
+        if (method is null)
+            return false;
+        return typeof(IAsyncStateMachine).IsAssignableFrom(method.DeclaringType);
+    }
+    
+    
+    
     /// <summary>
     /// Get the <see cref="Type">Types</see> of the parameters in this <see cref="MethodBase"/>
     /// </summary>

@@ -1,26 +1,24 @@
-﻿using ScrubJay.Reflection.Searching;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 [PublicAPI]
 public static class TypeExtensions
 {
-    public static void Deconstruct(this Type? type, out TypeRefKind refKind, [NotNullIfNotNull(nameof(type))] out Type? underlyingType)
+    public static void Deconstruct(this Type? type, out TRK refKind, [NotNullIfNotNull(nameof(type))] out Type? underlyingType)
     {
         if (type is null)
         {
-            refKind = TypeRefKind.Default;
+            refKind = TRK.Default;
             underlyingType = null;
         }
         else if (type.IsByRef)
         {
-            refKind = TypeRefKind.Ref;
+            refKind = TRK.Ref;
             underlyingType = type.GetElementType();
             Debug.Assert(underlyingType is not null);
         }
         else
         {
-            refKind = TypeRefKind.Default;
+            refKind = TRK.Default;
             underlyingType = type;
         }
     }

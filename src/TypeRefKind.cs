@@ -30,13 +30,13 @@ public enum TypeRefKind
 
 public static class TypeRefKindExtensions
 {
-    public static string AsString(this TypeRefKind kind)
+    public static string AsString(this TRK kind)
     {
         return kind switch
         {
-            TypeRefKind.In => "in ",
-            TypeRefKind.Out => "out ",
-            TypeRefKind.Ref => "ref ",
+            TRK.In => "in ",
+            TRK.Out => "out ",
+            TRK.Ref => "ref ",
             _ => string.Empty,
         };
     }

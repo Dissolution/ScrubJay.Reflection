@@ -18,7 +18,7 @@ internal sealed class TypeArrayEqualityComparer : IEqualityComparer<Type[]>, IHa
 }
 
 
-public class DelegateMap
+public class DelegateMap : IEnumerable<Delegate>
 {
     private readonly ConcurrentDictionary<Type[], Delegate> _map = new(TypeArrayEqualityComparer.Default);
 
@@ -26,16 +26,11 @@ public class DelegateMap
         where D : Delegate
     {
         var delegateType = typeof(D);
-        var genericTypes = delegateType.GetGenericArguments();
+        //var genericTypes = delegateType.GetGenericArguments();
         var invoke = DelegateHelper.GetInvokeMethod(delegateType);
         var (_, ret) = invoke.ReturnParameter;
         var pTypes = invoke.GetParameterTypes();
         var pCount = pTypes.Length;
-
-        int cnt = pCount;
-        if (ret != typeof(void))
-            cnt++;
-        Debug.Assert(cnt == genericTypes.Length);
 
         Type[] key = new Type[pCount + 1];
         Sequence.CopyTo(pTypes, key);
@@ -76,4 +71,17 @@ public class DelegateMap
         var del = _map.GetOrAdd(GetKey<D>(), key => createDelegate());
         return (D)del;
     }
+
+    public bool TryAdd<D>(D del)
+        where D : Delegate
+    {
+        return _map.TryAdd(GetKey<D>(), del);
+    }
+
+    public void Add<D>(D del)
+        where D : Delegate
+        => _map.AddOrUpdate(GetKey<D>(), del, (_, _) => del);
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    public IEnumerator<Delegate> GetEnumerator() => _map.Values.GetEnumerator();
 }

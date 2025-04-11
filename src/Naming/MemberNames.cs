@@ -1,7 +1,4 @@
-﻿using ScrubJay.Reflection.Extensions;
-using ScrubJay.Reflection.Text;
-
-namespace ScrubJay.Reflection.Naming;
+﻿namespace ScrubJay.Reflection.Naming;
 
 /// <summary>
 /// Helper Utility for getting the names of <see cref="ParameterInfo"/> and <see cref="MemberInfo"/>

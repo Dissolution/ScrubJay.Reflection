@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Text;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 /// <summary>
 /// Extensions related to <see cref="System.Reflection.NullabilityInfo"/>

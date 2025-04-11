@@ -20,7 +20,19 @@ public static class AttributeExtensions
     
     public static bool HasAttribute<A>(this MemberInfo? member, bool inherit = false)
         where A : Attribute
-        => HasAttribute(member, typeof(A), inherit);
+    {
+        if (member is null)
+            return false;
+        
+        try
+        {
+            return Attribute.IsDefined(member, typeof(A), inherit);
+        }
+        catch
+        {
+            return false;
+        }
+    }
     
     public static bool HasAttribute(this ParameterInfo? parameter, Type? attributeType, bool inherit = false)
     {
@@ -39,5 +51,17 @@ public static class AttributeExtensions
     
     public static bool HasAttribute<A>(this ParameterInfo? parameter, bool inherit = false)
         where A : Attribute
-        => HasAttribute(parameter, typeof(A), inherit);
+    {
+        if (parameter is null)
+            return false;
+        
+        try
+        {
+            return Attribute.IsDefined(parameter, typeof(A), inherit);
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

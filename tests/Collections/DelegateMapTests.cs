@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Reflection.Collections;
-using ScrubJay.Utilities;
 
 namespace ScrubJay.Reflection.Tests.Collections;
 

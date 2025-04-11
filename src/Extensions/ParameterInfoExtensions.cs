@@ -9,6 +9,31 @@ public static class ParameterInfoExtensions
     public static bool IsParams(this ParameterInfo parameter)
         => Attribute.IsDefined(parameter, typeof(ParamArrayAttribute), inherit: true);
 
+    public static TRK TypeRefKind(this ParameterInfo? parameter)
+    {
+        TRK kind = TRK.Default;
+        if (parameter is null)
+            return kind;
+        
+        var paramType = parameter.ParameterType;
+        if (paramType.IsByRef)
+        {
+            kind = TRK.Ref;
+
+            if (parameter.IsIn)
+            {
+                kind |= TRK.In;
+            }
+            
+            if (parameter.IsOut)
+            {
+                kind |= TRK.Out;
+            }
+        }
+
+        return kind;
+    }
+    
     /// <summary>
     /// Deconstruct this <see cref="ParameterInfo"/> into a
     /// <see cref="TypeRefKind"/> and a <see cref="Type"/>
@@ -18,29 +43,29 @@ public static class ParameterInfoExtensions
     /// <param name="paramType"></param>
     public static void Deconstruct(
         this ParameterInfo parameter,
-        out TypeRefKind paramRef,
+        out TRK paramRef,
         out Type paramType)
     {
         paramType = parameter.ParameterType;
         if (paramType.IsByRef)
         {
-            paramRef = TypeRefKind.Ref;
+            paramRef = TRK.Ref;
             paramType = paramType.GetElementType()
                 .ThrowIfNull("Could not get element type of ByRef Parameter");
             
             if (parameter.IsIn)
             {
-                paramRef |= TypeRefKind.In;
+                paramRef |= TRK.In;
             }
             
             if (parameter.IsOut)
             {
-                paramRef |= TypeRefKind.Out;
+                paramRef |= TRK.Out;
             }
         }
         else
         {
-            paramRef = TypeRefKind.Default;
+            paramRef = TRK.Default;
         }
     }
    

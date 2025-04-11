@@ -40,9 +40,12 @@
         <Using Include="System.Runtime.InteropServices"/>
         
         <Using Include="JetBrains.Annotations"/>
+
+        <Using Include="ScrubJay.Functional.Prelude" Static="true"/>
+        <Using Include="ScrubJay.Reflection.Prelude" Static="true"/>
         
         <Using Include="ScrubJay.Functional"/>
-        <Using Include="ScrubJay.Functional.Prelude" Static="true"/>
+
         <Using Include="ScrubJay.Collections"/>
         <Using Include="ScrubJay.Collections.Pooling"/>
         <Using Include="ScrubJay.Comparison"/>
@@ -54,11 +57,14 @@
         <Using Include="ScrubJay.Validation"/>
         
         <Using Include="ScrubJay.Reflection.Extensions"/>
+        <Using Include="ScrubJay.Reflection.Text"/>
+
     </ItemGroup>
 
     <!-- NuGet Packages -->
     <ItemGroup>
-        <PackageReference Include="ScrubJay.Core" Version="0.40.3-alpha" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
+        <PackageReference Include="ScrubJay.Core" Version="0.40.7-alpha" />
         
         <PackageReference Include="Fody" Version="6.9.2">
             <PrivateAssets>all</PrivateAssets>
@@ -74,7 +80,7 @@
 
     <!-- Need System.Memory for older frameworks -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net481' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
-        <PackageReference Include="System.Memory" Version="4.6.2" />
+        <PackageReference Include="System.Memory" Version="4.6.3" />
     </ItemGroup>
 
     <!-- And additional packages for NetStandard 2.0 -->

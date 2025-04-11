@@ -1,18 +1,28 @@
-﻿using System.Reflection;
+﻿using System.Linq.Expressions;
+using ScrubJay.Reflection.Expressions;
 
 namespace ScrubJay.Reflection.Searching;
 
-public class Mirror
+public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>
 {
-    protected readonly MemberInfo[] _allMembers;
-    
-    public Type Type { get; }
-    public IReadOnlyList<MemberInfo> AllMembers => _allMembers;
+    public static Mirror Reflect(Type type) => new Mirror(type);
+    public static Mirror<T> Reflect<T>() => new Mirror<T>();
 
-    internal Mirror(Type type)
+    public static Mirror<T> In<T>(Expression<Action<T>> expression)
     {
-        this.Type = type;
-        _allMembers = type.GetMembers(BF.Public | BF.NonPublic | BF.Instance | BF.Static | BF.FlattenHierarchy);
+        var members = ExpressionHelper.ExtractMembers(expression)
+            .Where(member => member.DeclaringType == typeof(T));
+        return new Mirror<T>(members);
+    }
+
+    internal Mirror(Type reflectedType, IEnumerable<MemberInfo> members)
+        : base(reflectedType, members)
+    {
+    }
+
+    public Mirror(Type type)
+        : base(type, type.AllMembers())
+    {
     }
 }
 
@@ -21,5 +31,9 @@ public class Mirror<T> : Mirror
     where T : allows ref struct
 #endif
 {
-    internal Mirror() : base(typeof(T)) { }
+    internal Mirror(IEnumerable<MemberInfo> members) : base(typeof(T), members)
+    {
+    }
+
+    public Mirror() : base(typeof(T)) { }
 }

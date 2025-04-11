@@ -74,27 +74,7 @@ public static class RuntimeBuilder
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
 
-    public static DynamicMethod CreateDynamicMethod(
-        string? name,
-        Type? returnType,
-        params Type[]? parameterTypes)
-    {
-        return new DynamicMethod(
-            name: NameHelper.MemberName(name, MemberTypes.Method),
-            attributes: MethodAttributes.Public | MethodAttributes.Static, // only valid value
-            callingConvention: CallingConventions.Standard, // only valid value
-            returnType: returnType ?? typeof(void),
-            parameterTypes: parameterTypes ?? [],
-            m: ModuleBuilder,
-            skipVisibility: true);
-    }
 
-    public static DynamicMethod CreateDynamicMethod<TDelegate>(string? name)
-        where TDelegate : Delegate
-    {
-        var invokeMethod = DelegateHelper.GetInvokeMethod<TDelegate>();
-        return CreateDynamicMethod(name, invokeMethod.ReturnType, invokeMethod.GetParameterTypes());
-    }
     
     public static DelegateBuilder<TDelegate> CreateDelegateBuilder<TDelegate>(string? name)
         where TDelegate : Delegate
@@ -104,14 +84,6 @@ public static class RuntimeBuilder
         return new DelegateBuilder<TDelegate>(dm);
     }
 
-    public static TDelegate GenerateDelegate<TDelegate>(Action<ILGenerator> generateDelegate)
-       where TDelegate : Delegate
-    {
-        var dm = CreateDynamicMethod<TDelegate>(null);
-        var generator = dm.GetILGenerator();
-        generateDelegate(generator);
-        return dm.CreateDelegate<TDelegate>();
-    }
 
     public static TDelegate EmitDelegate<TDelegate>(Action<FluentILEmitter> emitDelegate)
        where TDelegate : Delegate

@@ -1,6 +1,4 @@
-﻿using System.Reflection.Emit;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 /// <summary>
 /// Extensions on <see cref="DynamicMethod"/>
@@ -8,7 +6,7 @@ namespace ScrubJay.Reflection.Extensions;
 [PublicAPI]
 public static class DynamicMethodExtensions
 {
-#if NETFRAMEWORK || NETSTANDARD
+#if NETFRAMEWORK || NETSTANDARD || NETCOREAPP
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static TDelegate CreateDelegate<TDelegate>(this DynamicMethod dynamicMethod)
         where TDelegate : Delegate
