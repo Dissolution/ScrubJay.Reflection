@@ -71,10 +71,18 @@ public static class ParameterInfoExtensions
    
     public static Option<object?> Default(this ParameterInfo parameter)
     {
-        if (parameter.HasDefaultValue)
+        try
         {
-            return Some<object?>(parameter.DefaultValue);
+            if (parameter.HasDefaultValue)
+            {
+                return Some<object?>(parameter.DefaultValue);
+            }
+            return None<object?>();
         }
-        return None<object?>();
+        catch (Exception ex)
+        {
+            return None();
+        }
+        
     }
 }

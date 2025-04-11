@@ -285,6 +285,7 @@ public sealed class DecompiledMethod
             this.NameImpl = "this";
             this.PositionImpl = 0;
         }
+        
     }
 
     private sealed class ReturnParameterInfo : ParameterInfo

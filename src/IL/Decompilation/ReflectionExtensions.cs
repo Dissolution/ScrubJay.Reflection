@@ -21,6 +21,9 @@ public static class ReflectionExtensions
         var body = method.GetMethodBody();
         if (body is null)
         {
+            var methodType = method.GetType();
+            var ownerType = method.OwnerType();
+            
             var sig = TextBuilder.Build(tb => tb.AppendMethod(method));
             Debugger.Break();
             throw new InvalidOperationException("No Body");

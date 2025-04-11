@@ -6,13 +6,20 @@
 public static class NullabilityInfoExtensions
 {
     private static readonly NullabilityInfoContext _nullabilityInfoContext = new();
-
-    [return: NotNullIfNotNull(nameof(parameter))]
+    
     public static NullabilityInfo? NullabilityInfo(this ParameterInfo? parameter)
     {
         if (parameter is null)
             return null;
-        return _nullabilityInfoContext.Create(parameter);
+
+        try
+        {
+            return _nullabilityInfoContext.Create(parameter);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
     }
     
     [return: NotNullIfNotNull(nameof(field))]
