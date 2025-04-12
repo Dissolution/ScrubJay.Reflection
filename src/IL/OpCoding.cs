@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using ScrubJay.Maths;
 
 namespace ScrubJay.Reflection.IL;
 
@@ -46,10 +47,10 @@ public static class OpCoding
             return new InvalidOperationException("Could not read OpCode byte");
         if (op != IS_TWO_BYTE_OP_CODE)
         {
-            OpCode opcode = _oneByteOpCodes[op];
-            if (opcode == default)
+            OpCode opCode = _oneByteOpCodes[op];
+            if (opCode.Name is null)
                 return new InvalidOperationException($"Byte '{op}' is not a valid OpCode byte");
-            return Ok(opcode);
+            return Ok(opCode);
         }
         else
         {
@@ -57,10 +58,10 @@ public static class OpCoding
                 return new InvalidOperationException("Could not read second OpCode byte");
             if (op >= 31)
                 return new InvalidOperationException($"Byte '{op}' is not a valid second OpCode byte");
-            OpCode opcode = _twoByteOpCodes[op];
-            if (opcode == default)
+            OpCode opCode = _twoByteOpCodes[op];
+            if (opCode == default)
                 return new InvalidOperationException($"Byte '{op}' is not a valid second OpCode byte");
-            return Ok(opcode);
+            return Ok(opCode);
         }
     }
 
@@ -70,74 +71,65 @@ public static class OpCoding
         op == OpCodes.Volatile ||
         op == OpCodes.Tailcall;
 
-    public static bool TargetsLocalVariable(this OpCode opcode)
+    public static bool TargetsLocalVariable(this OpCode opCode)
     {
-        return TextHelper.Contains(opcode.Name, "loc", StringComparison.OrdinalIgnoreCase);
+        return TextHelper.Contains(opCode.Name, "loc", StringComparison.OrdinalIgnoreCase);
     }
 
-    public static bool TargetsLocalVariable(this OpCode opcode, out Option<int> index)
+    public static Option<Option<int>> TargetsLocal(this OpCode opCode)
     {
         var regex = new Regex(@"(?:ld|st)loc[\.as]*(\d)?", RegexOptions.Compiled);
-        var match = regex.Match(opcode.Name);
+        var match = regex.Match(opCode.Name);
         if (match.Success)
         {
-            var groups = match.Groups;
-
-            if (groups.Count >= 2)
+            if (match.Groups.Count >= 2 && int.TryParse(match.Groups[1].Value, out int argIndex))
             {
-                string integer = groups[1].Value;
-                if (int.TryParse(integer, out int i))
-                {
-                    index = Some(i);
-                    return true;
-                }
-                else
-                {
-                    index = None();
-                    return true;
-                }
+                return Some(Some(argIndex));
             }
+            else
+            {
+                return Some(None<int>());
+            }
+        }
 
-            Debugger.Break();
-            throw new NotImplementedException();
-        }
-        else
-        {
-            index = None();
-            return false;
-        }
+        return None();
     }
     
-    public static bool TargetsArgument(this OpCode opcode, out Option<int> index)
+    public static Option<Option<int>> TargetsArgument(this OpCode opCode)
     {
         var regex = new Regex(@"(?:ld|st)arg[\.as]*(\d)?", RegexOptions.Compiled);
-        var match = regex.Match(opcode.Name);
+        var match = regex.Match(opCode.Name);
         if (match.Success)
         {
-            var groups = match.Groups;
-
-            if (groups.Count >= 2)
+            if (match.Groups.Count >= 2 && int.TryParse(match.Groups[1].Value, out int argIndex))
             {
-                string integer = groups[1].Value;
-                if (int.TryParse(integer, out int i))
-                {
-                    index = Some(i);
-                    return true;
-                }
-                else
-                {
-                    index = None();
-                    return true;
-                }
+                return Some(Some(argIndex));
             }
+            else
+            {
+                return Some(None<int>());
+            }
+        }
 
-            Debugger.Break();
-            throw new NotImplementedException();
-        }
-        else
+        return None();
+    }
+
+    public static Option<int> TargetsI32Const(this OpCode opCode)
+    {
+        if (TextHelper.StartsWith(opCode.Name, "ldc.i4."))
         {
-            index = None();
-            return false;
+            if (TextHelper.EndsWith(opCode.Name, "m1"))
+            {
+                return Some(-1);
+            }
+            
+            char ch = opCode.Name[^1];
+            if (ch >= '0' && ch <= '8')
+            {
+                return Some(ch - '0');
+            }
         }
+
+        return None<int>();
     }
 }

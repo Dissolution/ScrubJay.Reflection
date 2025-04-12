@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.Emission;
+﻿namespace ScrubJay.Reflection.IL;
 
 
 [PublicAPI]
@@ -10,6 +10,11 @@ public static class EmissionExtensions
     }
 
     public static bool IsShortForm(this LocalBuilder local)
+    {
+        return local.LocalIndex <= byte.MaxValue;
+    }
+
+    public static bool IsShortForm(this LocalVariableInfo local)
     {
         return local.LocalIndex <= byte.MaxValue;
     }

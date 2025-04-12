@@ -1,57 +1,41 @@
-﻿namespace ScrubJay.Reflection.Text;
+﻿using Polyfills;
+
+namespace ScrubJay.Reflection.Text;
 
 public static class TextBuilderMemberAppendExtensions
 {
-    internal static TBuilder AppendNullability<TBuilder>(this TBuilder text, NullabilityInfo? nullabilityInfo)
-        where TBuilder : TextBuilderBase<TBuilder>
-    {
-        if (nullabilityInfo is null)
-            return text;
-
-        NullabilityState readState = nullabilityInfo.ReadState;
-        NullabilityState writeState = nullabilityInfo.WriteState;
-
-        return (readState, writeState) switch
-        {
-            (NullabilityState.Unknown, NullabilityState.Unknown) => text, // append nothing
-            (NullabilityState.Unknown, NullabilityState.NotNull) => throw new NotImplementedException(),
-            (NullabilityState.Unknown, NullabilityState.Nullable) => throw new NotImplementedException(),
-            (NullabilityState.NotNull, NullabilityState.Unknown) => throw new NotImplementedException(),
-            (NullabilityState.NotNull, NullabilityState.NotNull) => text, // append nothing
-            (NullabilityState.NotNull, NullabilityState.Nullable) => throw new NotImplementedException(),
-            (NullabilityState.Nullable, NullabilityState.Unknown) => throw new NotImplementedException(),
-            (NullabilityState.Nullable, NullabilityState.NotNull) => throw new NotImplementedException(),
-            (NullabilityState.Nullable, NullabilityState.Nullable) => text.Append('?'),
-            _ => throw new ArgumentOutOfRangeException(),
-        };
-    }
-    
-    
-    
     public static TBuilder AppendField<TBuilder>(this TBuilder text, FieldInfo? field)
         where TBuilder : TextBuilderBase<TBuilder>
     {
         if (field is null)
             return text;
+
+        var (prefix, postfix) = field.NullabilityInfo().GetPrefixPostfix();
+
         return text
+            .IfNotNull(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
             .AppendIf(field.IsStatic, "static ")
             .AppendType(field.FieldType)
-            .AppendNullability(field.NullabilityInfo())
+            .Append(postfix)
             .Append(' ')
             .AppendType(field.OwnerType())
             .Append('.')
             .Append(field.Name);
     }
-    
+
     public static TBuilder AppendProperty<TBuilder>(this TBuilder text, PropertyInfo? property)
         where TBuilder : TextBuilderBase<TBuilder>
     {
         if (property is null)
             return text;
-        return text 
+
+        var (prefix, postfix) = property.NullabilityInfo().GetPrefixPostfix();
+
+        return text
+            .IfNotNull(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
             .AppendIf(property.IsStatic(), "static ")
             .AppendType(property.PropertyType)
-            .AppendNullability(property.NullabilityInfo())
+            .Append(postfix)
             .Append(' ')
             .AppendType(property.OwnerType())
             .Append('.')
@@ -66,54 +50,58 @@ public static class TextBuilderMemberAppendExtensions
     {
         if (@event is null)
             return text;
+
+        var (prefix, postfix) = @event.NullabilityInfo().GetPrefixPostfix();
+
         return text
+            .IfNotNull(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
             .AppendIf(@event.IsStatic(), "static ")
             .AppendType(@event.EventHandlerType)
-            .AppendNullability(@event.NullabilityInfo())
+            .Append(postfix)
             .Append(' ')
             .AppendType(@event.OwnerType())
             .Append('.')
             .Append(@event.Name);
     }
-    
-    
-    
-    public static B AppendMethod<B>(this B builder, MethodBase? method)
+
+    public static B AppendConstructor<B>(this B builder, ConstructorInfo? ctor)
         where B : TextBuilderBase<B>
     {
-        if (method is null)
-            return builder;
+        if (ctor is null) return builder;
 
-        ParameterInfo? returnParameter = method is MethodInfo methodInfo ? methodInfo.ReturnParameter : null;
+        Type constructedType = ctor.DeclaringType.ThrowIfNull("Constructor has null Declaring Type");
+        string name = constructedType.Name;
+        if (name == ".ctor")
+        {
+            builder.Append("new ").AppendType(constructedType);
+        }
+        else if (name == ".cctor")
+        {
+            builder.Append("static ").AppendType(constructedType);
+        }
+        else
+        {
+            builder.Append("new ").AppendType(constructedType);
+        }
+        
+        if (ctor.IsGenericMethod)
+            Debugger.Break();
 
+        return AppendParameters(builder, ctor.GetParameters());
+    }
+    
+    public static B AppendMethodInfo<B>(this B builder, MethodInfo? method)
+        where B : TextBuilderBase<B>
+    {
+        if (method is null) return builder;
         return builder
             .AppendIf(method.IsAsync(), "async ")
-            .If(Validate.IsNotNull(returnParameter),
+            .If(Validate.IsNotNull(method.ReturnParameter),
                 static (tb, returnParam) => tb.AppendParameter(returnParam).Append(' '))
-            .If(method, static m => m.DeclaringType is not null,
-                static (tb, m) =>
-                {
-                    switch (m.Name)
-                    {
-                        case ".ctor":
-                            tb.Append("new ").AppendType(m.DeclaringType);
-                            break;
-                        case ".cctor":
-                            tb.Append("static ").AppendType(m.DeclaringType);
-                            break;
-                        default:
-                            tb.AppendType(m.DeclaringType)
-                                .Append(".")
-                                .Append(m.Name);
-                            break;
-                    }
-                },
-                static (tb, m) => tb.Append(m.Name))
-            .If(method.IsGenericMethod,
-                tb => tb.Append('<').Delimit(", ", method.GetGenericArguments(), static (t, a) => t.AppendType(a)).Append('>'))
-            .Append('(')
-            .Delimit(", ", method.GetParameters(), static (tb, param) => AppendParameter(tb, param))
-            .Append(')');
+            .AppendType(method.OwnerType())
+            .Append('.')
+            .AppendNameAndGenericTypes(method.Name, method.GetGenericArguments())
+            .AppendParameters(method.GetParameters());
     }
 
     public static B AppendParameter<B>(this B builder, ParameterInfo? parameter)
@@ -122,14 +110,15 @@ public static class TextBuilderMemberAppendExtensions
         if (parameter is null)
             return builder;
         var (paramRef, paramType) = parameter;
+        var (prefix, postfix) = parameter.NullabilityInfo().GetPrefixPostfix();
         return builder
+            .IfNotNull(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
             .Append(paramRef.AsString())
             .AppendType(paramType)
-            .AppendNullability(parameter.NullabilityInfo())
-            .If(Validate.IsNotEmpty(parameter.Name),
-                static (tb, name) => tb.Append(' ').Append(name))
+            .Append(postfix)
+            .IfNotNull(parameter.Name, static (tb, name) => tb.Append(' ').Append(name))
             .If(parameter.Default(),
-                static (tb, defaultValue) => tb.Append(" = ").Append(defaultValue));
+                static (tb, defaultValue) => tb.Append(" = ").Render(defaultValue));
     }
 
     private static readonly TypeMap<string> _shortNames = new()
@@ -206,34 +195,36 @@ public static class TextBuilderMemberAppendExtensions
             builder.AppendType(type.DeclaringType).Append('.');
         }
 
-        // If we are not generic, we append the name and are done
-        if (!type.IsGenericType)
+        // If we are not generic or are an enum, we append the name only
+        if (!type.IsGenericType || type.IsEnum)
             return builder.Append(type.Name);
 
-        Debug.Assert(!type.IsEnum);
+        return AppendNameAndGenericTypes(builder, type.Name, type.GetGenericArguments());
+    }
 
-        name = type.Name;
-#if NETFRAMEWORK || NETSTANDARD2_0
+    internal static B AppendNameAndGenericTypes<B>(this B builder, string name, Type[]? genericTypes)
+        where B : TextBuilderBase<B>
+    {
         int index = name.IndexOf('`');
-#else
-        int index = name.IndexOf('`', StringComparison.Ordinal);
-#endif
-        if (index >= 0)
-        {
-            builder.Append(name.AsSpan(0, index));
-        }
-        else
-        {
-            builder.Append(name);
-        }
-
-        Type[] genericArguments = type.GetGenericArguments();
-        return builder.Append('<')
-            .Delimit<Type>(", ", genericArguments,
-                (tb, argType) => tb.AppendType(argType))
-            .Append('>');
+        return builder
+            .If((name, index), static t => t.index >= 0,
+            static (tb,t) => tb.Append(t.name.AsSpan(0, t.index)),
+            static (tb, t) => tb.Append(t.name))
+            .If(Validate.IsNotEmpty(genericTypes),
+                static (tb, types) => tb
+                    .Append('<')
+                    .Delimit<Type>(", ", types, static (t, type) => t.AppendType(type))
+                    .Append('>'));
     }
     
+    internal static B AppendParameters<B>(this B builder, ParameterInfo[]? parameters)
+        where B : TextBuilderBase<B>
+        => builder.IfNotNull(parameters,
+            static (tb, paramz) => tb.Append('(')
+                .Delimit(", ", paramz, static (tb, param) => tb.AppendParameter(param))
+                .Append(')'));
+
+
     public static B AppendMember<B>(this B builder, MemberInfo? member)
         where B : TextBuilderBase<B>
     {
@@ -243,7 +234,8 @@ public static class TextBuilderMemberAppendExtensions
             FieldInfo field => AppendField(builder, field),
             PropertyInfo property => AppendProperty(builder, property),
             EventInfo @event => AppendEvent(builder, @event),
-            MethodBase method => AppendMethod(builder, method),
+            ConstructorInfo ctor => AppendConstructor(builder, ctor),
+            MethodInfo method => AppendMethodInfo(builder, method),
             Type type => AppendType(builder, type),
             _ => throw new NotImplementedException(),
         };

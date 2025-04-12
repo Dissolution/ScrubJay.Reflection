@@ -22,9 +22,9 @@ public sealed class OpCodeFieldInstruction : OpCodeTokenInstruction
         Debug.Assert(opCode.OperandType == OperandType.InlineField);
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(Field),
                 static (tb, field) => tb.Append('`').Render(field).Append('`'),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));
@@ -40,9 +40,9 @@ public sealed class OpCodeMethodInstruction : OpCodeTokenInstruction
         Debug.Assert(opCode.OperandType == OperandType.InlineMethod);
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(Method),
                 static (tb, method) => tb.Append('`').Render(method).Append('`'),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));
@@ -58,9 +58,9 @@ public sealed class OpCodeSignatureInstruction : OpCodeTokenInstruction
 
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(Signature),
                 static (tb, sig) => tb.Append('[').DelimitAppend(',', sig, "X2").Append(']'),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));
@@ -76,9 +76,9 @@ public sealed class OpCodeStringInstruction : OpCodeTokenInstruction
         
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(String),
                 static (tb, str) => tb.Render(str),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));
@@ -94,9 +94,9 @@ public sealed class OpCodeMemberInstruction : OpCodeTokenInstruction
 
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(Member),
                 static (tb, member) => tb.Append('`').Render(member).Append('`'),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));
@@ -112,9 +112,9 @@ public sealed class OpCodeTypeInstruction : OpCodeTokenInstruction
         Debug.Assert(opCode.OperandType == OperandType.InlineType);
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .If(Validate.IsNotNull(Type),
                 static (tb, type) => tb.Append('`').Render(type).Append('`'),
                 (tb, _) => tb.Append('&').Append(Token, "X8"));

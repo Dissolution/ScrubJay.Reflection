@@ -22,7 +22,7 @@ public class DelegateMap : IEnumerable<Delegate>
 {
     private readonly ConcurrentDictionary<Type[], Delegate> _map = new(TypeArrayEqualityComparer.Default);
 
-    internal static Type[] GetKey<D>()
+    public static Type[] GetKey<D>()
         where D : Delegate
     {
         var delegateType = typeof(D);

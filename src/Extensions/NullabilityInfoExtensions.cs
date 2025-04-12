@@ -56,4 +56,43 @@ public static class NullabilityInfoExtensions
             _ => null,
         };
     }
+
+    public static void Deconstruct(this NullabilityInfo? nullabilityInfo, 
+        out NullabilityState readState,
+        out NullabilityState writeState)
+    {
+        if (nullabilityInfo is not null)
+        {
+            readState = nullabilityInfo.ReadState;
+            writeState = nullabilityInfo.WriteState;
+        }
+        else
+        {
+            readState = NullabilityState.Unknown;
+            writeState = NullabilityState.Unknown;
+        }
+    }
+   
+    internal static (string? Prefix, string? Postfix) GetPrefixPostfix(this NullabilityInfo? nullabilityInfo)
+    {
+        if (nullabilityInfo is null)
+            return default;
+
+        var (read, write) = nullabilityInfo;
+
+        // Attributes are usually declared as WriteMod, ReadMod
+        return (write, read) switch
+        {
+            (NullabilityState.Unknown, NullabilityState.Unknown) => default,
+            (NullabilityState.Unknown, NullabilityState.NotNull) => ("[NotNull]", null),
+            (NullabilityState.Unknown, NullabilityState.Nullable) => ("[MaybeNull]", null),
+            (NullabilityState.NotNull, NullabilityState.Unknown) => ("[DisallowNull]", null),
+            (NullabilityState.NotNull, NullabilityState.NotNull) => default,
+            (NullabilityState.NotNull, NullabilityState.Nullable) => ("[DisallowNull, MaybeNull]", null),
+            (NullabilityState.Nullable, NullabilityState.Unknown) => ("[AllowNull]", null),
+            (NullabilityState.Nullable, NullabilityState.NotNull) => ("[AllowNull, NotNull]", null),
+            (NullabilityState.Nullable, NullabilityState.Nullable) => (null, "?"),
+            _ => default,
+        };
+    }
 }

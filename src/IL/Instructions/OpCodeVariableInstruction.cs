@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Emission;
-
-namespace ScrubJay.Reflection.IL.Instructions;
+﻿namespace ScrubJay.Reflection.IL.Instructions;
 
 public abstract class OpCodeVariableInstruction : OpCodeInstruction
 {
@@ -43,16 +41,16 @@ public abstract class OpCodeVariableInstruction : OpCodeInstruction
 
 public sealed class OpCodeLocalInstruction : OpCodeVariableInstruction
 {
-    public EmitterLocal? Local { get; set; }
+    public CILLocal? Local { get; set; }
     
     public OpCodeLocalInstruction(OpCode opCode, int index) : base(opCode, index)
     {
         
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .Append('`')
             .If(Local,
                 static (tb, local) => local.RenderTo(tb),
@@ -72,9 +70,9 @@ public class OpCodeParameterInstruction : OpCodeVariableInstruction
         
     }
     
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(b => base.RenderTo(b))
             .Append('`')
             .IfNotNull(Parameter,
                 static (tb, parameter) => tb.Render(parameter),

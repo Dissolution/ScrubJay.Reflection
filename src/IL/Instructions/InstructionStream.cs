@@ -27,7 +27,15 @@ public sealed class InstructionStream : IReadOnlyCollection<Instruction>
     public void Add(Instruction instruction)
     {
         Throw.IfNull(instruction);
-        Debug.Assert(instruction.Offset == _ilOffset);
+        if (instruction.Offset == ILOffset.Unknown)
+        {
+            instruction.Offset = _ilOffset;
+        }
+        else
+        {
+            Debug.Assert(instruction.Offset == _ilOffset);
+        }
+
         _ilOffset += instruction.Size;
         _instructions.Add(instruction);
     }

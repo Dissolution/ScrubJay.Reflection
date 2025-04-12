@@ -1,28 +1,28 @@
 ﻿using ScrubJay.Reflection.Runtime;
 using ScrubJay.Reflection.Searching;
 
-namespace ScrubJay.Reflection.Emission;
+namespace ScrubJay.Reflection.IL;
 
 [PublicAPI]
-public readonly struct EmitterLabel :
+public readonly struct CILLabel :
 #if NET7_0_OR_GREATER
-    IEqualityOperators<EmitterLabel, EmitterLabel, bool>,
+    IEqualityOperators<CILLabel, CILLabel, bool>,
 #endif
-    IEquatable<EmitterLabel>,
+    IEquatable<CILLabel>,
     IEquatable<Label>,
     IRenderable
 {
-    public static implicit operator Label(EmitterLabel emitterLabel) => emitterLabel.ToLabel();
-    public static implicit operator EmitterLabel(Label label) => new(label);
+    public static implicit operator Label(CILLabel cilLabel) => cilLabel.ToLabel();
+    public static implicit operator CILLabel(Label label) => new(label);
     
-    public static bool operator ==(EmitterLabel left, EmitterLabel right)
+    public static bool operator ==(CILLabel left, CILLabel right)
         => left.Equals(right);
-    public static bool operator !=(EmitterLabel left, EmitterLabel right)
+    public static bool operator !=(CILLabel left, CILLabel right)
         => !left.Equals(right);
 
     private static readonly Func<int, Label> _newLabel;
 
-    static EmitterLabel()
+    static CILLabel()
     {
         var ctor = Mirror
             .Reflect<Label>()
@@ -45,13 +45,13 @@ public readonly struct EmitterLabel :
 
     public bool IsShortForm => Id is >= 0 and <= 127;
 
-    public EmitterLabel(int id, string? name = null)
+    public CILLabel(int id, string? name = null)
     {
         this.Id = id;
         this.Name = name;
     }
 
-    public EmitterLabel(Label label, string? name = null)
+    public CILLabel(Label label, string? name = null)
     {
         this.Id = label.GetHashCode();
         this.Name = name;
@@ -62,9 +62,9 @@ public readonly struct EmitterLabel :
         return _newLabel(Id);
     }
 
-    public bool Equals(EmitterLabel emitterLabel)
+    public bool Equals(CILLabel cilLabel)
     {
-        return emitterLabel.Id == Id;
+        return cilLabel.Id == Id;
     }
 
     public bool Equals(Label label)
@@ -79,7 +79,7 @@ public readonly struct EmitterLabel :
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (obj is EmitterLabel emitterLabel)
+        if (obj is CILLabel emitterLabel)
             return Equals(emitterLabel);
         if (obj is Label label)
             return Equals(label);
@@ -90,7 +90,8 @@ public readonly struct EmitterLabel :
     
     public override int GetHashCode() => Id;
 
-    public void RenderTo(TextBuilder builder)
+    public void RenderTo<B>(B builder) 
+        where B : TextBuilderBase<B>
     {
         builder.IfNotNull(Name, Id, 
             static (tb, name) => tb.Append(name).Append(':'),

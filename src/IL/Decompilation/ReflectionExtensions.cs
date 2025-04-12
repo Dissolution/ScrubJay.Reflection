@@ -4,7 +4,7 @@ namespace ScrubJay.Reflection.IL.Decompilation;
 
 public static class ReflectionExtensions
 {
-    public static ITokenResolver GetTokenResolver(MethodBase method)
+    public static ITokenResolver GetTokenResolver(this MethodBase method)
     {
         if (method is DynamicMethod dm)
             return new DynamicMethodTokenResolver(dm);
@@ -21,12 +21,7 @@ public static class ReflectionExtensions
         var body = method.GetMethodBody();
         if (body is null)
         {
-            var methodType = method.GetType();
-            var ownerType = method.OwnerType();
-            
-            var sig = TextBuilder.Build(tb => tb.AppendMethod(method));
-            Debugger.Break();
-            throw new InvalidOperationException("No Body");
+            return [];
         }
         
         return body.LocalVariables;

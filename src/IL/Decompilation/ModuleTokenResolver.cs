@@ -12,8 +12,18 @@ public sealed class ModuleTokenResolver : ITokenResolver
     public FieldInfo? ResolveField(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments) =>
         _module.ResolveField(metadataToken, genericTypeArguments, genericMethodArguments);
 
-    public MethodBase? ResolveMethod(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments) =>
-        _module.ResolveMethod(metadataToken, genericTypeArguments, genericMethodArguments);
+    public MethodBase? ResolveMethod(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments)
+    {
+        try
+        {
+            return _module.ResolveMethod(metadataToken, genericTypeArguments, genericMethodArguments);
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+       
+    }
 
     public Type ResolveType(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments) =>
         _module.ResolveType(metadataToken, genericTypeArguments, genericMethodArguments);

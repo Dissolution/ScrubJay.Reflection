@@ -1,8 +1,7 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
 public class OpCodeInstruction : Instruction, 
-    IEquatable<OpCodeInstruction>,
-    IRenderable
+    IEquatable<OpCodeInstruction>
 {
     public OpCode OpCode { get; }
 
@@ -75,9 +74,9 @@ public class OpCodeInstruction : Instruction,
         this.OpCode = opCode;
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
+        builder.Invoke(base.RenderTo!)
             .Align(OpCode.Name.AsSpan(), 14, alignment: Alignment.Left);
     }
 

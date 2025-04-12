@@ -74,7 +74,7 @@ public static class MemberInfoExtensions
     {
         if (member is null)
             return null;
-        return member.ReflectedType ?? member.DeclaringType ?? member.Module.GetType();
+        return member.DeclaringType ?? member.ReflectedType ?? member.Module.GetType();
     }
 
     /// <summary>
@@ -88,6 +88,17 @@ public static class MemberInfoExtensions
         PropertyInfo propertyInfo => IsStatic(propertyInfo.GetMethod) || IsStatic(propertyInfo.SetMethod),
         EventInfo eventInfo => IsStatic(eventInfo.AddMethod) || IsStatic(eventInfo.RemoveMethod) || IsStatic(eventInfo.RaiseMethod),
         Type type => type is { IsAbstract: true, IsSealed: true },
+        _ => throw new ArgumentOutOfRangeException(nameof(member)),
+    };
+
+    public static Type[]? GenericTypes(this MemberInfo? member) => member switch
+    {
+        null => null,
+        MethodBase method => method.GetGenericArguments(),
+        FieldInfo fieldInfo => null,
+        PropertyInfo propertyInfo => null,
+        EventInfo eventInfo => null,
+        Type type => type.GetGenericArguments(),
         _ => throw new ArgumentOutOfRangeException(nameof(member)),
     };
     

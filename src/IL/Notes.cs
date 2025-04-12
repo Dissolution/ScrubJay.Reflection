@@ -51,3 +51,6 @@ public class Notes
         }
     }
 }
+/* Unused OpCodes:
+break, jmp, cpobj, conv.ovf.u8.un, ldelem.i2, ldelem.r4, stelem.r4, refanyval, ckfinite, mkrefany, prefix7, prefix6, prefix5, prefix4, prefix3, prefix2, prefix1, prefixref, arglist, ldarg, ldarga, starg, ldloc, ldloca, stloc, unaligned., tail., initblk
+*/

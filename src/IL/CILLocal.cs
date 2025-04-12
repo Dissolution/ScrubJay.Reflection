@@ -1,16 +1,16 @@
-﻿namespace ScrubJay.Reflection.Emission;
+﻿namespace ScrubJay.Reflection.IL;
 
 [PublicAPI]
-public readonly struct EmitterLocal :
+public readonly struct CILLocal :
 #if NET7_0_OR_GREATER
-    IEqualityOperators<EmitterLocal, EmitterLocal, bool>,
+    IEqualityOperators<CILLocal, CILLocal, bool>,
 #endif
-    IEquatable<EmitterLocal>,
+    IEquatable<CILLocal>,
     IEquatable<LocalVariableInfo>,
     IRenderable
 {
-    public static bool operator ==(EmitterLocal left, EmitterLocal right) => left.Equals(right);
-    public static bool operator !=(EmitterLocal left, EmitterLocal right) => !left.Equals(right);
+    public static bool operator ==(CILLocal left, CILLocal right) => left.Equals(right);
+    public static bool operator !=(CILLocal left, CILLocal right) => !left.Equals(right);
     
     public readonly Type Type;
     public readonly int Index;
@@ -20,7 +20,7 @@ public readonly struct EmitterLocal :
     public bool IsShortForm => Index <= byte.MaxValue;
 
   
-    public EmitterLocal(int index, Type type, bool isPinned = false, string? name = null)
+    public CILLocal(int index, Type type, bool isPinned = false, string? name = null)
     {
         this.Index = index;
         this.Type = type;
@@ -28,19 +28,19 @@ public readonly struct EmitterLocal :
         this.Name = name;
     }
     
-    public EmitterLocal(LocalVariableInfo localVariableInfo, string? name = null)
+    public CILLocal(LocalVariableInfo localVariableInfo, string? name = null)
     {
         this.Index = localVariableInfo.LocalIndex;
-        this.Type = localVariableInfo.LocalType;
+        this.Type = localVariableInfo.LocalType!;
         this.IsPinned = localVariableInfo.IsPinned;
         this.Name = name;
     }
 
-    public bool Equals(EmitterLocal emitterLocal)
+    public bool Equals(CILLocal cilLocal)
     {
-        return emitterLocal.Index == this.Index &&
-            emitterLocal.Type == this.Type &&
-            emitterLocal.IsPinned == this.IsPinned;
+        return cilLocal.Index == this.Index &&
+            cilLocal.Type == this.Type &&
+            cilLocal.IsPinned == this.IsPinned;
     }
 
     public bool Equals(LocalVariableInfo? localVariableInfo)
@@ -53,7 +53,7 @@ public readonly struct EmitterLocal :
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (obj is EmitterLocal emitterLocal)
+        if (obj is CILLocal emitterLocal)
             return Equals(emitterLocal);
         if (obj is LocalVariableInfo localVariableInfo)
             return Equals(localVariableInfo);
@@ -63,7 +63,8 @@ public readonly struct EmitterLocal :
     public override int GetHashCode() 
         => Hasher.HashMany(Index, Type, IsPinned);
 
-    public void RenderTo(TextBuilder builder)
+    public void RenderTo<B>(B builder) 
+        where B : TextBuilderBase<B>
     {
         builder.Append($"[{Index}] ")
             .AppendIf(IsPinned, "fixed ")

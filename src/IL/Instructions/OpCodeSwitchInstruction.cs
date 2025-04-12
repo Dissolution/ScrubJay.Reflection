@@ -4,24 +4,7 @@ public sealed class OpCodeSwitchInstruction : OpCodeInstruction
 {
     public int[] Deltas { get; }
     
-    private int[]? _targetOffsets;
-    public int[] TargetOffsets
-    {
-        get
-        {
-            if (_targetOffsets is null)
-            {
-                int cases = Deltas.Length;
-                int itself = 1 + sizeof(int) + (sizeof(int) * cases);
-                _targetOffsets = new int[cases];
-                for (int i = 0; i < cases; i++)
-                {
-                    _targetOffsets[i] = Offset + Deltas[i] + itself;
-                }
-            }
-            return _targetOffsets;
-        }
-    }
+    public ILOffset[] TargetOffsets { get; }
     
     public override int Size
     {
@@ -35,14 +18,23 @@ public sealed class OpCodeSwitchInstruction : OpCodeInstruction
     
     public OpCodeSwitchInstruction(int[] deltas) : base(OpCodes.Switch)
     {
+        int cases = deltas.Length;
+        int itself = 1 + sizeof(int) + (sizeof(int) * cases);
+        var targets = new ILOffset[cases];
+        for (int i = 0; i < cases; i++)
+        {
+            targets[i] = new(Offset + deltas[i] + itself);
+        }
+
         this.Deltas = deltas;
+        this.TargetOffsets = targets;
     }
 
-    public override void RenderTo(TextBuilder builder)
+    public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo)
-            .If(Validate.IsNotNull(_targetOffsets),
-                static (tb, offsets) => tb.Delimit(", ", offsets, static (t, off) => t.Append($"IL_{off:X4}")),
-                (tb, _) => tb.Delimit(", ", Deltas, static (tb, d) => tb.Append('Δ').Render(d)));
+        builder.Invoke(b => base.RenderTo(b))
+            .Append('[')
+            .Delimit(", ", TargetOffsets, static (t, off) => off.RenderTo(t))
+            .Append(']');
     }
 }

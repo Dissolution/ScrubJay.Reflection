@@ -27,9 +27,5 @@
     <ItemGroup>
       <ProjectReference Include="..\src\ScrubJay.Reflection.csproj" />
     </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="Matching\" />
-    </ItemGroup>
 
 </Project>

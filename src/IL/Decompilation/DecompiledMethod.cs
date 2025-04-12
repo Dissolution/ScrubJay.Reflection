@@ -1,5 +1,7 @@
-﻿using ScrubJay.Reflection.IL.Instructions;
-using InvalidOperationException = System.InvalidOperationException;
+﻿#if NETFRAMEWORK || NETSTANDARD2_0
+using Polyfills;
+#endif
+using ScrubJay.Reflection.IL.Instructions;
 
 namespace ScrubJay.Reflection.IL.Decompilation;
 
@@ -12,38 +14,29 @@ public sealed class DecompiledMethod
         return new(method);
     }
 
+    public static Result<DecompiledMethod> TryDecompile(MethodBase? method)
+    {
+        if (method is null)
+            return new ArgumentNullException(nameof(method));
+
+        // HACK
+        try
+        {
+            return new DecompiledMethod(method);
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+    
+
     private readonly MethodBase _method;
     private readonly ITokenResolver _tokenResolver;
 
+    public Type[]? OwnerGenericTypes { get; }
 
-    private Option<Type[]?> _ownerGenericTypes = None();
-    private Option<Type[]?> _methodGenericTypes = None();
-
-    public Type[]? OwnerGenericTypes
-    {
-        get
-        {
-            if (!_ownerGenericTypes.IsSome(out var ogts))
-            {
-                ogts = _method.OwnerType().GetGenericArguments().NullIfNone();
-                _ownerGenericTypes = Some(ogts);
-            }
-            return ogts;
-        }
-    }
-
-    public Type[]? MethodGenericTypes
-    {
-        get
-        {
-            if (!_methodGenericTypes.IsSome(out var mgts))
-            {
-                mgts = _method.GetGenericArguments().NullIfNone();
-                _methodGenericTypes = Some(mgts);
-            }
-            return mgts;
-        }
-    }
+    public Type[]? MethodGenericTypes { get; }
 
     public ParameterInfo? ReturnParameter { get; }
 
@@ -51,12 +44,17 @@ public sealed class DecompiledMethod
 
     public IList<LocalVariableInfo> Locals { get; }
 
+    public InstructionStream Instructions { get; }
 
     private DecompiledMethod(MethodBase method)
     {
         _method = method;
         _tokenResolver = ReflectionExtensions.GetTokenResolver(method);
 
+        MethodGenericTypes = method.GetGenericArguments().NullIfNone();
+        var owner = method.OwnerType();
+        OwnerGenericTypes = owner.GetGenericArguments().NullIfNone();
+        
         if (method is MethodInfo methodInfo)
         {
             ReturnParameter = methodInfo.ReturnParameter;
@@ -85,26 +83,57 @@ public sealed class DecompiledMethod
         }
 
         Locals = ReflectionExtensions.GetLocals(method);
+        Instructions = ReadInstructions();
     }
 
-    private object GetVariable(OpCode opCode, int index)
+    private OpCodeInstruction ReadNoArgInstruction(int offset, OpCode opCode)
     {
-        if (opCode.TargetsLocalVariable())
+        Debug.Assert(opCode.OperandType == OperandType.InlineNone);
+
+        if (opCode.TargetsLocal().Flatten().IsSome(out int index))
         {
-            return Locals[index];
+            return new OpCodeLocalInstruction(opCode, index)
+            {
+                Offset = offset,
+                Local = new(Locals[index]),
+            };
+        }
+        else if (opCode.TargetsArgument().Flatten().IsSome(out index))
+        {
+            return new OpCodeParameterInstruction(opCode, index)
+            {
+                Offset = offset,
+                Parameter = Parameters[index],
+            };
+        }
+        else if (opCode.TargetsI32Const().IsSome(out var i32))
+        {
+            return new OpCodeI32Instruction(opCode, i32)
+            {
+                Offset = offset,
+            };
         }
         else
         {
-            return Parameters[index];
+            return new OpCodeInstruction(opCode)
+            {
+                Offset = offset,
+            };
         }
     }
-
+    
 
     private OpCodeInstruction ReadOpCodeInstruction(ref SpanReader<byte> reader)
     {
         int offset = reader.Position;
-        OpCode opCode = reader.ReadOpCode();
-
+        
+        var readOp = reader.TryReadOpCode();
+        if (!readOp.IsOk(out var opCode))
+        {
+            Debugger.Break();
+        }
+        
+       
         switch (opCode.OperandType)
         {
             // operand is a 32-bit branch target
@@ -161,42 +190,12 @@ public sealed class DecompiledMethod
             // no operand
             case OperandType.InlineNone:
             {
-                if (opCode.TargetsLocalVariable(out var index))
-                {
-                    var instruction = new OpCodeLocalInstruction(opCode, index.SomeOr(-1))
-                    {
-                        Offset = offset,
-                    };
-                    if (index.IsSome(out var i))
-                    {
-                        instruction.Local = new(Locals[i]);
-                    }
-                    return instruction;
-                }
-                else if (opCode.TargetsArgument(out index))
-                {
-                    var instruction = new OpCodeParameterInstruction(opCode, index.SomeOr(-1))
-                    {
-                        Offset = offset,
-                    };
-                    if (index.IsSome(out var i))
-                    {
-                        instruction.Parameter = Parameters[i];
-                    }
-                    return instruction;
-                }
-                else
-                {
-                    return new OpCodeInstruction(opCode)
-                    {
-                        Offset = offset,
-                    };
-                }
+                return ReadNoArgInstruction(offset, opCode);
             }
             // operand is a 64-bit IEEE floating point number
             case OperandType.InlineR:
             {
-                Debug.Assert(opCode == OpCodes.Ldc_I8);
+                Debug.Assert(opCode == OpCodes.Ldc_R8);
                 double f64 = reader.TakeValue<double>();
                 return new OpCodeF64Instruction(f64)
                 {
@@ -268,30 +267,22 @@ public sealed class DecompiledMethod
             // operand is 16-bit integer containing the index of a local variable or an argument
             case OperandType.InlineVar:
             {
-                ushort index16 = reader.TakeValue<ushort>();
-                if (opCode.TargetsLocalVariable(out var localIndex))
+                ushort index = reader.TakeValue<ushort>();
+                if (opCode.TargetsLocalVariable())
                 {
-                    var instruction = new OpCodeLocalInstruction(opCode, index16)
+                    return new OpCodeLocalInstruction(opCode, index)
                     {
                         Offset = offset,
+                        Local = new(Locals[index]),
                     };
-                    if (localIndex.IsSome(out var i))
-                    {
-                        instruction.Local = new(Locals[i]);
-                    }
-                    return instruction;
                 }
-                else if (opCode.TargetsArgument(out var argIndex))
+                else if (opCode.TargetsArgument())
                 {
-                    var instruction = new OpCodeParameterInstruction(opCode, index16)
+                    return new OpCodeParameterInstruction(opCode, index)
                     {
                         Offset = offset,
+                        Parameter = Parameters[index],
                     };
-                    if (argIndex.IsSome(out var i))
-                    {
-                        instruction.Parameter = Parameters[i];
-                    }
-                    return instruction;
                 }
                 throw new InvalidOperationException();
             }
@@ -326,30 +317,22 @@ public sealed class DecompiledMethod
             // operand is 8-bit integer containing the index of a local variable or an argument
             case OperandType.ShortInlineVar:
             {
-                byte index8 = reader.TakeValue<byte>();
-                if (opCode.TargetsLocalVariable(out var localIndex))
+                byte index = reader.TakeValue<byte>();
+                if (opCode.TargetsLocalVariable())
                 {
-                    var instruction = new OpCodeLocalInstruction(opCode, index8)
+                    return new OpCodeLocalInstruction(opCode, index)
                     {
                         Offset = offset,
+                        Local = new(Locals[index]),
                     };
-                    if (localIndex.IsSome(out var i))
-                    {
-                        instruction.Local = new(Locals[i]);
-                    }
-                    return instruction;
                 }
-                else if (opCode.TargetsArgument(out var argIndex))
+                else if (opCode.TargetsArgument())
                 {
-                    var instruction = new OpCodeParameterInstruction(opCode, index8)
+                    return new OpCodeParameterInstruction(opCode, index)
                     {
                         Offset = offset,
+                        Parameter = Parameters[index],
                     };
-                    if (argIndex.IsSome(out var i))
-                    {
-                        instruction.Parameter = Parameters[i];
-                    }
-                    return instruction;
                 }
                 throw new InvalidOperationException();
             }
@@ -358,7 +341,7 @@ public sealed class DecompiledMethod
         }
     }
 
-    public InstructionStream ReadInstructions()
+    private InstructionStream ReadInstructions()
     {
         InstructionStream instructions = new();
 
@@ -374,9 +357,31 @@ public sealed class DecompiledMethod
         return instructions;
     }
 
+    public override string ToString()
+    {
+        return TextBuilder.New
+            .AppendIf(_method.IsStatic, "static ")
+            .Append(_method.OwnerType().FullName)
+            .Append('.')
+            .AppendNameAndGenericTypes(_method.Name, _method.GetGenericArguments())
+            .AppendLine('(')
+            .Delimit(static tb => tb.Append(',').NewLine(),
+                Parameters,
+                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param))
+            .NewLine()
+            .Append(") => ").AppendParameter(ReturnParameter).NewLine()
+            .AppendLine("-- Locals")
+            .Enumerate(Locals, (tb, local) => tb.Render(local).NewLine())
+            .AppendLine("-- CIL")
+            .LineDelimit(Instructions, (tb, instr) => instr.RenderTo(tb))
+            .ToStringAndDispose();
+    }
+
 
     private sealed class ThisParameterInfo : ParameterInfo
     {
+        public override bool HasDefaultValue => false;
+        
         public ThisParameterInfo(MethodBase method)
         {
             Debug.Assert(!method.IsStatic);
@@ -385,12 +390,18 @@ public sealed class DecompiledMethod
             this.NameImpl = "this";
             this.PositionImpl = 0;
         }
+
+        public override object[] GetCustomAttributes(bool inherit) => [];
+        public override object[] GetCustomAttributes(Type? attributeType, bool inherit) => [];
+        public override IList<CustomAttributeData> GetCustomAttributesData() => [];
     }
 
     private sealed class ReturnParameterInfo : ParameterInfo
     {
         public override ParameterAttributes Attributes { get; } = ParameterAttributes.Retval;
 
+        public override bool HasDefaultValue => false;
+        
         public ReturnParameterInfo(MethodBase method, Type returnType)
         {
             this.MemberImpl = method;
@@ -398,5 +409,9 @@ public sealed class DecompiledMethod
             this.NameImpl = "return";
             this.PositionImpl = -1;
         }
+        
+        public override object[] GetCustomAttributes(bool inherit) => [];
+        public override object[] GetCustomAttributes(Type? attributeType, bool inherit) => [];
+        public override IList<CustomAttributeData> GetCustomAttributesData() => [];
     }
 }

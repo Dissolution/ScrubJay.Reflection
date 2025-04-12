@@ -1,8 +1,9 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
-public abstract class Instruction : IEquatable<Instruction>
+[PublicAPI]
+public abstract class Instruction : IEquatable<Instruction>, IRenderable
 {
-    public int Offset { get; internal set; } = -1;
+    public ILOffset Offset { get; internal set; } = ILOffset.Unknown;
     
     public abstract int Size { get; }
 
@@ -24,13 +25,12 @@ public abstract class Instruction : IEquatable<Instruction>
     public override sealed int GetHashCode()
         => Throw.NotSupported<int>($"An {GetType().NameOf()} should only be stored in an {typeof(InstructionStream).NameOf()}");
 
-    public virtual void RenderTo(TextBuilder builder)
+    public virtual void RenderTo<B>(B builder) 
+        where B : TextBuilderBase<B>
     {
-        builder.Append("IL_")
-            .If(Offset < 0, static tb => tb.Append("????"),
-                tb => tb.Append(Offset, "X4"))
+        builder.Invoke(Offset.RenderTo!)
             .Append(": ");
     }
 
-    public override sealed string ToString() => TextBuilder.New.Invoke(RenderTo).ToStringAndDispose();
+    public override sealed string ToString() => TextBuilder.Build(RenderTo);
 }

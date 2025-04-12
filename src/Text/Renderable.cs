@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Reflection.Collections;
-
 #if NETFRAMEWORK || NETSTANDARD2_0
 using Polyfills;
 #endif
@@ -8,32 +7,49 @@ namespace ScrubJay.Reflection.Text;
 
 public interface IRenderable
 {
-    void RenderTo(TextBuilder builder);
+    void RenderTo<B>(B builder)
+        where B : TextBuilderBase<B>;
 }
+
+
 
 public static class Renderer
 {
-    public delegate TextBuilder AppendRenderedValue<in T>(TextBuilder builder, T? value);
+    private static readonly DelegateMap _cachedRenderers = [];
 
-    private static readonly DelegateMap _delegateMap = new();
+    public delegate void RenderValueTo<B, in T>(TextBuilderBase<B> builder, T? value)
+        where B : TextBuilderBase<B>;
     
+    public static void Map<B, T>(RenderValueTo<B, T> renderer)
+        where B : TextBuilderBase<B>
+    {
+        _cachedRenderers.TryAdd(renderer);
+    }
     
-    public static void Map<T>(AppendRenderedValue<T> renderValueTo) 
-        => _delegateMap.Add(renderValueTo);
+    public static B Render<B, T>(this B builder, T[]? array)
+        where B : TextBuilderBase<B>
+    {
+        return builder
+            .IfNotNull(array,
+                static (tb,arr) => tb.Append('[').Delimit(", ", arr, static (t,a) => t.Render(a)).Append(']'),
+            static tb => tb.Append("null"));
+    }
 
-    public static TextBuilder Render<T>(this TextBuilder builder, T? value)
+    public static B Render<B, T>(this B builder, T? value)
+        where B : TextBuilderBase<B>
     {
         if (value is IRenderable)
         {
             ((IRenderable)value).RenderTo(builder);
             return builder;
         }
-        
-        if (_delegateMap.TryGet<AppendRenderedValue<T>>(out var renderer))
+
+        if (_cachedRenderers.TryGet<RenderValueTo<B, T>>(out var renderer))
         {
-            return renderer(builder, value);
+            renderer(builder, value);
+            return builder;
         }
-        
+
         switch (value)
         {
             case null:
@@ -87,15 +103,13 @@ public static class Renderer
             case LocalVariableInfo local:
             {
                 return builder
-                    .Append("arg")
-                    .Append(local.LocalIndex)
-                    .AppendIf(local.IsPinned, "📍")
-                    .Append(": ")
-                    .Render(local.LocalType);
+                    .Append($"[{local.LocalIndex}] ")
+                    .AppendIf(local.IsPinned, "fixed ")
+                    .AppendType(local.LocalType);
             }
             default:
             {
-                string str = value.ToString();
+                string? str = value.ToString();
                 Debugger.Break();
                 return builder.Append(str);
             }
