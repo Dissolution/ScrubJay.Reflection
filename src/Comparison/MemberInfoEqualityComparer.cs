@@ -1,21 +1,23 @@
 namespace ScrubJay.Reflection.Comparison;
 
 [PublicAPI]
-public sealed class MemberInfoEqualityComparer : EqualityComparer<MemberInfo>
+public sealed class MemberInfoEqualityComparer : 
+    IEqualityComparer<MemberInfo>,
+    IHasDefault<MemberInfoEqualityComparer>
 {
-    public static MemberInfoEqualityComparer Instance { get; } = new();
+    public static MemberInfoEqualityComparer Default { get; } = new();
 
-    public override bool Equals(MemberInfo? x, MemberInfo? y)
+    public bool Equals(MemberInfo? x, MemberInfo? y)
     {
         if (ReferenceEquals(x, y))
             return true;
         if (x is null || y is null)
             return false;
-        return ModuleEqualityComparer.Instance.Equals(x.Module, y.Module) &&
+        return ModuleEqualityComparer.Default.Equals(x.Module, y.Module) &&
             x.MetadataToken == y.MetadataToken;
     }
 
-    public override int GetHashCode(MemberInfo? member)
+    public int GetHashCode(MemberInfo? member)
     {
         if (member is null)
             return Hasher.NullHash;

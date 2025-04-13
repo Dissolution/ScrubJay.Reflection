@@ -138,7 +138,7 @@ public static class CodeHelper
     public static string GetBackingFieldName(PropertyInfo property)
     {
         // Property => _property
-        ReadOnlySpan<char> name = property.Name.AsSpan();
+        text name = property.Name.AsSpan();
         int nameLen = name.Length;
 
         Span<char> buffer = stackalloc char[nameLen + 1];

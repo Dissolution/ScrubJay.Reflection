@@ -378,7 +378,7 @@ public sealed class DecompiledMethod
     }
 
 
-    private sealed class ThisParameterInfo : ParameterInfo
+    internal sealed class ThisParameterInfo : ParameterInfo
     {
         public override bool HasDefaultValue => false;
         
@@ -396,7 +396,7 @@ public sealed class DecompiledMethod
         public override IList<CustomAttributeData> GetCustomAttributesData() => [];
     }
 
-    private sealed class ReturnParameterInfo : ParameterInfo
+    internal sealed class ReturnParameterInfo : ParameterInfo
     {
         public override ParameterAttributes Attributes { get; } = ParameterAttributes.Retval;
 

@@ -28,6 +28,7 @@ public static class ILGeneratorMethodExtensions
     public static bool HasArgs(this ILGeneratorMethod method)
     {
         return method is (BeginCatchBlock or 
+            BeginExceptionBlock or
             ThrowException or 
             UsingNamespace or 
             >= CallManaged);
@@ -92,6 +93,24 @@ public sealed class ILGeneratorDefineLabelInstruction : ILGeneratorInstruction
     }
 }
 
+public sealed class ILGeneratorBeginExceptionBlockInstruction : ILGeneratorInstruction
+{
+    public CILLabel Label { get; }
+
+    public ILGeneratorBeginExceptionBlockInstruction(CILLabel label)
+        : base(BeginExceptionBlock)
+    {
+        Label = label;
+    }
+
+    public override void RenderTo<B>(B builder)
+    {
+        builder.Invoke(base.RenderTo!)
+            .Append('(')
+            .Render(Label)
+            .Append(')');
+    }
+}
 
 public sealed class ILGeneratorDeclareLocalInstruction : ILGeneratorInstruction
 {

@@ -14,7 +14,7 @@ public readonly struct CILLabel :
 {
     public static implicit operator Label(CILLabel cilLabel) => cilLabel.ToLabel();
     public static implicit operator CILLabel(Label label) => new(label);
-    
+
     public static bool operator ==(CILLabel left, CILLabel right)
         => left.Equals(right);
     public static bool operator !=(CILLabel left, CILLabel right)
@@ -40,7 +40,10 @@ public readonly struct CILLabel :
             }).OkOrThrow();
     }
 
-    public readonly int     Id;
+    public static Label CreateLabel(int index) => _newLabel(index);
+    
+
+    public readonly int Id;
     public readonly string? Name;
 
     public bool IsShortForm => Id is >= 0 and <= 127;
@@ -87,13 +90,13 @@ public readonly struct CILLabel :
             return id == Id;
         return false;
     }
-    
+
     public override int GetHashCode() => Id;
 
-    public void RenderTo<B>(B builder) 
+    public void RenderTo<B>(B builder)
         where B : TextBuilderBase<B>
     {
-        builder.IfNotNull(Name, Id, 
+        builder.IfNotNull(Name, Id,
             static (tb, name) => tb.Append(name).Append(':'),
             static (tb, id) => tb.Append("IL_").Append(id, "X4"));
     }

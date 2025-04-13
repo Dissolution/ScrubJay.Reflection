@@ -2,11 +2,14 @@
 
 namespace ScrubJay.Reflection.Searching;
 
+
+
 [PublicAPI]
-public abstract class FluentListBuilder<B, T> : FluentBuilder<B>
+public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
     where B : FluentListBuilder<B, T>
 {
     protected readonly List<T> _values;
+    protected readonly List<string> _restrictions = [];
 
     protected FluentListBuilder(IEnumerable<T>? values = null)
     {
@@ -19,10 +22,64 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>
             _values = new List<T>(values);
         }
     }
-    
-    public B Where(Func<T, bool> predicate)
+
+    public B Where(Func<T, bool> predicate,
+        [CallerMemberName] string? callerName = null)
     {
         _values.RemoveAll(member => !predicate(member));
+        Debug.Assert(callerName is not null);
+        _restrictions.Add(callerName!);
+        return _builder;
+    }
+
+    public B Where<S1>(S1 state1, Func<T, S1, bool> predicate,
+        [CallerMemberName] string? callerName = null)
+    {
+        _values.RemoveAll(member => !predicate(member, state1));
+        Debug.Assert(callerName is not null);
+        string restriction =TextBuilder.New
+            .Append(callerName)
+            .Append('(')
+            .Render(state1)
+            .Append(')')
+            .ToStringAndDispose();
+        _restrictions.Add(restriction);
+        return _builder;
+    }
+    
+    public B Where<S1, S2>(S1 state1, S2 state2, Func<T, S1, S2, bool> predicate,
+        [CallerMemberName] string? callerName = null)
+    {
+        _values.RemoveAll(member => !predicate(member, state1, state2));
+        Debug.Assert(callerName is not null);
+        string restriction =TextBuilder.New
+            .Append(callerName)
+            .Append('(')
+            .Render(state1)
+            .Append(", ")
+            .Render(state2)
+            .Append(')')
+            .ToStringAndDispose();
+        _restrictions.Add(restriction);
+        return _builder;
+    }
+
+    public B Where<S1, S2, S3>(S1 state1, S2 state2, S3 state3, Func<T, S1, S2, S3, bool> predicate,
+        [CallerMemberName] string? callerName = null)
+    {
+        _values.RemoveAll(member => !predicate(member, state1, state2, state3));
+        Debug.Assert(callerName is not null);
+        string restriction =TextBuilder.New
+            .Append(callerName)
+            .Append('(')
+            .Render(state1)
+            .Append(", ")
+            .Render(state2)
+            .Append(", ")
+            .Render(state3)
+            .Append(')')
+            .ToStringAndDispose();
+        _restrictions.Add(restriction);
         return _builder;
     }
 
@@ -51,4 +108,8 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>
         .DelimitAppend(", ", _values)
         .Append(']')
         .ToStringAndDispose();
+
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator<T> IEnumerable<T>.GetEnumerator() => GetEnumerator();
+    public List<T>.Enumerator GetEnumerator() => _values.GetEnumerator();
 }

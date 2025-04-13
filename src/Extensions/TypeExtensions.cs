@@ -23,6 +23,13 @@ public static class TypeExtensions
         }
     }
 
+    public static TRK TypeRefKind(this Type? type)
+    {
+        if (type is null || !type.IsByRef)
+            return TRK.Default;
+        return TRK.Ref;
+    }
+
     /// <summary>
     /// Is this <see cref="Type"/> <c>null</c> or <c>void</c>?
     /// </summary>
@@ -50,65 +57,27 @@ public static class TypeExtensions
     /// <summary>
     /// Gets all <see cref="MemberInfo"/>s that belongs to this <see cref="Type"/>
     /// </summary>
-    public static IReadOnlyList<MemberInfo> AllMembers(this Type? type)
+    public static MemberInfo[] AllMembers(this Type? type)
     {
         if (type is null)
             return [];
         return type.GetMembers(BF.Public | BF.NonPublic | BF.Instance | BF.Static | BF.FlattenHierarchy);
     }
-//
-//    public static bool Equals(this Type? type, Type? other, TypeMatch typeMatch)
-//    {
-//        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.Exact) && type == other)
-//            return true;
-//        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.Implements) && type.Implements(other))
-//            return true;
-//        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.ImplementedBy) && other.Implements(type))
-//            return true;
-//        return false;
-//    }
 
-
-    private static readonly ConcurrentTypeMap<bool> _isUnmanagedCache = [];
-
-    private static bool DetermineIfIsUnmanaged(Type type)
+    public static bool Equals(this Type? type, Type? other, TypeMatch typeMatch)
     {
-#if NETFRAMEWORK || NETSTANDARD2_0
-        if (!type.IsValueType)
-            return false;
-
-        var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-        return fields.All(static field => field.FieldType.IsUnmanaged());
-#else
-        return !(typeof(RuntimeHelpers)
-            .GetMethod(nameof(RuntimeHelpers.IsReferenceOrContainsReferences))
-            .ThrowIfNull()
-            .MakeGenericMethod(type)
-            .Invoke(null, null)
-            .ThrowIfNot<bool>());
-#endif
+        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.Exact) && type == other)
+            return true;
+        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.Implements) && type.Implements(other))
+            return true;
+        if (typeMatch.HasFlags<TypeMatch>(TypeMatch.ImplementedBy) && other.Implements(type))
+            return true;
+        return false;
     }
 
-    private static bool DetermineIfIsUnmanaged<T>()
-    {
-#if NETFRAMEWORK || NETSTANDARD2_0
-        return DetermineIfIsUnmanaged(typeof(T));
-#else
-        return !RuntimeHelpers.IsReferenceOrContainsReferences<T>();
-#endif
-    }
-
-    public static bool IsUnmanaged(this Type type)
-    {
-        return _isUnmanagedCache.GetOrAdd(type, DetermineIfIsUnmanaged);
-    }
-
-    public static bool IsUnmanaged<T>()
-    {
-        return _isUnmanagedCache.GetOrAdd<T>(DetermineIfIsUnmanaged<T>);
-    }
 
 #region Visibility
+
     private static bool IsPublic(Type type)
     {
         // public types are visible
@@ -133,11 +102,11 @@ public static class TypeExtensions
     {
         return type.IsNested && type.IsNestedPrivate;
     }
-    
+
     public static Viz Visibility(this Type? type)
     {
         var visibility = Viz.None;
-        if (type is null) 
+        if (type is null)
             return visibility;
         if (type.IsStatic())
         {
@@ -157,5 +126,28 @@ public static class TypeExtensions
             visibility |= Viz.Private;
         return visibility;
     }
+
 #endregion
+    
+    private static readonly HashSet<Type> _valueTupleTypes =
+    [
+        typeof(ValueTuple),
+        typeof(ValueTuple<>),
+        typeof(ValueTuple<,>),
+        typeof(ValueTuple<,,>),
+        typeof(ValueTuple<,,,>),
+        typeof(ValueTuple<,,,,>),
+        typeof(ValueTuple<,,,,,>),
+        typeof(ValueTuple<,,,,,,>),
+        typeof(ValueTuple<,,,,,,,>),
+    ];
+
+    public static bool IsValueTuple(this object? obj) => IsValueTuple(obj?.GetType());
+
+    public static bool IsValueTuple(this Type? type)
+    {
+        return type is not null &&
+            type.IsGenericType &&
+            _valueTupleTypes.Contains(type.GetGenericTypeDefinition());
+    }
 }

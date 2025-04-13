@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using ScrubJay.Parsing;
 
 namespace ScrubJay.Reflection.Expressions;
 
@@ -212,5 +213,40 @@ public static class ExpressionHelper
         List<MemberInfo> members = new();
         ExtractMembersTo(expression, members);
         return members;
+    }
+
+    public static Result<(ConstructorInfo Ctor, object?[] Arguments)> TryParseConstructor(Expression? expression)
+    {
+        if (expression is null)
+            return new ArgumentNullException(nameof(expression));
+        if (expression is NewExpression newExpression)
+        {
+            var ctor = newExpression.Constructor;
+            var arguments = newExpression.Arguments;
+            object?[] args = new object?[arguments.Count];
+            for (var i = 0; i < arguments.Count; i++)
+            {
+                if (arguments[i] is ConstantExpression constantExpression)
+                {
+                    args[i] = constantExpression.Value;
+                }
+                else
+                {
+                    Debugger.Break();
+                    return new ArgumentException("Expression did not contain a parsable Constructor", nameof(expression));
+                }
+            }
+            return (ctor, args);
+        }
+        else if (expression is LambdaExpression lambdaExpression)
+        {
+            return TryParseConstructor(lambdaExpression.Body);
+        }
+        else
+        {
+
+            Debugger.Break();
+            return new ArgumentException("Expression did not contain a parsable Constructor", nameof(expression));
+        }
     }
 }

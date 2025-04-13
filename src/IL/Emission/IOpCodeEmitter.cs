@@ -1,13 +1,7 @@
-using ScrubJay.Reflection.Runtime.Emission.Instructions;
+namespace ScrubJay.Reflection.IL.Emission;
 
-namespace ScrubJay.Reflection.Runtime.Emission;
-
-/// <summary>
-/// Emits <see cref="OpCode">OpCodes</see> onto the Microsoft Intermediate Language (MSIL) <see cref="InstructionStream{TInstruction}"/>
-/// </summary>
-/// <typeparam name="TEmitter"></typeparam>
-public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
-    where TEmitter : IFluentILEmitter<TEmitter>
+public interface IOpCodeEmitter<S> : IEmitter<S>
+    where S : IOpCodeEmitter<S>
 {
     /// <summary>
     /// Emits a lone <see cref="OpCode"/> onto the Stream
@@ -18,7 +12,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <remarks>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode)">Emit(OpCode) on learn.microsoft.com</a>
     /// </remarks>
-    TEmitter Emit(OpCode opCode);
+    S Emit(OpCode opCode);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Byte">byte</see> argument onto the Stream
@@ -32,7 +26,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <remarks>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-byte)">Emit(OpCode, byte) on learn.microsoft.com</a>
     /// </remarks>
-    TEmitter Emit(OpCode opCode, byte u8);
+    S Emit(OpCode opCode, byte u8);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="SByte">sbyte</see> argument onto the Stream
@@ -42,7 +36,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-sbyte)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, sbyte i8);
+    S Emit(OpCode opCode, sbyte i8);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Int16">short</see> argument onto the Stream
@@ -52,7 +46,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-int16)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, short i16);
+    S Emit(OpCode opCode, short i16);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Int32">int</see> argument onto the Stream
@@ -62,7 +56,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-int32)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, int i32);
+    S Emit(OpCode opCode, int i32);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Int64">long</see> argument onto the Stream
@@ -72,7 +66,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-int64)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, long i64);
+    S Emit(OpCode opCode, long i64);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Single">float</see> argument onto the Stream
@@ -82,7 +76,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-single)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, float f32);
+    S Emit(OpCode opCode, float f32);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Double">double</see> argument onto the Stream
@@ -92,7 +86,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-double)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, double f64);
+    S Emit(OpCode opCode, double f64);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="String">string</see> argument onto the Stream
@@ -103,41 +97,41 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-string)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, string str);
+    S Emit(OpCode opCode, string str);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with a <see cref="EmitterLabel"/> argument onto the Stream
+    /// Emits an <see cref="OpCode"/> with a <see cref="CILLabel"/> argument onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="label">The <see cref="EmitterLabel"/> to leave space for</param>
+    /// <param name="label">The <see cref="CILLabel"/> to leave space for</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="label"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-label)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, EmitterLabel label);
+    S Emit(OpCode opCode, CILLabel label);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with <see cref="EmitterLabel"/><see cref="Array">[]</see> arguments onto the Stream
+    /// Emits an <see cref="OpCode"/> with <see cref="CILLabel"/><see cref="Array">[]</see> arguments onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="labels">The <see cref="EmitterLabel">EmitterLabels</see> to leave space for</param>
-    /// <exception cref="ArgumentException">Thrown if <paramref name="labels"/> is empty</exception>
-    /// <exception cref="ArgumentNullException">Thrown if <paramref name="labels"/> is <c>null</c></exception>
+    /// <param name="cilLabels">The <see cref="CILLabel">CILLabels</see> to leave space for</param>
+    /// <exception cref="ArgumentException">Thrown if <paramref name="cilLabels"/> is empty</exception>
+    /// <exception cref="ArgumentNullException">Thrown if <paramref name="cilLabels"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-label())">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, params EmitterLabel[] labels);
+    S Emit(OpCode opCode, params CILLabel[] cilLabels);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with a <see cref="EmitterLocal"/> argument onto the Stream
+    /// Emits an <see cref="OpCode"/> with a <see cref="CILLocal"/> argument onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="local">The <see cref="EmitterLocal"/> whose index to emit</param>
+    /// <param name="local">The <see cref="CILLocal"/> whose index to emit</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="local"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-localbuilder)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, EmitterLocal local);
+    S Emit(OpCode opCode, CILLocal local);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="FieldInfo"/> argument onto the Stream
@@ -148,7 +142,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-fieldinfo)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, FieldInfo field);
+    S Emit(OpCode opCode, FieldInfo field);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="ConstructorInfo"/> argument onto the Stream
@@ -159,7 +153,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-constructorinfo)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, ConstructorInfo ctor);
+    S Emit(OpCode opCode, ConstructorInfo ctor);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="MethodInfo"/> argument onto the Stream
@@ -170,7 +164,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-methodinfo)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, MethodInfo method);
+    S Emit(OpCode opCode, MethodInfo method);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="Type"/> argument onto the Stream
@@ -181,7 +175,7 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-type)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, Type type);
+    S Emit(OpCode opCode, Type type);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="SignatureHelper"/> argument onto the Stream
@@ -192,5 +186,5 @@ public interface IFluentOpCodeEmitter<TEmitter> : IFluentILEmitter<TEmitter>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-signaturehelper)">learn.microsoft.com</a>
     /// </links>
-    TEmitter Emit(OpCode opCode, SignatureHelper signature);
+    S Emit(OpCode opCode, SignatureHelper signature);
 }

@@ -1,4 +1,5 @@
-﻿using ScrubJay.Reflection.Collections;
+﻿using ScrubJay.Debugging;
+using ScrubJay.Reflection.Collections;
 #if NETFRAMEWORK || NETSTANDARD2_0
 using Polyfills;
 #endif
@@ -11,28 +12,26 @@ public interface IRenderable
         where B : TextBuilderBase<B>;
 }
 
-
-
 public static class Renderer
 {
     private static readonly DelegateMap _cachedRenderers = [];
 
     public delegate void RenderValueTo<B, in T>(TextBuilderBase<B> builder, T? value)
         where B : TextBuilderBase<B>;
-    
+
     public static void Map<B, T>(RenderValueTo<B, T> renderer)
         where B : TextBuilderBase<B>
     {
         _cachedRenderers.TryAdd(renderer);
     }
-    
+
     public static B Render<B, T>(this B builder, T[]? array)
         where B : TextBuilderBase<B>
     {
         return builder
             .IfNotNull(array,
-                static (tb,arr) => tb.Append('[').Delimit(", ", arr, static (t,a) => t.Render(a)).Append(']'),
-            static tb => tb.Append("null"));
+                static (tb, arr) => tb.Append('[').Delimit(", ", arr, static (t, a) => t.Render(a)).Append(']'),
+                static tb => tb.Append("null"));
     }
 
     public static B Render<B, T>(this B builder, T? value)
@@ -54,6 +53,8 @@ public static class Renderer
         {
             case null:
                 return builder.Append("`null`");
+            case DBNull:
+                return builder.Append(nameof(DBNull));
             case bool b:
                 return builder.AppendIf(b, bool.TrueString, bool.FalseString);
             case byte u8:
@@ -73,25 +74,17 @@ public static class Renderer
             case ulong u64:
                 return builder.Append(u64).Append("UL");
             case float f32:
-                return builder.Append(f32, "G1").Append('f');
+                return builder.Append(f32, "N1").Append('f');
             case double f64:
-                return builder.Append(f64, "G1").Append('d');
+                return builder.Append(f64, "N1").Append('d');
             case decimal dec:
-                return builder.Append(dec, "G1").Append('m');
+                return builder.Append(dec, "N1").Append('m');
             case TimeSpan ts:
                 return builder.Append(ts, "g");
             case DateTime dt:
-                return builder.Append(dt, "yyyy/MM/dd HH:mm:ss");
+                return builder.Append(dt, "yyyy-MM-dd HH:mm:ss");
             case Guid guid:
-            {
-                return builder.Allocate(32, span =>
-                {
-                    bool wrote = guid.TryFormat(span, out int cw);
-                    Debug.Assert(wrote);
-                    Debug.Assert(cw == 32);
-                    span.ForEach((ref char ch) => ch = char.ToUpper(ch));
-                });
-            }
+                return builder.Append(guid.ToUpperDigitsString());
             case char ch:
                 return builder.Append('\'').Append(ch).Append('\'');
             case string str:
@@ -107,6 +100,17 @@ public static class Renderer
                     .AppendIf(local.IsPinned, "fixed ")
                     .AppendType(local.LocalType);
             }
+            case Exception ex:
+                return builder.Append(ex.Dump());
+#if !NETSTANDARD2_0
+            case ITuple tuple:
+            {
+                return builder.Append('(')
+                    .Delimit(", ", Enumerable.Range(0, tuple.Length),
+                        (tb, i) => tb.Render(tuple[i]))
+                    .Append(')');
+            }
+#endif
             default:
             {
                 string? str = value.ToString();

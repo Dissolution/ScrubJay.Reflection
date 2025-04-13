@@ -51,6 +51,36 @@ public abstract class MirrorMethodBaseBuilder<B, M> : MirrorMemberBaseBuilder<B,
             return true;
         });
     }
+
+    public B Arguments(params object?[] args)
+    {
+        int argCount = args.Length;
+        return Where(method =>
+        {
+            var methodParams = method.GetParameters();
+            var paramCount = methodParams.Length;
+            if (paramCount < argCount)
+                return false;
+
+            for (int p = 0; p < paramCount; p++)
+            {
+                var param = methodParams[p];
+                if (p < argCount)
+                {
+                    var arg = args[p];
+                    if (!param.CanAccept(arg))
+                        return false;
+                }
+                else
+                {
+                    if (!param.Default().IsSome())
+                        return false;
+                }
+            }
+
+            return true;
+        });
+    }
     
     public B Parameters<T1>() => Parameters(typeof(T1));
     public B Parameters<T1, T2>() => Parameters(typeof(T1), typeof(T2));
@@ -61,6 +91,10 @@ public abstract class MirrorMethodBaseBuilder<B, M> : MirrorMemberBaseBuilder<B,
     
     public B NotGeneric => Where(static method => method.GetGenericArguments().Length == 0);
 
+    public B IsGeneric => Where(static method => method.IsGenericMethod);
+
+    public B GenericCount(int count) => Where(method => method.GetGenericArguments().Length == count);
+    
     public B GenericTypes(params Type[]? types)
     {
         if (types == null)

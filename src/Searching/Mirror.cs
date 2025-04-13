@@ -5,8 +5,25 @@ namespace ScrubJay.Reflection.Searching;
 
 public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>
 {
+    private static readonly ConcurrentTypeMap<MemberInfo[]> _allMembersCache = [];
+    private static MemberInfo[] GetAllMembers(Type type)
+    {
+        return _allMembersCache.GetOrAdd(type, static t => t.AllMembers());
+    }
+    
+    
     public static Mirror Reflect(Type type) => new Mirror(type);
     public static Mirror<T> Reflect<T>() => new Mirror<T>();
+
+    public static IEnumerable<M> Members<M>(Expression expression)
+        where M : MemberInfo
+        => expression.ExtractMembers().OfType<M>();
+
+    public static Result<M> Member<M>(Expression expression)
+        where M : MemberInfo
+        => expression.ExtractMembers()
+            .OfType<M>()
+            .TryGetOne();
 
     public static Mirror<T> In<T>(Expression<Action<T>> expression)
     {
@@ -21,7 +38,7 @@ public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>
     }
 
     public Mirror(Type type)
-        : base(type, type.AllMembers())
+        : base(type, GetAllMembers(type))
     {
     }
 }

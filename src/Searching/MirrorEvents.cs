@@ -18,7 +18,8 @@ public abstract class MirrorEventsBuilder<B> : MirrorMemberBaseBuilder<B, EventI
 
     public B Handler(Type? handlerType, TypeMatch match = TypeMatch.Exact)
     {
-        return Where(field => field.EventHandlerType.Matches(handlerType, match));
+        return Where(handlerType, match,
+            static (field, ht, m) => field.EventHandlerType.Matches(ht, m));
     }
 
     public B Handler<D>(TypeMatch match = TypeMatch.Exact)

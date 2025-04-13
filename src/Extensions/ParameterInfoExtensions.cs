@@ -83,6 +83,22 @@ public static class ParameterInfoExtensions
         {
             return None();
         }
+    }
+
+    public static bool CanAccept(this ParameterInfo parameter, object? arg)
+    {
+        var paramType = parameter.ParameterType;
         
+        if (arg is null)
+        {
+            if (paramType.CanContainNull() && 
+                parameter.NullabilityInfo()?.WriteState != NullabilityState.NotNull)
+            {
+                return true;
+            }
+            return false;
+        }
+        
+        return arg.GetType().Implements(paramType);
     }
 }

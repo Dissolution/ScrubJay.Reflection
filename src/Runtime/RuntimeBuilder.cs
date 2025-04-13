@@ -1,9 +1,10 @@
-﻿using System.Runtime.Serialization;
+﻿
 using ScrubJay.Reflection.MosDef;
 using ScrubJay.Reflection.Naming;
 
 #if NETFRAMEWORK || NETSTANDARD2_0
 using Polyfills;
+using System.Runtime.Serialization;
 #endif
 
 namespace ScrubJay.Reflection.Runtime;
@@ -87,11 +88,34 @@ public static class RuntimeBuilder
 
 #endregion
     
-    public static HashSet<Type> GetAllTypes()
+    #region CustomAttributeBuilder
+    public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
+        where TAttribute : Attribute, new()
     {
-        return AppDomain.CurrentDomain
-            .GetAssemblies()
-            .SelectMany(static ass => Result.TryInvoke(ass.GetTypes).OkOr([]))
-            .ToHashSet();
+        var ctor = Reflect<TAttribute>().Constructors.Instance.NoParams.OneOrThrow();
+        return new CustomAttributeBuilder(ctor, []);
     }
+    
+    public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>(params object?[] ctorArgs)
+        where TAttribute : Attribute
+    {
+        var ctor = Reflect<TAttribute>()
+            .Instance.Constructors
+            .Arguments(ctorArgs)
+            .OneOrThrow($"Could not find a {MemberNames.NameOf(typeof(TAttribute))} constructor with that would accept {string.Join(", ", ctorArgs)}");
+        return new CustomAttributeBuilder(ctor, ctorArgs);
+    }
+    
+    public static CustomAttributeBuilder GetCustomAttributeBuilder(Type attributeType, params object[] ctorArgs)
+    {
+        if (!attributeType.Implements<Attribute>())
+            throw new ArgumentException($"{attributeType} is not an Attribute");
+        var ctor = Reflect(attributeType)
+            .Instance.Constructors
+            .Arguments(ctorArgs)
+            .OneOrThrow($"Could not find a {MemberNames.NameOf(attributeType)} constructor with that would accept {string.Join(", ", ctorArgs)}");
+        return new CustomAttributeBuilder(ctor, ctorArgs);
+    }
+    #endregion
+    
 }

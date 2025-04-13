@@ -54,7 +54,7 @@ public static class MethodBaseExtensions
         {
             MethodInfo info => info.ReturnType,
             ConstructorInfo { IsStatic: true } => typeof(void),
-            ConstructorInfo ctor => ctor.DeclaringType ?? ctor.Module.GetType(),
+            ConstructorInfo ctor => ctor.OwnerType(),
             _ => throw new ArgumentException("Invalid Method", nameof(method)),
         };
     }
