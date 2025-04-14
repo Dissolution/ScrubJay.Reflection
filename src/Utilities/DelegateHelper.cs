@@ -3,17 +3,15 @@
 [PublicAPI]
 public static class DelegateHelper
 {
-    [return: NotNullIfNotNull(nameof(delegateType))]
-    public static MethodInfo? GetInvokeMethod(Type? delegateType)
+    public static Option<MethodInfo> InvokeMethod(this Type? delegateType)
     {
         if (delegateType is null)
-            return null;
-        return delegateType
-            .GetMethod("Invoke", BF.Public | BF.Instance)
-            .ThrowIfNull();
+            return None();
+        return Option.NotNull(delegateType
+            .GetMethod("Invoke", BF.Public | BF.Instance));
     }
 
-    public static MethodInfo GetInvokeMethod<TDelegate>()
+    public static MethodInfo InvokeMethod<TDelegate>()
         where TDelegate : Delegate
     {
         return typeof(TDelegate)

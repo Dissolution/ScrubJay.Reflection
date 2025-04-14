@@ -10,7 +10,7 @@ public class DelegateDefinition
     public static DelegateDefinition Create<D>()
         where D : Delegate
     {
-        var invoke = DelegateHelper.GetInvokeMethod<D>();
+        var invoke = DelegateHelper.InvokeMethod<D>();
         return new()
         {
             ReturnType = invoke.ReturnType,
@@ -61,7 +61,7 @@ public class MethodDefinition : DelegateDefinition
     public static MethodDefinition Create<D>(string? name)
         where D : Delegate
     {
-        var invoke = DelegateHelper.GetInvokeMethod<D>();
+        var invoke = DelegateHelper.InvokeMethod<D>();
         return new()
         {
             Name = name,

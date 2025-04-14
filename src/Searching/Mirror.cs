@@ -3,7 +3,7 @@ using ScrubJay.Reflection.Expressions;
 
 namespace ScrubJay.Reflection.Searching;
 
-public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>
+public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>, ICloneable<Mirror>
 {
     private static readonly ConcurrentTypeMap<MemberInfo[]> _allMembersCache = [];
     private static MemberInfo[] GetAllMembers(Type type)
@@ -41,6 +41,10 @@ public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>
         : base(type, GetAllMembers(type))
     {
     }
+
+    object ICloneable.Clone() => Clone();
+
+    public Mirror Clone() => new Mirror(ReflectedType, _values);
 }
 
 public class Mirror<T> : Mirror

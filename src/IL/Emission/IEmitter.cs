@@ -1058,7 +1058,7 @@ public abstract class EmitterBase<S> : Emitter<S>,
 
     public S Ldfld(FieldInfo field)
     {
-        Validation.Throw.IfNull(field);
+        Throw.IfNull(field);
         if (field.IsStatic)
             return Emit(OpCodes.Ldsfld, field);
         return Emit(OpCodes.Ldfld, field);
@@ -1068,14 +1068,14 @@ public abstract class EmitterBase<S> : Emitter<S>,
 
     public S Ldflda(FieldInfo field)
     {
-        Validation.Throw.IfNull(field);
+        Throw.IfNull(field);
         if (field.IsStatic)
             return Emit(OpCodes.Ldsflda, field);
         return Emit(OpCodes.Ldflda, field);
     }
     public S Stfld(FieldInfo field)
     {
-        Validation.Throw.IfNull(field);
+        Throw.IfNull(field);
         if (field.IsStatic)
             return Emit(OpCodes.Stsfld, field);
         return Emit(OpCodes.Stfld, field);

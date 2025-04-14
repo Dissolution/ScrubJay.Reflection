@@ -26,22 +26,27 @@ public abstract class MirrorMemberBaseBuilder<B, M> : FluentListBuilder<B, M>
 
     public B Visibility(Viz visibility)
     {
-        return Where(member => member.Visibility().HasFlags(visibility));
+        return Only(visibility, static (member,viz) => member.Visibility().HasFlags(viz));
     }
 
     public B BindingFlags(BF bindingFlags)
     {
-        return Where(member => member.BindingFlags().HasFlags(bindingFlags));
+        return Only(bindingFlags, static (member,flags) => member.BindingFlags().HasFlags(flags));
     }
 
     public B Named(string name)
     {
-        return Where(member => TextHelper.Equate(member.Name, name));
+        return Only(name, static (member,n) => TextHelper.Equate(member.Name, n));
+    }
+    
+    public B Named(string name, StringComparison comparison)
+    {
+        return Only(name, comparison, static (member,n, c) => TextHelper.Equate(member.Name, n, c));
     }
 
     public B Named(string? name, StringMatch match)
     {
-        return Where(member => member.Name.Matches(name, match));
+        return Only(name, match, static (member,n,m) => member.Name.Matches(n,m));
     }
 
     public B With(Type attributeType)
@@ -49,14 +54,12 @@ public abstract class MirrorMemberBaseBuilder<B, M> : FluentListBuilder<B, M>
         Throw.IfNull(attributeType);
         if (!attributeType.Implements<Attribute>())
             throw new ArgumentException($"{attributeType.NameOf()} does not implement Attribute", nameof(attributeType));
-        return Where(member => member.HasAttribute(attributeType));
+        return Only(attributeType, static (member,at) => member.HasAttribute(at));
     }
 
     public B With<A>()
         where A : Attribute
-    {
-        return Where(member => member.HasAttribute<A>());
-    }
+        => With(typeof(A));
     
     public override string ToString() => TextBuilder.New
         .Append('[')

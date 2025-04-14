@@ -5,6 +5,7 @@ global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute
 global using text = System.ReadOnlySpan<char>;
 
 using System.Diagnostics;
+using System.Dynamic;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using ScrubJay.Debugging;
@@ -18,24 +19,19 @@ using ScrubJay.Reflection.Utilities;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-//var codes =
-//    OpCoding.AllOpCodes
-//        //.Where(static op => op.OperandType == OperandType.InlineNone)
-//        //.Where(static op => TextHelper.Contains(op.Name, "arg", StringComparison.OrdinalIgnoreCase))
-//        .OrderBy(static op => op.Name)
-//        .ToList();
-//
-//var text = TextBuilder.Build(tb => tb.LineDelimit(codes, (t,c) => t.Append(c.Name)));
-//
-//
-//
-//Debugger.Break();
-//
+
+var console = DynamicWrapper.WrapStaticType(typeof(Console));
+
+console.Write('a').Write(147).Write(DateTime.Now).WriteLine();
+
+Debugger.Break();
 
 
-var methods = 
-    //Util.GetAllTypes()
-    typeof(OpCoding).Assembly.GetTypes()
+
+
+
+var methods = TypeHelper
+    .GetAllTypes()
     .SelectMany(static type => Reflect(type).Methods.AsList())
     .Distinct()
     // Abstract methods cannot have a body

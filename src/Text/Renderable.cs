@@ -111,6 +111,16 @@ public static class Renderer
                     .Append(')');
             }
 #endif
+            case Enum e:
+            {
+                return builder.Append(e.ToString());
+            }
+            case object?[] objectArray:
+            {
+                return builder.Append("object[")
+                    .Delimit(", ", objectArray, static (tb,obj) => tb.Render(obj))
+                    .Append(']');
+            }
             default:
             {
                 string? str = value.ToString();

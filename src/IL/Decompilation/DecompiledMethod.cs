@@ -29,7 +29,7 @@ public sealed class DecompiledMethod
             return ex;
         }
     }
-    
+
 
     private readonly MethodBase _method;
     private readonly ITokenResolver _tokenResolver;
@@ -54,7 +54,7 @@ public sealed class DecompiledMethod
         MethodGenericTypes = method.GetGenericArguments().NullIfNone();
         var owner = method.OwnerType();
         OwnerGenericTypes = owner.GetGenericArguments().NullIfNone();
-        
+
         if (method is MethodInfo methodInfo)
         {
             ReturnParameter = methodInfo.ReturnParameter;
@@ -121,19 +121,19 @@ public sealed class DecompiledMethod
             };
         }
     }
-    
+
 
     private OpCodeInstruction ReadOpCodeInstruction(ref SpanReader<byte> reader)
     {
         int offset = reader.Position;
-        
+
         var readOp = reader.TryReadOpCode();
         if (!readOp.IsOk(out var opCode))
         {
             Debugger.Break();
         }
-        
-       
+
+
         switch (opCode.OperandType)
         {
             // operand is a 32-bit branch target
@@ -381,7 +381,7 @@ public sealed class DecompiledMethod
     internal sealed class ThisParameterInfo : ParameterInfo
     {
         public override bool HasDefaultValue => false;
-        
+
         public ThisParameterInfo(MethodBase method)
         {
             Debug.Assert(!method.IsStatic);
@@ -401,7 +401,7 @@ public sealed class DecompiledMethod
         public override ParameterAttributes Attributes { get; } = ParameterAttributes.Retval;
 
         public override bool HasDefaultValue => false;
-        
+
         public ReturnParameterInfo(MethodBase method, Type returnType)
         {
             this.MemberImpl = method;
@@ -409,9 +409,50 @@ public sealed class DecompiledMethod
             this.NameImpl = "return";
             this.PositionImpl = -1;
         }
-        
+
         public override object[] GetCustomAttributes(bool inherit) => [];
         public override object[] GetCustomAttributes(Type? attributeType, bool inherit) => [];
         public override IList<CustomAttributeData> GetCustomAttributesData() => [];
+    }
+
+    public sealed class SigParameterInfo : ParameterInfo
+    {
+        public new ParameterAttributes Attributes
+        {
+            get => base.AttrsImpl;
+            set => base.AttrsImpl = value;
+        }
+
+        public new string? Name
+        {
+            get => base.NameImpl;
+            set => base.NameImpl = value;
+        }
+
+        public new int Position
+        {
+            get => base.PositionImpl;
+            set => base.PositionImpl = value;
+        }
+
+        [NotNull, AllowNull]
+        public new Type ParameterType
+        {
+            get => base.ClassImpl ?? typeof(void);
+            set => base.ClassImpl = value;
+        }
+
+        public Option<object?> Default { get; set; }
+
+        public override bool HasDefaultValue => Default.IsSome();
+        
+        public override object? DefaultValue => Default.SomeOr(DBNull.Value);
+        
+        public override object? RawDefaultValue => Default.SomeOr(DBNull.Value);
+
+        public SigParameterInfo()
+        {
+            
+        }
     }
 }

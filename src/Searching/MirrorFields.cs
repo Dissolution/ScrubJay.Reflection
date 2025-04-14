@@ -21,12 +21,12 @@ public abstract class MirrorFieldBuilder<B> : MirrorMemberBaseBuilder<B, FieldIn
 
     public B Returning(Type type)
     {
-        return Where(field => field.FieldType == type, [type]);
+        return Only(type, static (field, t) => field.FieldType == t);
     }
 
     public B Returning(Type type, TypeMatch match)
     {
-        return Where(field => field.FieldType.Matches(type, match), $"Returning({type.NameOf()}, {match})");
+        return Only(type, match, static (field,t,m) => field.FieldType.Matches(t,m));
     }
 
     public B Returning<T>() => Returning(typeof(T));

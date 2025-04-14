@@ -85,6 +85,26 @@ public static class ParameterInfoExtensions
         }
     }
 
+    public static bool CanAcceptA(this ParameterInfo parameter, Type type)
+    {
+        return type.Implements(parameter.ParameterType);
+    }
+    
+    public static bool CanAcceptA(this ParameterInfo[] parameters, params Type[]? argTypes)
+    {
+        int count = parameters.Length;
+        if (argTypes is null)
+            return count == 0;
+        if (argTypes.Length != count)
+            return false;
+        for (var i = 0; i < count; i++)
+        {
+            if (!CanAcceptA(parameters[i], argTypes[i]))
+                return false;
+        }
+        return true;
+    }
+    
     public static bool CanAccept(this ParameterInfo parameter, object? arg)
     {
         var paramType = parameter.ParameterType;
@@ -100,5 +120,20 @@ public static class ParameterInfoExtensions
         }
         
         return arg.GetType().Implements(paramType);
+    }
+    
+    public static bool CanAccept(this ParameterInfo[] parameters, params object?[]? args)
+    {
+        int count = parameters.Length;
+        if (args is null)
+            return count == 0;
+        if (args.Length != count)
+            return false;
+        for (var i = 0; i < count; i++)
+        {
+            if (!CanAccept(parameters[i], args[i]))
+                return false;
+        }
+        return true;
     }
 }

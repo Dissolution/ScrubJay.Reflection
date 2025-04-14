@@ -23,7 +23,7 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
         }
     }
 
-    public B Where(Func<T, bool> predicate,
+    public B Only(Func<T, bool> predicate,
         [CallerMemberName] string? callerName = null)
     {
         _values.RemoveAll(member => !predicate(member));
@@ -32,7 +32,7 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
         return _builder;
     }
 
-    public B Where<S1>(S1 state1, Func<T, S1, bool> predicate,
+    public B Only<S1>(S1 state1, Func<T, S1, bool> predicate,
         [CallerMemberName] string? callerName = null)
     {
         _values.RemoveAll(member => !predicate(member, state1));
@@ -47,7 +47,7 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
         return _builder;
     }
     
-    public B Where<S1, S2>(S1 state1, S2 state2, Func<T, S1, S2, bool> predicate,
+    public B Only<S1, S2>(S1 state1, S2 state2, Func<T, S1, S2, bool> predicate,
         [CallerMemberName] string? callerName = null)
     {
         _values.RemoveAll(member => !predicate(member, state1, state2));
@@ -64,7 +64,7 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
         return _builder;
     }
 
-    public B Where<S1, S2, S3>(S1 state1, S2 state2, S3 state3, Func<T, S1, S2, S3, bool> predicate,
+    public B Only<S1, S2, S3>(S1 state1, S2 state2, S3 state3, Func<T, S1, S2, S3, bool> predicate,
         [CallerMemberName] string? callerName = null)
     {
         _values.RemoveAll(member => !predicate(member, state1, state2, state3));
@@ -101,8 +101,18 @@ public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
         return None();
     }
 
-    public T OneOrThrow(string? message = null) => One().SomeOrThrow(message);
-    
+    public T OneOrThrow(string? message = null)
+    {
+        if (_values.Count == 1)
+            return _values[0];
+
+        var error = TextBuilder.New
+            .LineDelimitAppend(_restrictions)
+            .IfNotNull(message, static (tb,msg) => tb.NewLine().Append($"Info: {msg}"))
+            .ToStringAndDispose();
+        throw new InvalidOperationException(error);
+    }
+
     public override string ToString() => TextBuilder.New
         .Append('[')
         .DelimitAppend(", ", _values)

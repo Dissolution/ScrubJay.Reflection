@@ -1,4 +1,6 @@
-﻿namespace ScrubJay.Reflection.Extensions;
+﻿using ScrubJay.Reflection.Utilities;
+
+namespace ScrubJay.Reflection.Extensions;
 
 /// <summary>
 /// Extensions on <see cref="MemberInfo"/>
@@ -101,6 +103,17 @@ public static class MemberInfoExtensions
         Type type => type.GetGenericArguments(),
         _ => throw new ArgumentOutOfRangeException(nameof(member)),
     };
+
+    public static ParameterInfo[] Parameters(this MemberInfo? member)
+    {
+        if (member is MethodBase method)
+            return method.GetParameters();
+        if (member is EventInfo eventInfo)
+            return eventInfo.EventHandlerType.InvokeMethod().SomeOrThrow().GetParameters();
+        if (member is PropertyInfo property)
+            return property.GetIndexParameters();
+        return [];
+    }
     
     /// <summary>
     /// Gets the <see cref="BF"/> for this <see cref="MemberInfo"/>

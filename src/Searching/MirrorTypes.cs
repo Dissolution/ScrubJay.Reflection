@@ -14,22 +14,21 @@ public abstract class MirrorTypesBuilder<B> : MirrorMemberBaseBuilder<B, Type>
     {
     }
 
-    public B NotGeneric => Where(static type => type.GetGenericArguments().Length == 0);
+    public B NotGeneric => Only(static type => type.GetGenericArguments().Length == 0);
 
     public B GenericTypes(params Type[]? types)
     {
         if (types == null)
-            return Where(static type => type.GetGenericArguments().Length == 0);
+            return Only(static type => type.GetGenericArguments().Length == 0);
 
-        return Where(
-            type =>
+        return Only(types, static (type,ts) =>
             {
                 var genericTypes = type.GetGenericArguments();
-                if (genericTypes.Length != types.Length)
+                if (genericTypes.Length != ts.Length)
                     return false;
                 for (int i = 0; i < genericTypes.Length; i++)
                 {
-                    if (genericTypes[i] != types[i])
+                    if (genericTypes[i] != ts[i])
                         return false;
                 }
 
@@ -40,16 +39,16 @@ public abstract class MirrorTypesBuilder<B> : MirrorMemberBaseBuilder<B, Type>
     public B GenericTypes(Type[]? types, TypeMatch match)
     {
         if (types == null)
-            return Where(static type => type.GetGenericArguments().Length == 0);
+            return Only(static type => type.GetGenericArguments().Length == 0);
 
-        return Where(type =>
+        return Only(types, match, static (type,ts,m) =>
         {
             var genericTypes = type.GetGenericArguments();
-            if (genericTypes.Length != types.Length)
+            if (genericTypes.Length != ts.Length)
                 return false;
             for (int i = 0; i < genericTypes.Length; i++)
             {
-                if (genericTypes[i].Matches(types[i], match))
+                if (genericTypes[i].Matches(ts[i], m))
                     return false;
             }
 

@@ -17,12 +17,12 @@ public abstract class MirrorMethodsBuilder<B> : MirrorMethodBaseBuilder<B, Metho
 
     public B Returning(Type type)
     {
-        return Where(method => method.ReturnType == type);
+        return Only(type, static (method,t) => method.ReturnType == t);
     }
 
     public B Returning(Type type, TypeMatch match)
     {
-        return Where(method => method.ReturnType.Matches(type, match));
+        return Only(type, match, static (method,t,m) => method.ReturnType.Matches(t,m));
     }
 
     public B Returning<T>() => Returning(typeof(T));

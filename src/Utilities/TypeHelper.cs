@@ -1,4 +1,8 @@
-﻿namespace ScrubJay.Reflection.Utilities;
+﻿#if NETFRAMEWORK || NETSTANDARD2_0
+using Polyfills;
+#endif
+
+namespace ScrubJay.Reflection.Utilities;
 
 [PublicAPI]
 public static class TypeHelper
@@ -62,4 +66,13 @@ public static class TypeHelper
     public static bool IsUnmanaged(this Type? type) => !IsReferenceOrContainsReferences(type);
 
     public static bool IsUnmanaged<T>() => !IsReferenceOrContainsReferences<T>();
+    
+    
+    public static HashSet<Type> GetAllTypes()
+    {
+        return AppDomain.CurrentDomain
+            .GetAssemblies()
+            .SelectMany(static assembly => Result.TryInvoke(assembly.GetTypes).OkOr([]))
+            .ToHashSet();
+    }
 }
