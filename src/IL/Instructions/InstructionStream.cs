@@ -1,6 +1,36 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
-public sealed class InstructionStream : IReadOnlyCollection<Instruction>
+public interface IInstructions : IReadOnlyCollection<Instruction>
+{
+    /// <summary>
+    /// Gets the total size of all <see cref="Instruction">Instructions</see>, in <see cref="byte">bytes</see>
+    /// </summary>
+    int Size { get; }
+
+    /// <summary>
+    /// Tries to find the <see cref="Instruction"/> with the given <see cref="ILOffset"/>
+    /// </summary>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    Option<Instruction> FindByOffset(ILOffset offset);
+}
+
+public interface IInstructionStream : IInstructions
+{
+    /// <summary>
+    /// Adds a new <see cref="Instruction"/> at the end of this instruction stream
+    /// </summary>
+    /// <param name="instruction"></param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="instruction"/> is <c>null</c>
+    /// </exception>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the <see cref="Instruction"/> has an invalid <see cref="Instruction.Offset"/>
+    /// </exception>
+    void Add(Instruction instruction);
+}
+
+public sealed class InstructionStream : IInstructionStream
 {
     private readonly List<Instruction> _instructions = [];
     private int _ilOffset = 0;
@@ -40,7 +70,7 @@ public sealed class InstructionStream : IReadOnlyCollection<Instruction>
         _instructions.Add(instruction);
     }
 
-    public Option<Instruction> TryFindByOffset(int offset)
+    public Option<Instruction> FindByOffset(ILOffset offset)
     {
         if (offset < 0 || offset >= _ilOffset)
             return None();

@@ -5,28 +5,13 @@ global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute
 global using text = System.ReadOnlySpan<char>;
 
 using System.Diagnostics;
-using System.Dynamic;
-using System.Reflection.Emit;
 using System.Runtime.InteropServices;
 using ScrubJay.Debugging;
 using ScrubJay.Enums;
-using ScrubJay.Functional;
 using ScrubJay.Reflection.IL;
-using ScrubJay.Reflection.IL.Decompilation;
-using ScrubJay.Reflection.IL.Instructions;
-using ScrubJay.Reflection.Sandbox;
 using ScrubJay.Reflection.Utilities;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
-
-
-var console = DynamicWrapper.WrapStaticType(typeof(Console));
-
-console.Write('a').Write(147).Write(DateTime.Now).WriteLine();
-
-Debugger.Break();
-
-
 
 
 
@@ -49,7 +34,7 @@ for (var i = 0; i < count; i++)
 {
     var method = methods[i];
 
-    var tryDecompile = DecompiledMethod.TryDecompile(method);
+    var tryDecompile = DecompiledILMethod.TryDecompile(method);
     if (tryDecompile.IsOkWithError(out var ok, out var error))
     {
         var display = ok.ToString();

@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
+[PublicAPI]
 public abstract class OpCodeTokenInstruction : OpCodeInstruction
 {
     public int Token { get;  }
@@ -13,110 +14,130 @@ public abstract class OpCodeTokenInstruction : OpCodeInstruction
     }
 }
 
+[PublicAPI]
 public sealed class OpCodeFieldInstruction : OpCodeTokenInstruction
 {
-    public FieldInfo? Field { get; set; }
+    public FieldInfo Field { get; }
     
-    public OpCodeFieldInstruction(OpCode opCode, int token) : base(opCode, token)
+    public OpCodeFieldInstruction(OpCode opCode, FieldInfo field) : base(opCode, field.MetadataToken)
     {
-        Debug.Assert(opCode.OperandType == OperandType.InlineField);
+        if (opCode.OperandType != OperandType.InlineField &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Field = field.ThrowIfNull();
     }
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(Field),
+        builder.Invoke(base.RenderTo!)
+            .IfNotNull(Field,
                 static (tb, field) => tb.Append('`').Render(field).Append('`'),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
+                tb => tb.Append('&').Append(Token, "X8"));
     }
 }
 
+[PublicAPI]
 public sealed class OpCodeMethodInstruction : OpCodeTokenInstruction
 {
-    public MethodBase? Method { get; set; }
+    public MethodBase Method { get; }
     
-    public OpCodeMethodInstruction(OpCode opCode, int token) : base(opCode, token)
+    public OpCodeMethodInstruction(OpCode opCode, MethodBase method) : base(opCode, method.MetadataToken)
     {
-        Debug.Assert(opCode.OperandType == OperandType.InlineMethod);
+        if (opCode.OperandType != OperandType.InlineMethod &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Method = method.ThrowIfNull();
     }
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(Method),
+        builder.Invoke(base.RenderTo!)
+            .IfNotNull(Method,
                 static (tb, method) => tb.Append('`').Render(method).Append('`'),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
+                tb => tb.Append('&').Append(Token, "X8"));
     }
 }
 
+[PublicAPI]
+public sealed class OpCodeMemberInstruction : OpCodeTokenInstruction
+{
+    public MemberInfo Member { get; }
+    
+    public OpCodeMemberInstruction(OpCode opCode, MemberInfo member) 
+        : base(opCode, member.MetadataToken)
+    {
+        if (opCode != OpCodes.Ldtoken)
+            throw new ArgumentException(nameof(opCode));
+        this.Member = member.ThrowIfNull();
+    }
+
+    public override void RenderTo<B>(B builder)
+    {
+        builder.Invoke(base.RenderTo!)
+            .IfNotNull(Member,
+                static (tb, member) => tb.Append('`').Render(member).Append('`'),
+                tb => tb.Append('&').Append(Token, "X8"));
+    }
+}
+
+[PublicAPI]
+public sealed class OpCodeTypeInstruction : OpCodeTokenInstruction
+{
+    public Type Type { get; }
+    
+    public OpCodeTypeInstruction(OpCode opCode, Type type) : base(opCode, type.MetadataToken)
+    {
+        if (opCode.OperandType != OperandType.InlineType &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Type = type.ThrowIfNull();
+    }
+
+    public override void RenderTo<B>(B builder)
+    {
+        builder.Invoke(base.RenderTo!)
+            .IfNotNull(Type,
+                static (tb, type) => tb.Append('`').Render(type).Append('`'),
+                tb => tb.Append('&').Append(Token, "X8"));
+    }
+}
+
+[PublicAPI]
 public sealed class OpCodeSignatureInstruction : OpCodeTokenInstruction
 {
     public byte[]? Signature { get; set; }
     
-    public OpCodeSignatureInstruction(int token) : base(OpCodes.Calli, token)
+    public OpCodeSignatureInstruction(OpCode opCode, int token) : base(opCode, token)
     {
-
+        Debug.Assert(opCode == OpCodes.Calli);
     }
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(Signature),
+        builder.Invoke(base.RenderTo!)
+            .IfNotNull(Signature,
                 static (tb, sig) => tb.Append('[').DelimitAppend(',', sig, "X2").Append(']'),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
+                tb => tb.Append('&').Append(Token, "X8"));
     }
 }
 
+[PublicAPI]
 public sealed class OpCodeStringInstruction : OpCodeTokenInstruction
 {
-    public string? String { get; set; }
+    public string String { get; }
     
-    public OpCodeStringInstruction(int token) : base(OpCodes.Ldstr, token)
+    public OpCodeStringInstruction(OpCode opCode, string str) : base(opCode, str.GetMetadataToken())
     {
-        
+        if (opCode != OpCodes.Ldstr)
+            throw new ArgumentException(null, nameof(opCode));
+        String = str;
     }
 
     public override void RenderTo<B>(B builder)
     {
         builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(String),
+            .IfNotNull(String,
                 static (tb, str) => tb.Render(str),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
-    }
-}
-
-public sealed class OpCodeMemberInstruction : OpCodeTokenInstruction
-{
-    public MemberInfo? Member { get; set; }
-    
-    public OpCodeMemberInstruction(int token) : base(OpCodes.Ldtoken, token)
-    {
-
-    }
-
-    public override void RenderTo<B>(B builder)
-    {
-        builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(Member),
-                static (tb, member) => tb.Append('`').Render(member).Append('`'),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
-    }
-}
-
-public sealed class OpCodeTypeInstruction : OpCodeTokenInstruction
-{
-    public Type? Type { get; set; }
-    
-    public OpCodeTypeInstruction(OpCode opCode, int token) : base(opCode, token)
-    {
-        Debug.Assert(opCode.OperandType == OperandType.InlineType);
-    }
-
-    public override void RenderTo<B>(B builder)
-    {
-        builder.Invoke(b => base.RenderTo(b))
-            .If(Validate.IsNotNull(Type),
-                static (tb, type) => tb.Append('`').Render(type).Append('`'),
-                (tb, _) => tb.Append('&').Append(Token, "X8"));
+                tb => tb.Append('&').Append(Token, "X8"));
     }
 }

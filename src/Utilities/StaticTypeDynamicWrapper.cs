@@ -1,10 +1,8 @@
 ﻿using System.Dynamic;
 using System.Linq.Expressions;
-using ScrubJay.Reflection.Collections;
-using ScrubJay.Reflection.IL.Decompilation;
+using ScrubJay.Reflection.MosDef;
 using ScrubJay.Reflection.Searching;
 using ScrubJay.Reflection.Validation;
-using ScrubJay.Text.Comparison;
 
 namespace ScrubJay.Reflection.Utilities;
 
@@ -122,7 +120,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         
         for (var i = 0; i < count; i++)
         {
-            ParameterInfo param = new DecompiledMethod.SigParameterInfo()
+            ParameterInfo param = new SigParameterInfo()
             {
                 Position = i,
                 Name = argNames[i],
@@ -419,19 +417,21 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         Debugger.Break();
         return base.TryUnaryOperation(binder, out result);
     }
+    
     public override bool Equals(object? obj)
     {
+        bool equals = base.Equals(obj);
         Debugger.Break();
-        return base.Equals(obj);
+        return equals;
     }
+    
     public override int GetHashCode()
     {
-        Debugger.Break();
-        return base.GetHashCode();
+        return Hasher.Hash(_type);
     }
+    
     public override string ToString()
     {
-        Debugger.Break();
-        return base.ToString();
+        return $"dynamic_static({_type.NameOf()})";
     }
 }

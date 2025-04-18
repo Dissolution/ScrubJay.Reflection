@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
+[PublicAPI]
 public abstract class OpCodeVariableInstruction : OpCodeInstruction
 {
     public int Index { get; }
@@ -39,46 +40,46 @@ public abstract class OpCodeVariableInstruction : OpCodeInstruction
     }
 }
 
+[PublicAPI]
 public sealed class OpCodeLocalInstruction : OpCodeVariableInstruction
 {
-    public CILLocal? Local { get; set; }
+    public ILLocal Local { get; }
     
-    public OpCodeLocalInstruction(OpCode opCode, int index) : base(opCode, index)
+    public OpCodeLocalInstruction(OpCode opCode, ILLocal local) : base(opCode, local.Index)
     {
         
     }
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(b => base.RenderTo(b))
-            .Append('`')
-            .If(Local,
-                static (tb, local) => local.RenderTo(tb),
-                tb => tb.Append('[')
-                    .Render(IsShort ? (byte)Index : (ushort)Index)
-                    .Append(']'))
-            .Append('`');
+        builder.Invoke(base.RenderTo!)
+            // inline none opcodes specify their index in their name (eg ldloc.2)
+            .If(OpCode.OperandType != OperandType.InlineNone,
+                tb => tb.Append(Index).Append(": "))
+            .Append('`').Render(Local).Append('`');
     }
 }
 
-public class OpCodeParameterInstruction : OpCodeVariableInstruction
+[PublicAPI]
+public sealed class OpCodeParameterInstruction : OpCodeVariableInstruction
 {
-    public ParameterInfo? Parameter { get; set; }
+    public ParameterInfo Parameter { get; }
     
-    public OpCodeParameterInstruction(OpCode opCode, int index) : base(opCode, index)
+    public OpCodeParameterInstruction(OpCode opCode, ParameterInfo parameter)
+        : base(opCode, parameter.Position)
     {
-        
+        Throw.IfNull(parameter);
+        if (!opCode.TargetsArgument())
+            throw new ArgumentException(null, nameof(opCode));
+        this.Parameter = parameter;
     }
     
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(b => base.RenderTo(b))
-            .Append('`')
-            .IfNotNull(Parameter,
-                static (tb, parameter) => tb.Render(parameter),
-                tb => tb.Append('[')
-                    .Render(IsShort ? (byte)Index : (ushort)Index)
-                    .Append(']'))
-            .Append('`');
+        builder.Invoke(base.RenderTo!)
+            // inline none opcodes specify their index in their name (eg ldloc.2)
+            .If(OpCode.OperandType != OperandType.InlineNone,
+                tb => tb.Append(Index).Append(": "))
+            .Append('`').Render(Parameter).Append('`');
     }
 }

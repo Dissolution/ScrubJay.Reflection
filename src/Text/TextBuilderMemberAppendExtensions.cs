@@ -1,6 +1,4 @@
-﻿using Polyfills;
-
-namespace ScrubJay.Reflection.Text;
+﻿namespace ScrubJay.Reflection.Text;
 
 public static class TextBuilderMemberAppendExtensions
 {
@@ -40,7 +38,7 @@ public static class TextBuilderMemberAppendExtensions
             .AppendType(property.OwnerType())
             .Append('.')
             .Append(property.Name)
-            .If(Validate.IsNotEmpty(property.GetIndexParameters()),
+            .IfNotEmpty(property.GetIndexParameters(),
                 static (tb, indexers) => tb.Append('[').Delimit(", ", indexers,
                     static (t, pi) => t.AppendParameter(pi)).Append(']'));
     }
@@ -96,7 +94,7 @@ public static class TextBuilderMemberAppendExtensions
         if (method is null) return builder;
         return builder
             .AppendIf(method.IsAsync(), "async ")
-            .If(Validate.IsNotNull(method.ReturnParameter),
+            .IfNotNull(method.ReturnParameter,
                 static (tb, returnParam) => tb.AppendParameter(returnParam).Append(' '))
             .AppendType(method.OwnerType())
             .Append('.')
@@ -112,13 +110,23 @@ public static class TextBuilderMemberAppendExtensions
         var (paramRef, paramType) = parameter;
         var (prefix, postfix) = parameter.NullabilityInfo().GetPrefixPostfix();
         return builder
-            .IfNotNull(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
+            .IfNotEmpty(prefix, static (tb, pf) => tb.Append(pf).Append(' '))
             .Append(paramRef.AsString())
             .AppendType(paramType)
             .Append(postfix)
-            .IfNotNull(parameter.Name, static (tb, name) => tb.Append(' ').Append(name))
+            .IfNotEmpty(parameter.Name, static (tb, name) => tb.Append(' ').Append(name))
             .If(parameter.Default(),
                 static (tb, defaultValue) => tb.Append(" = ").Render(defaultValue));
+    }
+
+    public static B AppendAttribute<B>(this B builder, Attribute? attribute)
+        where B : TextBuilderBase<B>
+    {
+        if (attribute is null)
+            return builder;
+
+        var str = attribute.ToString();
+        return builder.Append(str);
     }
 
     private static readonly TypeMap<string> _shortNames = new()
@@ -202,15 +210,15 @@ public static class TextBuilderMemberAppendExtensions
         return AppendNameAndGenericTypes(builder, type.Name, type.GetGenericArguments());
     }
 
-    internal static B AppendNameAndGenericTypes<B>(this B builder, string name, Type[]? genericTypes)
+    internal static B AppendNameAndGenericTypes<B>(this B builder, string? name, Type[]? genericTypes)
         where B : TextBuilderBase<B>
     {
-        int index = name.IndexOf('`');
+        int index = name?.IndexOf('`') ?? -1;
         return builder
             .If((name, index), static t => t.index >= 0,
             static (tb,t) => tb.Append(t.name.AsSpan(0, t.index)),
             static (tb, t) => tb.Append(t.name))
-            .If(Validate.IsNotEmpty(genericTypes),
+            .IfNotEmpty(genericTypes,
                 static (tb, types) => tb
                     .Append('<')
                     .Delimit<Type>(", ", types, static (t, type) => t.AppendType(type))

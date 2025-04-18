@@ -1,9 +1,6 @@
 ﻿// ReSharper disable IdentifierTypo
 // ReSharper disable CommentTypo
 
-using EmitterLabel = ScrubJay.Reflection.IL.CILLabel;
-using EmitterLocal = ScrubJay.Reflection.IL.CILLocal;
-
 namespace ScrubJay.Reflection.IL.Emission;
 
 /// <summary>
@@ -227,7 +224,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s?view=netcore-3.0"/>
-    TEmitter Beq(EmitterLabel label);
+    TEmitter Beq(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if two values are equal.
@@ -235,7 +232,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.beq_s?view=netcore-3.0"/>
-    TEmitter Beq_S(EmitterLabel label);
+    TEmitter Beq_S(ILLabel label);
 
 #endregion
 
@@ -247,7 +244,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s?view=netcore-3.0"/>
-    TEmitter Bge(EmitterLabel label);
+    TEmitter Bge(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is greater than or equal to (<see langword="&gt;="/>) the second value.
@@ -255,7 +252,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_s?view=netcore-3.0"/>
-    TEmitter Bge_S(EmitterLabel label);
+    TEmitter Bge_S(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given <see cref="Label"/> if the first value is greater than or equal to (<see langword="&gt;="/>) the second value when comparing unsigned integer values or unordered float values.
@@ -263,7 +260,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s?view=netcore-3.0"/>
-    TEmitter Bge_Un(EmitterLabel label);
+    TEmitter Bge_Un(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is greater than or equal to (<see langword="&gt;="/>) the second value when comparing unsigned integer values or unordered float values.
@@ -271,7 +268,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bge_un_s?view=netcore-3.0"/>
-    TEmitter Bge_Un_S(EmitterLabel label);
+    TEmitter Bge_Un_S(ILLabel label);
 
 #endregion
 
@@ -283,7 +280,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s?view=netcore-3.0"/>
-    TEmitter Bgt(EmitterLabel label);
+    TEmitter Bgt(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is greater than (<see langword="&gt;"/>) the second value.
@@ -291,7 +288,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_s?view=netcore-3.0"/>
-    TEmitter Bgt_S(EmitterLabel label);
+    TEmitter Bgt_S(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given <see cref="Label"/> if the first value is greater than (<see langword="&gt;"/>) the second value when comparing unsigned integer values or unordered float values.
@@ -299,7 +296,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s?view=netcore-3.0"/>
-    TEmitter Bgt_Un(EmitterLabel label);
+    TEmitter Bgt_Un(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is greater than (<see langword="&gt;"/>) the second value when comparing unsigned integer values or unordered float values.
@@ -307,7 +304,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bgt_un_s?view=netcore-3.0"/>
-    TEmitter Bgt_Un_S(EmitterLabel label);
+    TEmitter Bgt_Un_S(ILLabel label);
 
 #endregion
 
@@ -319,7 +316,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s?view=netcore-3.0"/>
-    TEmitter Ble(EmitterLabel label);
+    TEmitter Ble(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is less than or equal to (<see langword="&lt;="/>) the second value.
@@ -327,7 +324,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_s?view=netcore-3.0"/>
-    TEmitter Ble_S(EmitterLabel label);
+    TEmitter Ble_S(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given <see cref="Label"/> if the first value is less than or equal to (<see langword="&lt;="/>) the second value when comparing unsigned integer values or unordered float values.
@@ -335,7 +332,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s?view=netcore-3.0"/>
-    TEmitter Ble_Un(EmitterLabel label);
+    TEmitter Ble_Un(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is less than or equal to (<see langword="&lt;="/>) the second value when comparing unsigned integer values or unordered float values.
@@ -343,7 +340,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ble_un_s?view=netcore-3.0"/>
-    TEmitter Ble_Un_S(EmitterLabel label);
+    TEmitter Ble_Un_S(ILLabel label);
 
 #endregion
 
@@ -355,7 +352,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s?view=netcore-3.0"/>
-    TEmitter Blt(EmitterLabel label);
+    TEmitter Blt(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is less than (<see langword="&lt;"/>) the second value.
@@ -363,7 +360,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_s?view=netcore-3.0"/>
-    TEmitter Blt_S(EmitterLabel label);
+    TEmitter Blt_S(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given <see cref="Label"/> if the first value is less than (<see langword="&lt;"/>) the second value when comparing unsigned integer values or unordered float values.
@@ -371,7 +368,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s?view=netcore-3.0"/>
-    TEmitter Blt_Un(EmitterLabel label);
+    TEmitter Blt_Un(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if the first value is less than (<see langword="&lt;"/>) the second value when comparing unsigned integer values or unordered float values.
@@ -379,7 +376,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.blt_un_s?view=netcore-3.0"/>
-    TEmitter Blt_Un_S(EmitterLabel label);
+    TEmitter Blt_Un_S(ILLabel label);
 
 #endregion
 
@@ -391,7 +388,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s?view=netcore-3.0"/>
-    TEmitter Bne_Un(EmitterLabel label);
+    TEmitter Bne_Un(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if two unsigned or unordered values are not equal (<see langword="!="/>).
@@ -399,7 +396,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.bne_un_s?view=netcore-3.0"/>
-    TEmitter Bne_Un_S(EmitterLabel label);
+    TEmitter Bne_Un_S(ILLabel label);
 
 #endregion
 
@@ -411,7 +408,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s?view=netcore-3.0"/>
-    TEmitter Brfalse(EmitterLabel label);
+    TEmitter Brfalse(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if value is <see langword="false"/>, <see langword="null"/>, or zero.
@@ -419,7 +416,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form<see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brfalse_s?view=netcore-3.0"/>
-    TEmitter Brfalse_S(EmitterLabel label);
+    TEmitter Brfalse_S(ILLabel label);
 
 #endregion
 
@@ -431,7 +428,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s?view=netcore-3.0"/>
-    TEmitter Brtrue(EmitterLabel label);
+    TEmitter Brtrue(ILLabel label);
 
     /// <summary>
     /// Transfers control to the given short-form <see cref="Label"/> if value is <see langword="true"/>, not-<see langword="null"/>, or non-zero.
@@ -439,7 +436,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form<see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.brtrue_s?view=netcore-3.0"/>
-    TEmitter Brtrue_S(EmitterLabel label);
+    TEmitter Brtrue_S(ILLabel label);
 
 #endregion
 
@@ -453,7 +450,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br?view=netcore-3.0"/>
     /// <seealso href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s?view=netcore-3.0"/>
-    TEmitter Br(EmitterLabel label);
+    TEmitter Br(ILLabel label);
 
     /// <summary>
     /// Unconditionally transfers control to the given short-form <see cref="Label"/>.
@@ -461,7 +458,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The short-form <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> does not qualify for short-form instructions.</exception>
     /// <see href="https://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.br_s?view=netcore-3.0"/>
-    TEmitter Br_S(EmitterLabel label);
+    TEmitter Br_S(ILLabel label);
 
     /// <summary>
     /// Exits a internal region of code, unconditionally transferring control to the given <see cref="Label"/>.
@@ -469,7 +466,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave"/>
     /// <seealso href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s"/>
-    TEmitter Leave(EmitterLabel label);
+    TEmitter Leave(ILLabel label);
 
     /// <summary>
     /// Exits a internal region of code, unconditionally transferring control to the given short-form <see cref="Label"/>.
@@ -477,7 +474,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="label">The <see cref="Label"/> to transfer to.</param>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="label"/> is not short-form.</exception>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.leave_s"/>
-    TEmitter Leave_S(EmitterLabel label);
+    TEmitter Leave_S(ILLabel label);
 
 #endregion
 
@@ -500,7 +497,7 @@ public interface IOperationEmitter<TEmitter> : IEmitter<TEmitter>
     /// <param name="labels">The labels for the jumptable.</param>
     /// <exception cref="ArgumentNullException">If <paramref name="labels"/> is <see langword="null"/> or empty.</exception>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.switch"/>
-    TEmitter Switch(params EmitterLabel[] labels);
+    TEmitter Switch(params ILLabel[] labels);
 
 #endregion
 
@@ -1818,76 +1815,76 @@ TEmitter Prefixref();
 #region Load
 
     /// <summary>
-    /// Loads the given <see cref="EmitterLocal"/>'s value onto the stack.
+    /// Loads the given <see cref="ILLocal"/>'s value onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc"/>
     /// <seealso href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
     TEmitter Ldloc(ushort index);
 
     /// <summary>
-    /// Loads the given <see cref="EmitterLocal"/>'s value onto the stack.
+    /// Loads the given <see cref="ILLocal"/>'s value onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc"/>
     /// <seealso href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
-    TEmitter Ldloc(EmitterLocal local);
+    TEmitter Ldloc(ILLocal local);
 
     /// <summary>
-    /// Loads the given short-form <see cref="EmitterLocal"/>'s value onto the stack.
+    /// Loads the given short-form <see cref="ILLocal"/>'s value onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
     TEmitter Ldloc_S(byte index);
 
     /// <summary>
-    /// Loads the given short-form <see cref="EmitterLocal"/>'s value onto the stack.
+    /// Loads the given short-form <see cref="ILLocal"/>'s value onto the stack.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="local"/> is not short-form.</exception>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_s"/>
-    TEmitter Ldloc_S(EmitterLocal local);
+    TEmitter Ldloc_S(ILLocal local);
 
     /// <summary>
-    /// Loads the value of the <see cref="EmitterLocal"/> variable at index 0 onto the stack.
+    /// Loads the value of the <see cref="ILLocal"/> variable at index 0 onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_0"/>
     TEmitter Ldloc_0();
 
     /// <summary>
-    /// Loads the value of the <see cref="EmitterLocal"/> variable at index 1 onto the stack.
+    /// Loads the value of the <see cref="ILLocal"/> variable at index 1 onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_1"/>
     TEmitter Ldloc_1();
 
     /// <summary>
-    /// Loads the value of the <see cref="EmitterLocal"/> variable at index 2 onto the stack.
+    /// Loads the value of the <see cref="ILLocal"/> variable at index 2 onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_2"/>
     TEmitter Ldloc_2();
 
     /// <summary>
-    /// Loads the value of the <see cref="EmitterLocal"/> variable at index 3 onto the stack.
+    /// Loads the value of the <see cref="ILLocal"/> variable at index 3 onto the stack.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloc_3"/>
     TEmitter Ldloc_3();
 
     /// <summary>
-    /// Loads the address of the given <see cref="EmitterLocal"/> variable.
+    /// Loads the address of the given <see cref="ILLocal"/> variable.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca"/>
     /// <seealso href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s"/>
-    TEmitter Ldloca(EmitterLocal local);
+    TEmitter Ldloca(ILLocal local);
 
     /// <summary>
-    /// Loads the address of the given short-form <see cref="EmitterLocal"/> variable.
+    /// Loads the address of the given short-form <see cref="ILLocal"/> variable.
     /// </summary>
     /// <exception cref="ArgumentOutOfRangeException">If the <paramref name="local"/> is not short-form.</exception>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.ldloca_s"/>
-    TEmitter Ldloca_S(EmitterLocal local);
+    TEmitter Ldloca_S(ILLocal local);
 
 #endregion
 
 #region Store
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the given <see cref="EmitterLocal"/>.
+    /// Pops the value from the top of the stack and stores it in a the given <see cref="ILLocal"/>.
     /// </summary>
     /// <param name="index">The index of the Local Variable to store the value in.</param>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc"/>
@@ -1895,47 +1892,47 @@ TEmitter Prefixref();
     TEmitter Stloc(ushort index);
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the given short-form <see cref="EmitterLocal"/>.
+    /// Pops the value from the top of the stack and stores it in a the given short-form <see cref="ILLocal"/>.
     /// </summary>
     /// <param name="index">The index of the Local Variable to store the value in.</param>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s"/>
     TEmitter Stloc_S(byte index);
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the given <see cref="EmitterLocal"/>.
+    /// Pops the value from the top of the stack and stores it in a the given <see cref="ILLocal"/>.
     /// </summary>
-    /// <param name="local">The <see cref="EmitterLocal"/> to store the value in.</param>
+    /// <param name="local">The <see cref="ILLocal"/> to store the value in.</param>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc"/>
     /// <seealso href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s"/>
-    TEmitter Stloc(EmitterLocal local);
+    TEmitter Stloc(ILLocal local);
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the given short-form <see cref="EmitterLocal"/>.
+    /// Pops the value from the top of the stack and stores it in a the given short-form <see cref="ILLocal"/>.
     /// </summary>
-    /// <param name="local">The short-form <see cref="EmitterLocal"/> to store the value in.</param>
+    /// <param name="local">The short-form <see cref="ILLocal"/> to store the value in.</param>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_s"/>
-    TEmitter Stloc_S(EmitterLocal local);
+    TEmitter Stloc_S(ILLocal local);
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the <see cref="EmitterLocal"/> at index 0.
+    /// Pops the value from the top of the stack and stores it in a the <see cref="ILLocal"/> at index 0.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_0"/>
     TEmitter Stloc_0();
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the <see cref="EmitterLocal"/> at index 1.
+    /// Pops the value from the top of the stack and stores it in a the <see cref="ILLocal"/> at index 1.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_1"/>
     TEmitter Stloc_1();
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the <see cref="EmitterLocal"/> at index 2.
+    /// Pops the value from the top of the stack and stores it in a the <see cref="ILLocal"/> at index 2.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_2"/>
     TEmitter Stloc_2();
 
     /// <summary>
-    /// Pops the value from the top of the stack and stores it in a the <see cref="EmitterLocal"/> at index 3.
+    /// Pops the value from the top of the stack and stores it in a the <see cref="ILLocal"/> at index 3.
     /// </summary>
     /// <see href="http://docs.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes.stloc_3"/>
     TEmitter Stloc_3();

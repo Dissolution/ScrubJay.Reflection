@@ -1,16 +1,16 @@
 ﻿namespace ScrubJay.Reflection.IL;
 
 [PublicAPI]
-public readonly struct CILLocal :
+public readonly struct ILLocal :
 #if NET7_0_OR_GREATER
-    IEqualityOperators<CILLocal, CILLocal, bool>,
+    IEqualityOperators<ILLocal, ILLocal, bool>,
 #endif
-    IEquatable<CILLocal>,
+    IEquatable<ILLocal>,
     IEquatable<LocalVariableInfo>,
     IRenderable
 {
-    public static bool operator ==(CILLocal left, CILLocal right) => left.Equals(right);
-    public static bool operator !=(CILLocal left, CILLocal right) => !left.Equals(right);
+    public static bool operator ==(ILLocal left, ILLocal right) => left.Equals(right);
+    public static bool operator !=(ILLocal left, ILLocal right) => !left.Equals(right);
     
     public readonly Type Type;
     public readonly int Index;
@@ -18,9 +18,8 @@ public readonly struct CILLocal :
     public readonly string? Name;
     
     public bool IsShortForm => Index <= byte.MaxValue;
-
   
-    public CILLocal(int index, Type type, bool isPinned = false, string? name = null)
+    public ILLocal(int index, Type type, bool isPinned = false, string? name = null)
     {
         this.Index = index;
         this.Type = type;
@@ -28,7 +27,7 @@ public readonly struct CILLocal :
         this.Name = name;
     }
     
-    public CILLocal(LocalVariableInfo localVariableInfo, string? name = null)
+    public ILLocal(LocalVariableInfo localVariableInfo, string? name = null)
     {
         this.Index = localVariableInfo.LocalIndex;
         this.Type = localVariableInfo.LocalType!;
@@ -36,11 +35,11 @@ public readonly struct CILLocal :
         this.Name = name;
     }
 
-    public bool Equals(CILLocal cilLocal)
+    public bool Equals(ILLocal ilLocal)
     {
-        return cilLocal.Index == this.Index &&
-            cilLocal.Type == this.Type &&
-            cilLocal.IsPinned == this.IsPinned;
+        return ilLocal.Index == this.Index &&
+            ilLocal.Type == this.Type &&
+            ilLocal.IsPinned == this.IsPinned;
     }
 
     public bool Equals(LocalVariableInfo? localVariableInfo)
@@ -53,7 +52,7 @@ public readonly struct CILLocal :
 
     public override bool Equals([NotNullWhen(true)] object? obj)
     {
-        if (obj is CILLocal emitterLocal)
+        if (obj is ILLocal emitterLocal)
             return Equals(emitterLocal);
         if (obj is LocalVariableInfo localVariableInfo)
             return Equals(localVariableInfo);
@@ -66,7 +65,7 @@ public readonly struct CILLocal :
     public void RenderTo<B>(B builder) 
         where B : TextBuilderBase<B>
     {
-        builder.Append($"[{Index}] ")
+        builder//.Append($"[{Index}] ")
             .AppendIf(IsPinned, "fixed ")
             .AppendType(Type)
             .IfNotNull(Name, static (tb, name) => tb.Append(' ').Append(name));

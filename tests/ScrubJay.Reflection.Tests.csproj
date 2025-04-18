@@ -11,6 +11,7 @@
         
         <AssemblyName>ScrubJay.Reflection.Tests</AssemblyName>
         <RootNamespace>ScrubJay.Reflection.Tests</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

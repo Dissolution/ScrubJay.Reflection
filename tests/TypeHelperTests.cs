@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using ScrubJay.Reflection.Extensions;
 using ScrubJay.Reflection.Utilities;
 
 namespace ScrubJay.Reflection.Tests;

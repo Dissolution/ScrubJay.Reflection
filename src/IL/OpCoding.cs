@@ -1,5 +1,4 @@
 ﻿using System.Text.RegularExpressions;
-using ScrubJay.Maths;
 
 namespace ScrubJay.Reflection.IL;
 
@@ -12,7 +11,7 @@ public static class OpCoding
 
 
     public static IReadOnlyList<OpCode> AllOpCodes { get; } = Reflect<OpCodes>()
-        .Fields.Returning<OpCode>()
+        .Fields.Contains<OpCode>()
         .Select(field => field.GetValue(null).ThrowIfNot<OpCode>())
         .ToList();
 

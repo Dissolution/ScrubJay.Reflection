@@ -24,20 +24,20 @@ public abstract class MirrorPropertyBuilder<B> : MirrorMemberBaseBuilder<B, Prop
     {
     }
 
-    public B Returning(Type type)
+    public B Contains(Type type)
     {
         return Only(type, static (prop,t) => prop.PropertyType == t);
     }
 
-    public B Returning(Type type, TypeMatch match)
+    public B Contains(Type type, TypeMatch match)
     {
         return Only(type, match,
             static (field,t,m) => field.PropertyType.Matches(t,m));
     }
 
-    public B Returning<T>() => Returning(typeof(T));
+    public B Contains<T>() => Contains(typeof(T));
 
-    public B Returning<T>(TypeMatch match) => Returning(typeof(T), match);
+    public B Contains<T>(TypeMatch match) => Contains(typeof(T), match);
 
     public B Gettable()
     {

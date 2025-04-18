@@ -49,17 +49,16 @@ public class ILGeneratorInstruction : Instruction
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo!)
-            .Align(ILGenMethod.AsString().AsSpan(), 22, alignment: Alignment.Right)
+        builder.Align(ILGenMethod.AsString().AsSpan(), 22, alignment: Alignment.Right)
             .AppendIf(!ILGenMethod.HasArgs(), "()");
     }
 }
 
 public sealed class ILGeneratorMarkLabelInstruction : ILGeneratorInstruction
 {
-    public CILLabel Label { get; }
+    public ILLabel Label { get; }
 
-    public ILGeneratorMarkLabelInstruction(CILLabel label)
+    public ILGeneratorMarkLabelInstruction(ILLabel label)
         : base(MarkLabel)
     {
         Label = label;
@@ -76,9 +75,9 @@ public sealed class ILGeneratorMarkLabelInstruction : ILGeneratorInstruction
 
 public sealed class ILGeneratorDefineLabelInstruction : ILGeneratorInstruction
 {
-    public CILLabel Label { get; }
+    public ILLabel Label { get; }
 
-    public ILGeneratorDefineLabelInstruction(CILLabel label)
+    public ILGeneratorDefineLabelInstruction(ILLabel label)
         : base(DefineLabel)
     {
         Label = label;
@@ -95,9 +94,9 @@ public sealed class ILGeneratorDefineLabelInstruction : ILGeneratorInstruction
 
 public sealed class ILGeneratorBeginExceptionBlockInstruction : ILGeneratorInstruction
 {
-    public CILLabel Label { get; }
+    public ILLabel Label { get; }
 
-    public ILGeneratorBeginExceptionBlockInstruction(CILLabel label)
+    public ILGeneratorBeginExceptionBlockInstruction(ILLabel label)
         : base(BeginExceptionBlock)
     {
         Label = label;
@@ -114,9 +113,9 @@ public sealed class ILGeneratorBeginExceptionBlockInstruction : ILGeneratorInstr
 
 public sealed class ILGeneratorDeclareLocalInstruction : ILGeneratorInstruction
 {
-    public CILLocal Local { get; }
+    public ILLocal Local { get; }
 
-    public ILGeneratorDeclareLocalInstruction(CILLocal local)
+    public ILGeneratorDeclareLocalInstruction(ILLocal local)
         : base(DeclareLocal)
     {
         Local = local;

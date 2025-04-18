@@ -100,38 +100,38 @@ public interface IOpCodeEmitter<S> : IEmitter<S>
     S Emit(OpCode opCode, string str);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with a <see cref="CILLabel"/> argument onto the Stream
+    /// Emits an <see cref="OpCode"/> with a <see cref="ILLabel"/> argument onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="label">The <see cref="CILLabel"/> to leave space for</param>
+    /// <param name="label">The <see cref="ILLabel"/> to leave space for</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="label"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-label)">learn.microsoft.com</a>
     /// </links>
-    S Emit(OpCode opCode, CILLabel label);
+    S Emit(OpCode opCode, ILLabel label);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with <see cref="CILLabel"/><see cref="Array">[]</see> arguments onto the Stream
+    /// Emits an <see cref="OpCode"/> with <see cref="ILLabel"/><see cref="Array">[]</see> arguments onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="cilLabels">The <see cref="CILLabel">CILLabels</see> to leave space for</param>
+    /// <param name="cilLabels">The <see cref="ILLabel">CILLabels</see> to leave space for</param>
     /// <exception cref="ArgumentException">Thrown if <paramref name="cilLabels"/> is empty</exception>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="cilLabels"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-label())">learn.microsoft.com</a>
     /// </links>
-    S Emit(OpCode opCode, params CILLabel[] cilLabels);
+    S Emit(OpCode opCode, params ILLabel[] cilLabels);
 
     /// <summary>
-    /// Emits an <see cref="OpCode"/> with a <see cref="CILLocal"/> argument onto the Stream
+    /// Emits an <see cref="OpCode"/> with a <see cref="ILLocal"/> argument onto the Stream
     /// </summary>
     /// <param name="opCode">The <see cref="OpCode"/> to emit</param>
-    /// <param name="local">The <see cref="CILLocal"/> whose index to emit</param>
+    /// <param name="local">The <see cref="ILLocal"/> whose index to emit</param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="local"/> is <c>null</c></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emit?view=net-8.0#system-reflection-emit-ilgenerator-emit(system-reflection-emit-opcode-system-reflection-emit-localbuilder)">learn.microsoft.com</a>
     /// </links>
-    S Emit(OpCode opCode, CILLocal local);
+    S Emit(OpCode opCode, ILLocal local);
 
     /// <summary>
     /// Emits an <see cref="OpCode"/> with a <see cref="FieldInfo"/> argument onto the Stream

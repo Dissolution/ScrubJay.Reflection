@@ -2,9 +2,9 @@
 
 namespace ScrubJay.Reflection.IL.Decompilation;
 
-public static class ReflectionExtensions
+public static class DecompileHelper
 {
-    public static ITokenResolver GetTokenResolver(this MethodBase method)
+    public static ITokenResolver GetTokenResolver(MethodBase method)
     {
         if (method is DynamicMethod dm)
             return new DynamicMethodTokenResolver(dm);
@@ -23,10 +23,10 @@ public static class ReflectionExtensions
         {
             return [];
         }
-        
+
         return body.LocalVariables;
     }
-    
+
     public static byte[] GetILBytes(MethodBase method)
     {
         if (method is DynamicMethod dm)
@@ -46,10 +46,9 @@ public static class ReflectionExtensions
             .Fields
             .Instance
             .NonPublic
-            .Named("_resolver", new StringMatch.Ordinal()
+            .Named("_resolver", new StringMatch(StringComparison.OrdinalIgnoreCase)
             {
                 EndsWith = true,
-                IgnoreCase = true,
             })
             .OneOrThrow("DynamicMethod does not contain a '_resolver' field");
 
@@ -64,12 +63,11 @@ public static class ReflectionExtensions
             .Fields
             .Instance
             .NonPublic
-            .Named("_code", new StringMatch.Ordinal()
+            .Named("_code", new StringMatch(StringComparison.OrdinalIgnoreCase)
             {
                 EndsWith = true,
-                IgnoreCase = true,
             })
-            .Returning<byte[]>()
+            .Contains<byte[]>()
             .OneOrThrow("DynamicMethod's Resolver does not contain a '_code' field");
 
         object? code = codeField.GetValue(resolver);

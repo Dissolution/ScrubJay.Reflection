@@ -9,14 +9,14 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// Begins an exception block for a non-filtered <see cref="Exception"/>
     /// </summary>
     /// <param name="label">
-    /// The <see cref="CILLabel"/> that points to the end of the <c>try/catch</c> block<br/>
+    /// The <see cref="ILLabel"/> that points to the end of the <c>try/catch</c> block<br/>
     /// This will leave you in the correct place to execute <see langword="finally"/> blocks or to finish the <see langword="try"/>.
     /// </param>
-    /// <param name="labelName">Automatically captured name for the <see cref="CILLabel"/></param>
+    /// <param name="labelName">Automatically captured name for the <see cref="ILLabel"/></param>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginexceptionblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginExceptionBlock(out CILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
+    S BeginExceptionBlock(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
 
     /// <summary>
     /// Begins a <c>catch</c> block
@@ -120,73 +120,73 @@ public interface IGenEmitter<S> : IEmitter<S>
 #region Locals
 
     /// <summary>
-    /// Declares a <see cref="CILLocal"/> variable
+    /// Declares a <see cref="ILLocal"/> variable
     /// </summary>
-    /// <param name="localType">The type of the <see cref="CILLocal"/></param>
-    /// <param name="local">Outputs the declared <see cref="CILLocal"/></param>
-    /// <param name="localName">Automatically captured name for the <see cref="CILLocal"/></param>
+    /// <param name="localType">The type of the <see cref="ILLocal"/></param>
+    /// <param name="local">Outputs the declared <see cref="ILLocal"/></param>
+    /// <param name="localName">Automatically captured name for the <see cref="ILLocal"/></param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="localType"/> is <c>null</c></exception>
     /// <exception cref="InvalidOperationException">Thrown if within <see cref="TypeBuilder.CreateType"/></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal(Type localType, out CILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    S DeclareLocal(Type localType, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
-    /// Declares a <see cref="CILLocal"/> variable
+    /// Declares a <see cref="ILLocal"/> variable
     /// </summary>
-    /// <typeparam name="T">The <see cref="Type"/> of the <see cref="CILLocal"/></typeparam>
-    /// <param name="local">Outputs the declared <see cref="CILLocal"/></param>
-    /// <param name="localName">Automatically captured name for the <see cref="CILLocal"/></param>
+    /// <typeparam name="T">The <see cref="Type"/> of the <see cref="ILLocal"/></typeparam>
+    /// <param name="local">Outputs the declared <see cref="ILLocal"/></param>
+    /// <param name="localName">Automatically captured name for the <see cref="ILLocal"/></param>
     /// <exception cref="InvalidOperationException">Thrown if within <see cref="TypeBuilder.CreateType"/></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal<T>(out CILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    S DeclareLocal<T>(out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
-    /// Declares a <see cref="CILLocal"/> variable
+    /// Declares a <see cref="ILLocal"/> variable
     /// </summary>
-    /// <param name="localType">The type of the <see cref="CILLocal"/></param>
-    /// <param name="pinned">Whether or not the <see cref="CILLocal"/> should be pinned in memory</param>
-    /// <param name="local">Outputs the declared <see cref="CILLocal"/></param>
-    /// <param name="localName">Automatically captured name for the <see cref="CILLocal"/></param>
+    /// <param name="localType">The type of the <see cref="ILLocal"/></param>
+    /// <param name="pinned">Whether or not the <see cref="ILLocal"/> should be pinned in memory</param>
+    /// <param name="local">Outputs the declared <see cref="ILLocal"/></param>
+    /// <param name="localName">Automatically captured name for the <see cref="ILLocal"/></param>
     /// <exception cref="ArgumentNullException">Thrown if <paramref name="localType"/> is <c>null</c></exception>
     /// <exception cref="InvalidOperationException">Thrown if within <see cref="TypeBuilder.CreateType"/></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type-system-boolean)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal(Type localType, bool pinned, out CILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    S DeclareLocal(Type localType, bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
-    /// Declares a <see cref="CILLocal"/> variable
+    /// Declares a <see cref="ILLocal"/> variable
     /// </summary>
-    /// <typeparam name="T">The <see cref="Type"/> of the <see cref="CILLocal"/></typeparam>
-    /// <param name="pinned">Whether or not the <see cref="CILLocal"/> should be pinned in memory</param>
-    /// <param name="local">Outputs the declared <see cref="CILLocal"/></param>
-    /// <param name="localName">Automatically captured name for the <see cref="CILLocal"/></param>
+    /// <typeparam name="T">The <see cref="Type"/> of the <see cref="ILLocal"/></typeparam>
+    /// <param name="pinned">Whether or not the <see cref="ILLocal"/> should be pinned in memory</param>
+    /// <param name="local">Outputs the declared <see cref="ILLocal"/></param>
+    /// <param name="localName">Automatically captured name for the <see cref="ILLocal"/></param>
     /// <exception cref="InvalidOperationException">Thrown if within <see cref="TypeBuilder.CreateType"/></exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type-system-boolean)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal<T>(bool pinned, out CILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    S DeclareLocal<T>(bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
 #endregion
 
 #region Labels
 
     /// <summary>
-    /// Declares a new <see cref="CILLabel"/>
+    /// Declares a new <see cref="ILLabel"/>
     /// </summary>
-    /// <param name="label">Outputs the declared <see cref="CILLabel"/></param>
-    /// <param name="labelName">Automatically captured name for the <see cref="CILLabel"/></param>
+    /// <param name="label">Outputs the declared <see cref="ILLabel"/></param>
+    /// <param name="labelName">Automatically captured name for the <see cref="ILLabel"/></param>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.definelabel?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S DefineLabel(out CILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
+    S DefineLabel(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
 
     /// <summary>
-    /// Marks the current position with an <see cref="CILLabel"/>
+    /// Marks the current position with an <see cref="ILLabel"/>
     /// </summary>
     /// <param name="label">The label for which to set an index</param>
     /// <exception cref="ArgumentException">If the <paramref name="label"/> has an invalid index</exception>
@@ -194,7 +194,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.marklabel?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S MarkLabel(CILLabel label);
+    S MarkLabel(ILLabel label);
 
 #endregion
 

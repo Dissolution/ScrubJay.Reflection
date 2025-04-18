@@ -63,11 +63,20 @@ public static class TypeHelper
         return _isRefCache.GetOrAdd<T>(DetermineIsRef<T>);
     }
 
-    public static bool IsUnmanaged(this Type? type) => !IsReferenceOrContainsReferences(type);
+    public static bool IsUnmanaged(this Type? type)
+    {
+        if (type is null) return false;
+        if (type == typeof(string) || Nullable.GetUnderlyingType(type) is not null)
+            return false;
+        return !IsReferenceOrContainsReferences(type);
+    }
 
-    public static bool IsUnmanaged<T>() => !IsReferenceOrContainsReferences<T>();
-    
-    
+    public static bool IsUnmanaged<T>() => IsUnmanaged(typeof(T));
+//    {
+//        return !IsReferenceOrContainsReferences<T>();
+//    }
+
+
     public static HashSet<Type> GetAllTypes()
     {
         return AppDomain.CurrentDomain

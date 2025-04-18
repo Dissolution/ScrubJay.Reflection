@@ -1,6 +1,8 @@
 ﻿
-using ScrubJay.Reflection.MosDef;
+using ScrubJay.Reflection.IL.Emission;
 using ScrubJay.Reflection.Naming;
+using ScrubJay.Reflection.Utilities;
+using ScrubJay.Reflection.Validation;
 
 #if NETFRAMEWORK || NETSTANDARD2_0
 using Polyfills;
@@ -17,9 +19,9 @@ public static class RuntimeBuilder
 
     static RuntimeBuilder()
     {
-        AssemblyName name = new("ScrubJay.Reflection");
+        AssemblyName name = new("ScrubJay.Reflection.Runtime");
         Assembly = AssemblyBuilder.DefineDynamicAssembly(name, AssemblyBuilderAccess.Run);
-        Module = Assembly.DefineDynamicModule("Runtime");
+        Module = Assembly.DefineDynamicModule("RuntimeModule");
     }
 
     /// <summary>
@@ -36,18 +38,6 @@ public static class RuntimeBuilder
 
 #region DynamicMethod
 
-    public static DynamicMethod CreateDynamicMethod(MethodDefinition definition)
-    {
-        return new DynamicMethod(
-            name: CodeHelper.GetValidMemberName(MemberTypes.Method, definition.Name),
-            attributes: MethodAttributes.Public | MethodAttributes.Static,
-            callingConvention: CallingConventions.Standard,
-            returnType: definition._returnType,
-            parameterTypes: definition._parameterTypes,
-            m: Module,
-            skipVisibility: true);
-    }
-
     public static DynamicMethod CreateDynamicMethod(string? name, Type? returnType, params Type[]? parameterTypes)
     {
         return new DynamicMethod(
@@ -63,9 +53,23 @@ public static class RuntimeBuilder
     public static DynamicMethod CreateDynamicMethod<D>(string? name = null)
         where D : Delegate
     {
-        return CreateDynamicMethod(MethodDefinition.Create<D>(name));
+        var invoke = DelegateHelper.InvokeMethod<D>();
+        return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
     }
 
+    public static DynamicMethod CreateDynamicMethod(Type delegateType, string? name = null)
+    {
+        TypeAssert.IsDelegate(delegateType);
+        var invoke = DelegateHelper.InvokeMethod(delegateType).SomeOrThrow();
+        return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
+    }
+    
+    public static DynamicMethod CreateDynamicMethod(MethodInfo methodSignature, string? name = null)
+    {
+        Throw.IfNull(methodSignature);
+        return CreateDynamicMethod(name, methodSignature.ReturnType, methodSignature.GetParameterTypes());
+    }
+    
 #endregion
 
 #region Create Delegate
@@ -78,6 +82,23 @@ public static class RuntimeBuilder
             var dm = CreateDynamicMethod<D>(null);
             var generator = dm.GetILGenerator();
             generate(generator);
+            return dm.CreateDelegate<D>();
+        }
+        catch (Exception ex)
+        {
+            return ex;
+        }
+    }
+
+    public static Result<D> TryEmitDelegate<D>(Action<Emitter> emit)
+        where D : Delegate
+    {
+        try
+        {
+            var dm = CreateDynamicMethod<D>(null);
+            var generator = dm.GetILGenerator();
+            var emitter = new Emitter(generator);
+            emit(emitter);
             return dm.CreateDelegate<D>();
         }
         catch (Exception ex)

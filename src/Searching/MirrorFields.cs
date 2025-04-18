@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Naming;
-
-namespace ScrubJay.Reflection.Searching;
+﻿namespace ScrubJay.Reflection.Searching;
 
 public sealed class MirrorFields : MirrorFieldBuilder<MirrorFields>
 {
@@ -19,17 +17,17 @@ public abstract class MirrorFieldBuilder<B> : MirrorMemberBaseBuilder<B, FieldIn
     {
     }
 
-    public B Returning(Type type)
+    public B Contains(Type type)
     {
         return Only(type, static (field, t) => field.FieldType == t);
     }
 
-    public B Returning(Type type, TypeMatch match)
+    public B Contains(Type type, TypeMatch match)
     {
         return Only(type, match, static (field,t,m) => field.FieldType.Matches(t,m));
     }
 
-    public B Returning<T>() => Returning(typeof(T));
+    public B Contains<T>() => Contains(typeof(T));
     
-    public B Returning<T>(TypeMatch match) => Returning(typeof(T), match);
+    public B Contains<T>(TypeMatch match) => Contains(typeof(T), match);
 }

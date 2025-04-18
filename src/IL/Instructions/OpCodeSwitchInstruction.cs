@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
+[PublicAPI]
 public sealed class OpCodeSwitchInstruction : OpCodeInstruction
 {
     public int[] Deltas { get; }
