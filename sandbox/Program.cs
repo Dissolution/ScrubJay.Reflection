@@ -8,11 +8,17 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ScrubJay.Debugging;
 using ScrubJay.Enums;
+using ScrubJay.Reflection.Expressions;
 using ScrubJay.Reflection.IL.Decompilation;
+using ScrubJay.Reflection.IL.Emission;
 using ScrubJay.Reflection.Runtime;
 using ScrubJay.Reflection.Utilities;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+
+var emitter = new CleanEmitter(default!, default!);
+emitter.
 
 
 /* DECOMPILE EVERYTHING!

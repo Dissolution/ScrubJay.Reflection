@@ -3,7 +3,7 @@ using ScrubJay.Reflection.IL.LabelOffSetManagement;
 namespace ScrubJay.Reflection.IL.Emission;
 
 public interface IOpCodeEmitter<E> : IEmitter<E>
-    where E : IOpCodeEmitter<E>
+    where E : IEmitter<E> //IOpCodeEmitter<E>
 {
     /// <summary>
     /// Emits a lone <see cref="OpCode"/> onto the Stream

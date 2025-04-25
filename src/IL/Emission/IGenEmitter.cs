@@ -4,7 +4,7 @@ namespace ScrubJay.Reflection.IL.Emission;
 
 [PublicAPI]
 public interface IGenEmitter<E> : IEmitter<E>
-    where E : IGenEmitter<E>
+    where E : IEmitter<E> //IGenEmitter<E>
 {
 #region try/catch/finally
 

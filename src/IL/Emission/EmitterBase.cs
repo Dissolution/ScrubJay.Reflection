@@ -8,6 +8,7 @@ using Polyfills;
 using ScrubJay.Reflection.IL.Instructions;
 using ScrubJay.Reflection.IL.LabelOffSetManagement;
 using ScrubJay.Reflection.Naming;
+using ScrubJay.Reflection.Utilities;
 using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
@@ -52,7 +53,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     IOpCodeEmitter<E>,
     IGenEmitter<E>,
     IOperationEmitter<E>
-    where E : EmitterBase<E>
+    where E : IEmitter<E>
 {
     protected readonly E _emitter;
 
@@ -61,9 +62,9 @@ public abstract class EmitterBase<E> : EmitterBase,
     protected EmitterBase(DynamicMethodBuilder method, ILGenerator ilGenerator)
         : base(method, ilGenerator)
     {
-        _emitter = (E)this;
+        _emitter = (E)(IEmitter<E>)this;
     }
-
+    
     public E Invoke(Action<E>? instanceAction)
     {
         instanceAction?.Invoke(_emitter);
@@ -72,7 +73,7 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Invoke(Func<E, E>? instanceFluentFunc)
     {
-        _ = instanceFluentFunc?.Invoke(_emitter);
+        instanceFluentFunc?.Invoke(_emitter);
         return _emitter;
     }
 
@@ -810,6 +811,9 @@ public abstract class EmitterBase<E> : EmitterBase,
         };
     }
 
+    public E Ldarg(ParameterInfo parameter)
+        => Ldarg(parameter.Position);
+
     public E Ldarga(ushort index)
     {
         if (index <= byte.MaxValue)
@@ -972,7 +976,7 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Ldelem(Type type)
     {
-        if (type == typeof(nint))
+        if (type == typeof(nint) || type == typeof(IntPtr))
             return Ldelem_I();
         if (type == typeof(sbyte))
             return Ldelem_I1();
@@ -1025,7 +1029,7 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Stelem(Type type)
     {
-        if (type == typeof(nint))
+        if (type == typeof(nint) || type == typeof(IntPtr))
             return Stelem_I();
         if (type == typeof(sbyte))
             return Stelem_I1();
@@ -1035,6 +1039,16 @@ public abstract class EmitterBase<E> : EmitterBase,
             return Stelem_I4();
         if (type == typeof(long))
             return Stelem_I8();
+//        if (type == typeof(byte))
+//            return Stelem_U1();
+//        if (type == typeof(ushort))
+//            return Stelem_U2();
+//        if (type == typeof(uint))
+//            return Stelem_U4();
+        if (type == typeof(float))
+            return Stelem_R4();
+        if (type == typeof(double))
+            return Stelem_R8();
         if (type == typeof(object))
             return Stelem_Ref();
         return Emit(OpCodes.Stelem, type);
@@ -1050,38 +1064,50 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Ldfld(FieldInfo field)
     {
-        MemberAssert.IsInstance(field);
+        //MemberAssert.IsInstance(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Ldsfld, field);
         return Emit(OpCodes.Ldfld, field);
     }
     
     public E Ldflda(FieldInfo field)
     {
-        MemberAssert.IsInstance(field);
+        //MemberAssert.IsInstance(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Ldsflda, field);
         return Emit(OpCodes.Ldflda, field);
     }
 
     public E Ldsfld(FieldInfo field)
     {
-        MemberAssert.IsStatic(field);
-        return Emit(OpCodes.Ldsfld, field);
+        //MemberAssert.IsStatic(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Ldsfld, field);
+        return Emit(OpCodes.Ldfld, field);
     }
 
     public E Ldsflda(FieldInfo field)
     {
-        MemberAssert.IsStatic(field);
-        return Emit(OpCodes.Ldsflda, field);
+        //MemberAssert.IsStatic(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Ldsflda, field);
+        return Emit(OpCodes.Ldflda, field);
     }
    
     public E Stfld(FieldInfo field)
     {
-        MemberAssert.IsInstance(field);
+        //MemberAssert.IsInstance(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Stsfld, field);
         return Emit(OpCodes.Stfld, field);
     }
 
     public E Stsfld(FieldInfo field)
     {
-        MemberAssert.IsStatic(field);
-        return Emit(OpCodes.Stsfld, field);
+        //MemberAssert.IsStatic(field);
+        if (field.IsStatic)
+            return Emit(OpCodes.Stsfld, field);
+        return Emit(OpCodes.Stfld, field);
     }
 
 #endregion
@@ -1092,10 +1118,6 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Cpobj<T>()
         => Cpobj(typeof(T));
-
-    public E Stobj(Type type) => Emit(OpCodes.Stobj, type);
-
-    public E Stobj<T>() => Stobj(typeof(T));
 
     public E Unaligned(int alignment)
     {
@@ -1130,6 +1152,34 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Ldind_Ref() => Emit(OpCodes.Ldind_Ref);
 
+    public E Ldind(Type type)
+    {
+        if (type == typeof(IntPtr) || type == typeof(nint))
+            return Emit(OpCodes.Ldind_I);
+        if (type == typeof(sbyte))
+            return Emit(OpCodes.Ldind_I1);
+        if (type == typeof(short))
+            return Emit(OpCodes.Ldind_I2);
+        if (type == typeof(int))
+            return Emit(OpCodes.Ldind_I4);
+        if (type == typeof(long))
+            return Emit(OpCodes.Ldind_I8);
+        if (type == typeof(byte))
+            return Emit(OpCodes.Ldind_U1);
+        if (type == typeof(ushort))
+            return Emit(OpCodes.Ldind_U2);
+        if (type == typeof(uint))
+            return Emit(OpCodes.Ldind_U4);
+        if (type == typeof(float))
+            return Emit(OpCodes.Ldind_R4);
+        if (type == typeof(double))
+            return Emit(OpCodes.Ldind_R8);
+        if (type == typeof(object))
+            return Emit(OpCodes.Ldind_Ref);
+        return Emit(OpCodes.Ldobj, type);
+    }
+    public E Ldind<T>() => Ldind(typeof(T));
+    
     public E Ldobj(Type type) => Emit(OpCodes.Ldobj, type);
 
     public E Ldobj<T>() => Ldobj(typeof(T));
@@ -1154,6 +1204,31 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public E Stind_Ref() => Emit(OpCodes.Stind_Ref);
 
+    public E Stind(Type type)
+    {
+        if (type == typeof(IntPtr) || type == typeof(nint))
+            return Emit(OpCodes.Stind_I);
+        if (type == typeof(sbyte))
+            return Emit(OpCodes.Stind_I1);
+        if (type == typeof(short))
+            return Emit(OpCodes.Stind_I2);
+        if (type == typeof(int))
+            return Emit(OpCodes.Stind_I4);
+        if (type == typeof(long))
+            return Emit(OpCodes.Stind_I8);
+        if (type == typeof(float))
+            return Emit(OpCodes.Stind_R4);
+        if (type == typeof(double))
+            return Emit(OpCodes.Stind_R8);
+        if (type == typeof(object))
+            return Emit(OpCodes.Stind_Ref);
+        return Emit(OpCodes.Ldobj, type);
+    }
+    public E Stind<T>() => Stind(typeof(T));
+    
+    public E Stobj(Type type) => Emit(OpCodes.Stobj, type);
+
+    public E Stobj<T>() => Stobj(typeof(T));
 #endregion
 
 #endregion
@@ -1289,38 +1364,65 @@ public abstract class EmitterBase<E> : EmitterBase,
 
 #region Custom Helpers
 
-    /// <summary>
-    /// Pushes a <typeparamref name="T"/> value onto the stream using the appropriate operations
-    /// </summary>
-    /// <param name="value"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    /// <exception cref="NotImplementedException"></exception>
-    public E PushValue<T>(T? value)
-    {
-        if (value is null)
-            return Ldnull();
-        if (value is string str)
-            return Ldstr(str);
-        if (value is sbyte i8)
-            return Ldc_I4_S(i8);
-        if (value is int i32)
-            return Ldc_I4(i32);
-        if (value is long i64)
-            return Ldc_I8(i64);
-        if (value is float f32)
-            return Ldc_R4(f32);
-        if (value is double f64)
-            return Ldc_R8(f64);
+//    /// <summary>
+//    /// Pushes a <typeparamref name="T"/> value onto the stream using the appropriate operations
+//    /// </summary>
+//    /// <param name="value"></param>
+//    /// <typeparam name="T"></typeparam>
+//    /// <returns></returns>
+//    /// <exception cref="NotImplementedException"></exception>
+//    public E PushValue<T>(T? value)
+//    {
+//        return value switch
+//        {
+//            null => Ldnull(),
+//            bool boolean => boolean ? Ldc_I4_1() : Ldc_I4_0(),
+//            sbyte i8 => Ldc_I4_S(i8),
+//            byte u8 => Ldc_I4(u8),
+//            short i16 => Ldc_I4(i16),
+//            ushort u16 => Ldc_I4(u16),
+//            int i32 => Ldc_I4(i32),
+//            uint u32 => Ldc_I8(u32),
+//            long i64 => Ldc_I8(i64),
+//            ulong u64 => Ldc_I8((long)u64).Conv_U8(),
+//            float f32 => Ldc_R4(f32),
+//            double f64 => Ldc_R8(f64),
+//            string str => Ldstr(str),
+//            Type type => Ldtoken(type).Call(EmissionHelper.Type_GetTypeFromHandle_Method),
+//            MethodInfo method => Ldtoken(method).Call(EmissionHelper.Method_GetMethodFromHandle_Method),
+//            ILLocal local => Ldloc(local),
+//            _ => throw new NotImplementedException(),
+//        };
+//    }
 
-        if (value is Type type)
+
+
+    public E PushDefault<T>() => EmitterExtensions.PushDefault<E>(_emitter, typeof(T));
+
+    public E PushDefaultAddr(Type type)
+    {
+        if (type.IsValueType)
         {
-            return Ldtoken(type)
-                .Call(EmissionHelper.Type_GetTypeFromHandle_Method);
+            // we have to use a local
+            return DeclareLocal(type, out var temp)
+                .Ldloca(temp)
+                .Initobj(type)
+                .Ldloca(temp);
         }
-        
-        throw new NotImplementedException();
+        else
+        {
+            // defalt is null
+            return Ldnulla();
+        }
     }
+    
+    public E PushDefaultAddr<T>() => PushDefaultAddr(typeof(T));
+    
+    /// <summary>
+    /// Loads a <c>null</c> reference onto the stack
+    /// </summary>
+    public E Ldnulla() => Ldc_I4_0().Conv_U();
+    
 
     public E MarkLabel(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null)
     {

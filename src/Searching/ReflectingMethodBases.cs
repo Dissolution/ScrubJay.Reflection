@@ -20,6 +20,8 @@ public abstract class ReflectingMethodBases<B, M> : ReflectingMemberBases<B, M>
 
     public B NoParams => Only(static method => method.GetParameters().Length == 0);
 
+    public B ParamCount(int count) => Only(count, static (method, cnt) => method.GetParameters().Length == cnt);
+    
     public B Parameters(params Type[]? parameterTypes)
     {
         if (parameterTypes == null)

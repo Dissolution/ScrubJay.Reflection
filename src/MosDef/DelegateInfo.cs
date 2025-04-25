@@ -21,6 +21,7 @@ public sealed record class DelegateInfo
             GenericTypes = delegateType.GetGenericArguments(),
             ReturnParameter = invokeMethod.ReturnParameter,
             Parameters = invokeMethod.GetParameters(),
+            DelegateType = delegateType,
         };
         return info;
     }
@@ -50,6 +51,8 @@ public sealed record class DelegateInfo
     }
 
     private Type[]? _parameterTypes = null;
+    private Type? _delegateType = null;
+    
     
     public Attribute[] Attributes { get; init; } = [];
 
@@ -58,12 +61,22 @@ public sealed record class DelegateInfo
     public Type[] GenericTypes { get; init; } = [];
     
     public required ParameterInfo ReturnParameter { get; init; }
+
+    public Type ReturnType => ReturnParameter.ParameterType;
     
     public required ParameterInfo[] Parameters { get; init; }
 
     public Type[] ParameterTypes => _parameterTypes ??= Parameters.ConvertAll(static p => p.ParameterType);
+
+    public int ParameterCount => Parameters.Length;
     
-    private DelegateInfo()
+    public Type DelegateType
+    {
+        get => _delegateType ??= DelegateHelper.CreateDelegateType(ParameterTypes, ReturnType);
+        init => _delegateType = value;
+    }
+    
+    public DelegateInfo()
     {
         
     }

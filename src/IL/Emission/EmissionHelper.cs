@@ -9,6 +9,8 @@ namespace ScrubJay.Reflection.IL.Emission;
 public static class EmissionHelper
 {
     public static MethodInfo Type_GetTypeFromHandle_Method { get; }
+    public static MethodInfo Method_GetMethodFromHandle_Method { get; }
+    
     public static MethodInfo GetUninitializedObject_Method { get; }
 
     static EmissionHelper()
@@ -18,6 +20,13 @@ public static class EmissionHelper
             .Named(nameof(Type.GetTypeFromHandle))
             .OneOrThrow();
 
+        Method_GetMethodFromHandle_Method = Reflect<MethodBase>()
+            .Public.Static.Methods()
+            .Named(nameof(MethodBase.GetMethodFromHandle))
+            .ParamCount(1)
+            .OneOrThrow();
+        
+        
 #if NETFRAMEWORK || NETSTANDARD2_0
         GetUninitializedObject_Method = Reflect(typeof(FormatterServices))
             .Public.Static.Methods()

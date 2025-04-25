@@ -1,4 +1,6 @@
 ﻿
+using ScrubJay.Reflection.IL.Emission.Arguments;
+
 namespace ScrubJay.Reflection.IL.Emission;
 
 public static class EmitterExtensions
@@ -16,13 +18,7 @@ public static class EmitterExtensions
         return emitter;
     }
 
-    public static IFluentILEmitter EmitLoadInstance(this IFluentILEmitter emitter, Arg instance, MemberInfo member)
-    {
-        // No instance, nothing to load
-        if (!member.TryGetInstanceType(out var instanceType)) return emitter;
-        instance.TryLoadAs(emitter, instanceType).ThrowIfFailed();
-        return emitter;
-    }
+   
     
     public static IFluentILEmitter EmitParamsLengthCheck(this IFluentILEmitter emitter,
         ParameterInfo paramsParameter, int length)
@@ -38,8 +34,59 @@ public static class EmitterExtensions
             .Throw()
             .MarkLabel(lenEqual);
     }
+    */
 
-    public static IFluentILEmitter EmitLoadParams(this IFluentILEmitter emitter,
+    public static E PushValue<E, T>(this E emitter, T? value)
+        where E : IOperationEmitter<E>
+    {
+        return value switch
+        {
+            null => emitter.Ldnull(),
+            bool boolean => boolean ? emitter.Ldc_I4_1() : emitter.Ldc_I4_0(),
+            sbyte i8 => emitter.Ldc_I4_S(i8),
+            byte u8 => emitter.Ldc_I4(u8),
+            short i16 => emitter.Ldc_I4(i16),
+            ushort u16 => emitter.Ldc_I4(u16),
+            int i32 => emitter.Ldc_I4(i32),
+            uint u32 => emitter.Ldc_I8(u32),
+            long i64 => emitter.Ldc_I8(i64),
+            ulong u64 => emitter.Ldc_I8((long)u64).Conv_U8(),
+            float f32 => emitter.Ldc_R4(f32),
+            double f64 => emitter.Ldc_R8(f64),
+            string str => emitter.Ldstr(str),
+            Type type => emitter.Ldtoken(type).Call(EmissionHelper.Type_GetTypeFromHandle_Method),
+            MethodInfo method => emitter.Ldtoken(method).Call(EmissionHelper.Method_GetMethodFromHandle_Method),
+            ILLocal local => emitter.Ldloc(local),
+            _ => throw new NotImplementedException(),
+        };
+    }
+    
+    public static E PushDefault<E>(this E emitter, Type type)
+        where E : IOperationEmitter<E>, IGenEmitter<E>
+    {
+        if (type.IsValueType)
+        {
+            // we have to use a local
+            return emitter
+                .DeclareLocal(type, out var temp)
+                .Ldloca(temp)
+                .Initobj(type)
+                .Ldloc(temp);
+        }
+        else
+        {
+            // defalt is null
+            return emitter.Ldnull();
+        }
+    }
+    
+    public static Emitter EmitLoadAsInstance(this Emitter emitter, Argument instance)
+    {
+        return instance.LoadAsInstance(emitter);
+    }
+    
+
+    public static Emitter EmitLoadParams(this Emitter emitter,
         ParameterInfo paramsParameter,
         ReadOnlySpan<ParameterInfo> destParameters)
     {
@@ -67,7 +114,7 @@ public static class EmitterExtensions
         // Everything will be loaded!
         return emitter;
     }
-    */
+
 
     public static E EmitThrowException<E, X>(this E emitter, params object?[] exceptionArgs)
         where E : ISimpleEmitter<E>

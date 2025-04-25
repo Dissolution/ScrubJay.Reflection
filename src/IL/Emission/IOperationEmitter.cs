@@ -11,7 +11,7 @@ namespace ScrubJay.Reflection.IL.Emission;
 /// <typeparam name="E"></typeparam>
 /// <seealso href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.opcodes"/>
 public interface IOperationEmitter<E> : IEmitter<E>
-    where E : IOperationEmitter<E>
+    where E : IEmitter<E> //IOperationEmitter<E>
 {
 #region Math Operations
 

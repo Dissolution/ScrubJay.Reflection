@@ -5,25 +5,45 @@ namespace ScrubJay.Reflection.IL.Instructions;
 [PublicAPI]
 public sealed class OpCodeSwitchInstruction : OpCodeInstruction
 {
-    public int[] Deltas { get; }
+    private int[]? _deltas = null;
+    private ILOffset[]? _targetOffsets = null;
+
+    public int[] Deltas
+    {
+        get => _deltas ?? throw new NotImplementedException();
+        set
+        {
+            _deltas = value;
+            int cases = _deltas.Length;
+            var targets = new ILOffset[cases];
+            var targetOffset = Offset + (1 + sizeof(int) + (sizeof(int) * cases));
+            for (int i = 0; i < cases; i++)
+            {
+                targets[i] = targetOffset + Deltas[i];
+            }
+            _targetOffsets = targets;
+        }
+    }
 
     public ILOffset[] TargetOffsets
     {
         get
         {
-            int cases = Deltas.Length;
-
-            var targets = new ILOffset[cases];
-
-            var targetOffset = Offset + (1 + sizeof(int) + (sizeof(int) * cases));
-        
-            for (int i = 0; i < cases; i++)
+            if (_targetOffsets is null)
             {
-                targets[i] = targetOffset + Deltas[i];
+                int cases = _deltas!.Length;
+                var targets = new ILOffset[cases];
+                var targetOffset = Offset + (1 + sizeof(int) + (sizeof(int) * cases));
+                for (int i = 0; i < cases; i++)
+                {
+                    targets[i] = targetOffset + Deltas[i];
+                }
+
+                _targetOffsets = targets;
             }
-            
-            return targets;
+            return _targetOffsets;
         }
+        set => throw new NotImplementedException();
     }
     
     public override int Size

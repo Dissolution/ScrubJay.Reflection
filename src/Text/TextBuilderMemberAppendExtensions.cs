@@ -151,6 +151,10 @@ public static class TextBuilderMemberAppendExtensions
         { typeof(nuint), "nuint" },
     };
 
+    public static B AppendType<B, T>(this B builder)
+        where B : TextBuilderBase<B>
+        => AppendType<B>(builder, typeof(T));
+    
     public static B AppendType<B>(this B builder, Type? type)
         where B : TextBuilderBase<B>
     {

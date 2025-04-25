@@ -65,27 +65,6 @@ public class SetterTests
                 Assert.Equal(guid, holder.ClassEntity.Id);
             }
         }
-
-        [Fact]
-        public void AsInterfaceWorks()
-        {
-            var entityField = Prelude
-                .Reflect<EntityHolder>()
-                .Fields<NameStampClassEntity>()
-                .OneOrThrow();
-            var setter = FieldThings.CreateSetter<EntityHolder, IEntity>(entityField);
-            Assert.NotNull(setter);
-
-            int i = 0;
-            foreach (var guid in TestData.InfiniteGuids().Take(10))
-            {
-                var holder = new EntityHolder(guid, $"{i++}");
-
-                IEntity result = setter(ref holder);
-                Assert.NotNull(result);
-                Assert.Equal(holder.NameStampClassEntity, result);
-            }
-        }
     }
 
     public class InstanceStructTests
@@ -99,16 +78,16 @@ public class SetterTests
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
             {
-                var entity = new StructEntity(guid);
-                Assert.Equal(guid, entity.Id);
+                var entity = new StructEntity();
+                Assert.NotEqual(guid, entity.Id);
 
-                var result = setter(ref entity);
-                Assert.Equal(guid, result);
+                setter(ref entity, guid);
+                Assert.Equal(guid, entity.Id);
             }
         }
 
         [Fact]
-        public void AsObjectWorks()
+        public void FromObjectWorks()
         {
             var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
             var setter = FieldThings.CreateSetter<StructEntity, object>(idField);
@@ -116,34 +95,13 @@ public class SetterTests
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
             {
-                var entity = new StructEntity(guid);
+                var entity = new StructEntity();
+                Assert.NotEqual(guid, entity.Id);
+
+                object guidobj = (object)guid;
+                
+                setter(ref entity, guidobj);
                 Assert.Equal(guid, entity.Id);
-
-                object? result = setter(ref entity);
-                Assert.NotNull(result);
-                Assert.IsType(typeof(Guid), result);
-                Assert.Equal(guid, (Guid)result);
-            }
-        }
-
-        [Fact]
-        public void AsInterfaceWorks()
-        {
-            var entityField = Prelude
-                .Reflect<EntityHolder>()
-                .Fields<StructEntity>()
-                .OneOrThrow();
-            var setter = FieldThings.CreateSetter<EntityHolder, IEntity>(entityField);
-            Assert.NotNull(setter);
-
-            int i = 0;
-            foreach (var guid in TestData.InfiniteGuids().Take(10))
-            {
-                var holder = new EntityHolder(guid, $"{i++}");
-
-                IEntity result = setter(ref holder);
-                Assert.NotNull(result);
-                Assert.Equal(holder.StructEntity, result);
             }
         }
     }
@@ -158,11 +116,11 @@ public class SetterTests
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))
         {
-            StaticEntity.Id = guid;
-            Assert.Equal(guid, StaticEntity.Id);
+            StaticEntity.Id = Guid.NewGuid();
+            Assert.NotEqual(guid, StaticEntity.Id);
 
-            var result = setter(ref None.Ref);
-            Assert.Equal(guid, result);
+            setter(ref None.Ref, guid);
+            Assert.Equal(guid, StaticEntity.Id);
         }
     }
 }
