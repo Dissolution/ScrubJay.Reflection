@@ -11,7 +11,7 @@ public static class OpCoding
 
 
     public static IReadOnlyList<OpCode> AllOpCodes { get; } = Reflect<OpCodes>()
-        .Fields.Contains<OpCode>()
+        .Fields().Containing<OpCode>()
         .Select(field => field.GetValue(null).ThrowIfNot<OpCode>())
         .ToList();
 
@@ -23,6 +23,7 @@ public static class OpCoding
         foreach (var opCode in AllOpCodes)
         {
             ushort value = unchecked((ushort)opCode.Value);
+
             if (value < 0b_1_00000000)
             {
                 Debug.Assert(opCode.Size == 1);

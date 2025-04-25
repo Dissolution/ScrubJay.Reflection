@@ -1,6 +1,5 @@
 ﻿using ScrubJay.Debugging;
 using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.Runtime;
 using ScrubJay.Reflection.Utilities;
 
 using static InlineIL.IL;
@@ -29,12 +28,12 @@ public static class Cloner
     private static string? DeepCloneString(string? str) => str;
 
     private static readonly MethodInfo _deepCloneUnmanagedMethod = Reflect(typeof(Cloner))
-        .Private.Static.Methods.Named(nameof(DeepCloneUnmanaged))
+        .Private.Static.Methods().Named(nameof(DeepCloneUnmanaged))
         .GenericCount(1)
         .OneOrThrow();
 
     private static readonly MethodInfo _deepCloneMethod = Reflect(typeof(Cloner))
-        .Public.Static.Methods.Named(nameof(DeepClone))
+        .Public.Static.Methods().Named(nameof(DeepClone))
         .GenericCount(1)
         .OneOrThrow();
     
@@ -54,7 +53,8 @@ public static class Cloner
         
         var deepCloneItemMethod = _deepCloneMethod.MakeGenericMethod(elementType);
 
-        var methodBuilder = new DynamicMethodBuilder(typeof(DeepCloneValue<>).MakeGenericType(arrayType));
+        var methodBuilder =RuntimeBuilder.BuildDynamicMethod(
+            typeof(DeepCloneValue<>).MakeGenericType(arrayType));
         methodBuilder.Emitter
         // load the array's length and store it
             .DeclareLocal<int>(out var arrayLen)
@@ -65,7 +65,7 @@ public static class Cloner
             .DeclareLocal(arrayType, out var clone)
             // use the length to create an empty array and store it in clone
             .Ldloc(arrayLen)
-            .Newarr(elementType)
+            .Newarr(elementType!)
             .Stloc(clone)
             // int i = 0;
             .DeclareLocal<int>(out var i)
@@ -84,9 +84,9 @@ public static class Cloner
             .Ldarg(0)
             .Ldloc(i)
             // load the original's item, copy it, and store in clone
-            .Ldelem(elementType)
+            .Ldelem(elementType!)
             .Call(deepCloneItemMethod)
-            .Stelem(elementType)
+            .Stelem(elementType!)
             // increment i
             .Ldloc(i)
             .Ldc_I4_1()
@@ -123,7 +123,7 @@ public static class Cloner
         if (type.IsArray)
             return DeepCloneArray(type);
 
-        var fields = Reflect(type).Instance.Fields.AsList();
+        var fields = Reflect(type).Instance.Fields().AsList();
 
         if (fields.Count == 0)
             throw new NotImplementedException();

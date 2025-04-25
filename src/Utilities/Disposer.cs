@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Runtime;
-
-namespace ScrubJay.Reflection.Utilities;
+﻿namespace ScrubJay.Reflection.Utilities;
 
 public static class Disposer
 {
@@ -22,14 +20,14 @@ public static class Disposer
     {
         // Dispose method?
         var disposeMethod = Reflect(type)
-            .Public.Instance.Methods.Named("Dispose")
+            .Public.Instance.Methods().Named("Dispose")
             .Returning(typeof(void))
             .NoParams
             .One();
         
         // all event fields
         var eventFields = Reflect(type)
-            .Instance.Events
+            .Instance.Events()
             .Select(v => v.GetBackingField())
             .WhereNotNull()
             .ToList();
@@ -41,7 +39,7 @@ public static class Disposer
         }
 
         // Create our dynamic method
-        var runtimeMethod = new DynamicMethodBuilder(
+        var runtimeMethod = RuntimeBuilder.BuildDynamicMethod(
             typeof(StrongDisposeValue<>).MakeGenericType(type),
             $"{type.Name}_StrongDispose");
         var emitter = runtimeMethod.Emitter;

@@ -1,5 +1,4 @@
-﻿
-using ScrubJay.Reflection.IL.Emission;
+﻿using ScrubJay.Reflection.IL.Emission;
 using ScrubJay.Reflection.Naming;
 using ScrubJay.Reflection.Utilities;
 using ScrubJay.Reflection.Validation;
@@ -59,7 +58,7 @@ public static class RuntimeBuilder
 
     public static DynamicMethod CreateDynamicMethod(Type delegateType, string? name = null)
     {
-        TypeAssert.IsDelegate(delegateType);
+        MemberAssert.IsDelegateType(delegateType);
         var invoke = DelegateHelper.InvokeMethod(delegateType).SomeOrThrow();
         return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
     }
@@ -72,6 +71,21 @@ public static class RuntimeBuilder
     
 #endregion
 
+    public static DynamicMethodBuilder BuildDynamicMethod(Type delegateType, string? name = null)
+    {
+        MemberAssert.IsDelegateType(delegateType);
+        return new DynamicMethodBuilder(delegateType, name);
+    }
+    
+    public static DynamicMethodBuilder<D> BuildDynamicMethod<D>(string? name = null)
+        where D : Delegate
+    {
+        return new DynamicMethodBuilder<D>(name);
+    }
+
+    
+    
+    
 #region Create Delegate
 
     public static Result<D> TryGenerateDelegate<D>(Action<ILGenerator> generate)
@@ -93,18 +107,9 @@ public static class RuntimeBuilder
     public static Result<D> TryEmitDelegate<D>(Action<Emitter> emit)
         where D : Delegate
     {
-        try
-        {
-            var dm = CreateDynamicMethod<D>(null);
-            var generator = dm.GetILGenerator();
-            var emitter = new Emitter(generator);
-            emit(emitter);
-            return dm.CreateDelegate<D>();
-        }
-        catch (Exception ex)
-        {
-            return ex;
-        }
+        var dm = BuildDynamicMethod<D>();
+        dm.Emitter.Invoke(emit);
+        return dm.TryCreateDelegate();
     }
 
 #endregion
@@ -113,7 +118,7 @@ public static class RuntimeBuilder
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
         where TAttribute : Attribute, new()
     {
-        var ctor = Reflect<TAttribute>().Constructors.Instance.NoParams.OneOrThrow();
+        var ctor = Reflect<TAttribute>().Constructors().Instance.NoParams.OneOrThrow();
         return new CustomAttributeBuilder(ctor, []);
     }
     
@@ -121,8 +126,8 @@ public static class RuntimeBuilder
         where TAttribute : Attribute
     {
         var ctor = Reflect<TAttribute>()
-            .Instance.Constructors
-            .Arguments(ctorArgs)
+            .Instance.Constructors()
+            .Accepting(ctorArgs)
             .OneOrThrow($"Could not find a {MemberNames.NameOf(typeof(TAttribute))} constructor with that would accept {string.Join(", ", ctorArgs)}");
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
@@ -132,8 +137,8 @@ public static class RuntimeBuilder
         if (!attributeType.Implements<Attribute>())
             throw new ArgumentException($"{attributeType} is not an Attribute");
         var ctor = Reflect(attributeType)
-            .Instance.Constructors
-            .Arguments(ctorArgs)
+            .Instance.Constructors()
+            .Accepting(ctorArgs)
             .OneOrThrow($"Could not find a {MemberNames.NameOf(attributeType)} constructor with that would accept {string.Join(", ", ctorArgs)}");
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }

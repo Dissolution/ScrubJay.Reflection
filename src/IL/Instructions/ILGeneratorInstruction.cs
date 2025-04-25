@@ -1,4 +1,5 @@
-﻿using static ScrubJay.Reflection.IL.Instructions.ILGeneratorMethod;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
+using static ScrubJay.Reflection.IL.Instructions.ILGeneratorMethod;
 
 namespace ScrubJay.Reflection.IL.Instructions;
 

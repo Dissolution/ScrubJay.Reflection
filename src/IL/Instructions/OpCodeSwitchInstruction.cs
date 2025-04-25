@@ -1,11 +1,30 @@
-﻿namespace ScrubJay.Reflection.IL.Instructions;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
+
+namespace ScrubJay.Reflection.IL.Instructions;
 
 [PublicAPI]
 public sealed class OpCodeSwitchInstruction : OpCodeInstruction
 {
     public int[] Deltas { get; }
-    
-    public ILOffset[] TargetOffsets { get; }
+
+    public ILOffset[] TargetOffsets
+    {
+        get
+        {
+            int cases = Deltas.Length;
+
+            var targets = new ILOffset[cases];
+
+            var targetOffset = Offset + (1 + sizeof(int) + (sizeof(int) * cases));
+        
+            for (int i = 0; i < cases; i++)
+            {
+                targets[i] = targetOffset + Deltas[i];
+            }
+            
+            return targets;
+        }
+    }
     
     public override int Size
     {
@@ -17,18 +36,11 @@ public sealed class OpCodeSwitchInstruction : OpCodeInstruction
         }
     }
     
-    public OpCodeSwitchInstruction(int[] deltas) : base(OpCodes.Switch)
+    public OpCodeSwitchInstruction(OpCode opCode, int[] deltas) : base(opCode)
     {
-        int cases = deltas.Length;
-        int itself = 1 + sizeof(int) + (sizeof(int) * cases);
-        var targets = new ILOffset[cases];
-        for (int i = 0; i < cases; i++)
-        {
-            targets[i] = new(Offset + deltas[i] + itself);
-        }
-
+        if (opCode != OpCodes.Switch)
+            throw new ArgumentException(null, nameof(opCode));
         this.Deltas = deltas;
-        this.TargetOffsets = targets;
     }
 
     public override void RenderTo<B>(B builder)

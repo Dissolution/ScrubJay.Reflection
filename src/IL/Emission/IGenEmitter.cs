@@ -1,7 +1,10 @@
-﻿namespace ScrubJay.Reflection.IL.Emission;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
 
-public interface IGenEmitter<S> : IEmitter<S>
-    where S : IGenEmitter<S>
+namespace ScrubJay.Reflection.IL.Emission;
+
+[PublicAPI]
+public interface IGenEmitter<E> : IEmitter<E>
+    where E : IGenEmitter<E>
 {
 #region try/catch/finally
 
@@ -16,7 +19,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginexceptionblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginExceptionBlock(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
+    E BeginExceptionBlock(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
 
     /// <summary>
     /// Begins a <c>catch</c> block
@@ -29,19 +32,19 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.begincatchblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginCatchBlock(Type exceptionType);
+    E BeginCatchBlock(Type exceptionType);
 
     /// <summary>
     /// Begins a <c>catch</c> block
     /// </summary>
-    /// <typeparam name="TException">The <see cref="Type"/> of <see cref="Exception"/> to catch</typeparam>
+    /// <typeparam name="X">The <see cref="Type"/> of <see cref="Exception"/> to catch</typeparam>
     /// <exception cref="ArgumentException">Thrown if within a filtered exception</exception>
     /// <exception cref="NotSupportedException">Thrown if not currently in an exception block</exception>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.begincatchblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginCatchBlock<TException>()
-        where TException : Exception;
+    E BeginCatchBlock<X>()
+        where X : Exception;
 
     /// <summary>
     /// Begins a <see langword="finally"/> block
@@ -50,7 +53,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginfinallyblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginFinallyBlock();
+    E BeginFinallyBlock();
 
     /// <summary>
     /// Begins an exception block for a filtered <see cref="Exception"/>
@@ -60,7 +63,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginexceptfilterblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginExceptFilterBlock();
+    E BeginExceptFilterBlock();
 
     /// <summary>
     /// Begins an exception fault block
@@ -70,7 +73,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginfaultblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginFaultBlock();
+    E BeginFaultBlock();
 
     /// <summary>
     /// Ends an exception block
@@ -80,7 +83,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.endexceptionblock?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S EndExceptionBlock();
+    E EndExceptionBlock();
 
 #endregion
 
@@ -93,7 +96,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.beginscope?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S BeginScope();
+    E BeginScope();
 
     /// <summary>
     /// Ends a lexical scope
@@ -102,7 +105,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.endscope?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S EndScope();
+    E EndScope();
 
     /// <summary>
     /// Specifies the <see langword="namespace"/> to be used in evaluating locals and watches for the current active lexical scope
@@ -113,7 +116,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.usingnamespace?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S UsingNamespace(string @namespace);
+    E UsingNamespace(string @namespace);
 
 #endregion
 
@@ -130,7 +133,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal(Type localType, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    E DeclareLocal(Type localType, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
     /// Declares a <see cref="ILLocal"/> variable
@@ -142,7 +145,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal<T>(out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    E DeclareLocal<T>(out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
     /// Declares a <see cref="ILLocal"/> variable
@@ -156,7 +159,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type-system-boolean)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal(Type localType, bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    E DeclareLocal(Type localType, bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
     /// <summary>
     /// Declares a <see cref="ILLocal"/> variable
@@ -169,7 +172,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.declarelocal?view=net-8.0#system-reflection-emit-ilgenerator-declarelocal(system-type-system-boolean)">learn.microsoft.com</a>
     /// </links>
-    S DeclareLocal<T>(bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
+    E DeclareLocal<T>(bool pinned, out ILLocal local, [CallerArgumentExpression(nameof(local))] string? localName = null);
 
 #endregion
 
@@ -183,7 +186,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.definelabel?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S DefineLabel(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
+    E DefineLabel(out ILLabel label, [CallerArgumentExpression(nameof(label))] string? labelName = null);
 
     /// <summary>
     /// Marks the current position with an <see cref="ILLabel"/>
@@ -194,7 +197,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.marklabel?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S MarkLabel(ILLabel label);
+    E MarkLabel(ILLabel label);
 
 #endregion
 
@@ -210,7 +213,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emitcall?view=net-8.0">learn.microsoft.com</a>
     /// </links>
-    S EmitCall(MethodInfo methodInfo, Type[]? optionalParameterTypes);
+    E EmitCall(MethodInfo methodInfo, Type[]? optionalParameterTypes);
 
     /// <summary>
     /// Puts a <see cref="OpCodes.Calli"/> instruction onto the stream, specifying an unmanaged calling convention for the indirect call
@@ -224,7 +227,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emitcalli?view=net-8.0#system-reflection-emit-ilgenerator-emitcalli(system-reflection-emit-opcode-system-runtime-interopservices-callingconvention-system-type-system-type())">learn.microsoft.com</a>
     /// </links>
-    S EmitCalli(CallingConventions callingConvention, Type? returnType, Type[]? parameterTypes, Type[]? optionalParameterTypes);
+    E EmitCalli(CallingConventions callingConvention, Type? returnType, Type[]? parameterTypes, Type[]? optionalParameterTypes);
 
 #if !NETSTANDARD2_0
     /// <summary>
@@ -237,7 +240,7 @@ public interface IGenEmitter<S> : IEmitter<S>
     /// <links>
     /// <a href="https://learn.microsoft.com/en-us/dotnet/api/system.reflection.emit.ilgenerator.emitcalli?view=net-8.0#system-reflection-emit-ilgenerator-emitcalli(system-reflection-emit-opcode-system-reflection-callingconventions-system-type-system-type()-system-type())">learn.microsoft.com</a>
     /// </links>
-    S EmitCalli(CallingConvention unmanagedCallConv, Type? returnType, Type[]? parameterTypes);
+    E EmitCalli(CallingConvention unmanagedCallConv, Type? returnType, Type[]? parameterTypes);
 #endif
 
 #endregion

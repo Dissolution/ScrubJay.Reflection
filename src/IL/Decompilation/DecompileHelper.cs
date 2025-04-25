@@ -4,11 +4,11 @@ namespace ScrubJay.Reflection.IL.Decompilation;
 
 public static class DecompileHelper
 {
-    public static ITokenResolver GetTokenResolver(MethodBase method)
+    public static ITokenProvider GetTokenResolver(MethodBase method)
     {
         if (method is DynamicMethod dm)
-            return new DynamicMethodTokenResolver(dm);
-        return new ModuleTokenResolver(method.Module);
+            return new DynamicMethodITokenProvider(dm);
+        return new ModuleTokenProvider(method.Module);
     }
 
     public static IList<LocalVariableInfo> GetLocals(MethodBase method)
@@ -43,7 +43,7 @@ public static class DecompileHelper
     {
         // Find the DynamicMethod's Resolver field
         var resolverField = Reflect<DynamicMethod>()
-            .Fields
+            .Fields()
             .Instance
             .NonPublic
             .Named("_resolver", new StringMatch(StringComparison.OrdinalIgnoreCase)
@@ -60,14 +60,13 @@ public static class DecompileHelper
         }
 
         var codeField = ReflectOn(resolver)
-            .Fields
             .Instance
             .NonPublic
+            .Fields<byte[]>()
             .Named("_code", new StringMatch(StringComparison.OrdinalIgnoreCase)
             {
                 EndsWith = true,
             })
-            .Contains<byte[]>()
             .OneOrThrow("DynamicMethod's Resolver does not contain a '_code' field");
 
         object? code = codeField.GetValue(resolver);

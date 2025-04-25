@@ -5,8 +5,8 @@
 /// </summary>
 public static class NullabilityInfoExtensions
 {
-    private static readonly NullabilityInfoContext _nullabilityInfoContext = new();
-    
+    private static readonly ThreadLocal<NullabilityInfoContext> _nullabilityContexts = new(() => new());
+
     public static NullabilityInfo? NullabilityInfo(this ParameterInfo? parameter)
     {
         if (parameter is null)
@@ -14,50 +14,50 @@ public static class NullabilityInfoExtensions
 
         try
         {
-            return _nullabilityInfoContext.Create(parameter);
+            return _nullabilityContexts.Value!.Create(parameter);
         }
         catch (Exception)
         {
             return null;
         }
     }
-    
+
     [return: NotNullIfNotNull(nameof(field))]
     public static NullabilityInfo? NullabilityInfo(this FieldInfo? field)
     {
         if (field is null)
             return null;
-        return _nullabilityInfoContext.Create(field);
+        return _nullabilityContexts.Value!.Create(field);
     }
-    
+
     [return: NotNullIfNotNull(nameof(property))]
     public static NullabilityInfo? NullabilityInfo(this PropertyInfo? property)
     {
         if (property is null)
             return null;
-        return _nullabilityInfoContext.Create(property);
+        return _nullabilityContexts.Value!.Create(property);
     }
-    
+
     [return: NotNullIfNotNull(nameof(@event))]
     public static NullabilityInfo? NullabilityInfo(this EventInfo? @event)
     {
         if (@event is null)
             return null;
-        return _nullabilityInfoContext.Create(@event);
+        return _nullabilityContexts.Value!.Create(@event);
     }
-    
+
     public static NullabilityInfo? NullabilityInfo(this MemberInfo? member)
     {
         return member switch
         {
-            FieldInfo field => _nullabilityInfoContext.Create(field),
-            PropertyInfo property => _nullabilityInfoContext.Create(property),
-            EventInfo @event => _nullabilityInfoContext.Create(@event),
+            FieldInfo field => _nullabilityContexts.Value!.Create(field),
+            PropertyInfo property => _nullabilityContexts.Value!.Create(property),
+            EventInfo @event => _nullabilityContexts.Value!.Create(@event),
             _ => null,
         };
     }
 
-    public static void Deconstruct(this NullabilityInfo? nullabilityInfo, 
+    public static void Deconstruct(this NullabilityInfo? nullabilityInfo,
         out NullabilityState readState,
         out NullabilityState writeState)
     {
@@ -72,7 +72,7 @@ public static class NullabilityInfoExtensions
             writeState = NullabilityState.Unknown;
         }
     }
-   
+
     internal static (string? Prefix, string? Postfix) GetPrefixPostfix(this NullabilityInfo? nullabilityInfo)
     {
         if (nullabilityInfo is null)

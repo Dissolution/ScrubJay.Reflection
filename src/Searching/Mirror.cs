@@ -3,16 +3,17 @@ using ScrubJay.Reflection.Expressions;
 
 namespace ScrubJay.Reflection.Searching;
 
-public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>, ICloneable<Mirror>
+public class Mirror : ReflectingMemberInfos<Mirror, MemberInfo>, ICloneable<Mirror>
 {
     private static readonly ConcurrentTypeMap<MemberInfo[]> _allMembersCache = [];
+    
     private static MemberInfo[] GetAllMembers(Type type)
     {
         return _allMembersCache.GetOrAdd(type, static t => t.AllMembers());
     }
     
-    
     public static Mirror Reflect(Type type) => new Mirror(type);
+    
     public static Mirror<T> Reflect<T>() => new Mirror<T>();
 
     public static IEnumerable<M> Members<M>(Expression expression)
@@ -25,26 +26,27 @@ public class Mirror : MirrorMemberInfoBuilder<Mirror, MemberInfo>, ICloneable<Mi
             .OfType<M>()
             .TryGetOne();
 
-    public static Mirror<T> In<T>(Expression<Action<T>> expression)
+    public static Mirror In<T>(Expression<Action<T>> expression)
     {
         var members = ExpressionHelper.ExtractMembers(expression)
             .Where(member => member.DeclaringType == typeof(T));
-        return new Mirror<T>(members);
+        return new Mirror(members);
     }
 
-    internal Mirror(Type reflectedType, IEnumerable<MemberInfo> members)
-        : base(reflectedType, members)
+    
+    public Mirror(IEnumerable<MemberInfo> members)
+        : base(members)
     {
     }
 
     public Mirror(Type type)
-        : base(type, GetAllMembers(type))
+        : base(GetAllMembers(type))
     {
     }
 
     object ICloneable.Clone() => Clone();
 
-    public Mirror Clone() => new Mirror(ReflectedType, _values);
+    public Mirror Clone() => new Mirror(_values);
 }
 
 public class Mirror<T> : Mirror
@@ -52,9 +54,5 @@ public class Mirror<T> : Mirror
     where T : allows ref struct
 #endif
 {
-    internal Mirror(IEnumerable<MemberInfo> members) : base(typeof(T), members)
-    {
-    }
-
     public Mirror() : base(typeof(T)) { }
 }

@@ -14,13 +14,13 @@ public static class EmissionHelper
     static EmissionHelper()
     {
         Type_GetTypeFromHandle_Method = Reflect<Type>()
-            .Public.Static.Methods
+            .Public.Static.Methods()
             .Named(nameof(Type.GetTypeFromHandle))
             .OneOrThrow();
 
 #if NETFRAMEWORK || NETSTANDARD2_0
         GetUninitializedObject_Method = Reflect(typeof(FormatterServices))
-            .Public.Static.Methods
+            .Public.Static.Methods()
             .Named(nameof(FormatterServices.GetUninitializedObject))
             .OneOrThrow();
 #else
@@ -35,5 +35,32 @@ public static class EmissionHelper
             .OneOrThrow();
         */
 #endif
+    }
+    
+    public static string? GetLocalName(string? name)
+    {
+        var buffer = name.AsSpan();
+       
+        // trim the name
+        buffer = buffer.Trim();
+        
+        // if empty, no valid name
+        if (buffer.Length == 0)
+            return null;
+        
+        // check for spaces
+        var spaceIndex = buffer.LastIndexOf(' ');
+        if (spaceIndex >= 0)
+        {
+            // if found, trim to after the space
+            buffer = buffer.Slice(spaceIndex + 1);
+        }
+
+        return buffer.AsString();
+    }
+    
+    public static string? GetLabelName(string? name)
+    {
+        throw new NotImplementedException();
     }
 }

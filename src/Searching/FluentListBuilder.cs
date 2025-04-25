@@ -1,11 +1,9 @@
-﻿using ScrubJay.Fluent;
-
-namespace ScrubJay.Reflection.Searching;
+﻿namespace ScrubJay.Reflection.Searching;
 
 
 
 [PublicAPI]
-public abstract class FluentListBuilder<B, T> : FluentBuilder<B>, IEnumerable<T>
+public abstract class FluentListBuilder<B, T> : BuilderBase<B>, IEnumerable<T>
     where B : FluentListBuilder<B, T>
 {
     protected readonly List<T> _values;

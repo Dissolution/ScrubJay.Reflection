@@ -1,4 +1,4 @@
-﻿using ScrubJay.Fluent;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
 using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
@@ -12,7 +12,7 @@ public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<TryCatchFinally<
     }
 }
 
-public abstract class TryCatchFinallyBuilder<B, E> : FluentBuilder<B>
+public abstract class TryCatchFinallyBuilder<B, E> : BuilderBase<B>
     where B : TryCatchFinallyBuilder<B, E>
     where E : IGenEmitter<E>
 {
@@ -46,7 +46,7 @@ public abstract class TryCatchFinallyBuilder<B, E> : FluentBuilder<B>
     
     public B Catch(Type exceptionType, Action<E, ILLabel> emitCatchBlock)
     {
-        TypeAssert.IsException(exceptionType);
+        MemberAssert.IsExceptionType(exceptionType);
         Throw.IfNull(emitCatchBlock);
         var emitter = _emitter.BeginCatchBlock(exceptionType);
         emitCatchBlock(emitter, EndLabel);

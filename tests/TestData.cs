@@ -67,6 +67,13 @@ public static class TestData
         (new ManagedClass(147, "TJ")),
         (new StringBuilder().Append("TRJ")),
     ];
+
+    public static IEnumerable<Guid> InfiniteGuids()
+    {
+        while (true)
+            yield return Guid.NewGuid();
+    }
+    
     
     public static void AssertPropertiesEqual<T>(T? left, T? right)
     {
@@ -74,8 +81,8 @@ public static class TestData
         if (left is null) return;
 
         var properties = Mirror.Reflect<T>()
-            .Properties.Public.Instance
-            .NotAnIndexer
+            .Properties().Public.Instance
+            .NonIndexer
             .ToList();
 
         if (properties.Count == 0)

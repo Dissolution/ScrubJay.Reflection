@@ -12,7 +12,7 @@ public sealed record class DelegateInfo
     
     public static DelegateInfo Create(Type delegateType)
     {
-        TypeAssert.IsDelegate(delegateType);
+        MemberAssert.IsDelegateType(delegateType);
         var invokeMethod = delegateType.InvokeMethod().SomeOrThrow();
         DelegateInfo info = new()
         {
@@ -43,7 +43,7 @@ public sealed record class DelegateInfo
     {
         Throw.IfNull(del);
         var invoke = ReflectOn(del)
-            .Methods.Named("Invoke")
+            .Methods().Named("Invoke")
             .AsList();
         Debugger.Break();
         throw new NotImplementedException();

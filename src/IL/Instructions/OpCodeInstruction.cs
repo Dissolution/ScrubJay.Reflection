@@ -1,14 +1,16 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
-public class OpCodeInstruction : Instruction, 
-    IEquatable<OpCodeInstruction>
+[PublicAPI]
+public abstract class OpCodeInstruction : Instruction
 {
     public OpCode OpCode { get; }
 
+    /*
     public override int Size
     {
         get
         {
+            
             int size = OpCode.Size;
 
             switch (OpCode.OperandType)
@@ -51,7 +53,8 @@ public class OpCodeInstruction : Instruction,
             return size;
         }
     }
-
+    */
+    
     public bool IsShort
     {
         get
@@ -76,20 +79,20 @@ public class OpCodeInstruction : Instruction,
 
     public override void RenderTo<B>(B builder)
     {
-        builder.Invoke(base.RenderTo!)
+        builder.Invoke(base.RenderTo)
+            // maximum OpCode.Name is 13, so this neatly sets us up with one space before the next render
             .Align(OpCode.Name.AsSpan(), 14, alignment: Alignment.Left);
     }
+}
 
-    public bool Equals(OpCodeInstruction? other)
-    {
-        return other is not null &&
-            other.Offset == this.Offset &&
-            other.OpCode == this.OpCode &&
-            other.Size == this.Size;
-    }
 
-    public override bool Equals(object? obj)
+[PublicAPI]
+public sealed class OpCodeNoneInstruction : OpCodeInstruction
+{
+    public override int Size => OpCode.Size;
+
+    public OpCodeNoneInstruction(OpCode opCode) : base(opCode)
     {
-        return obj is OpCodeInstruction opCodeInstruction && Equals(opCodeInstruction);
+        Debug.Assert(opCode.OperandType == OperandType.InlineNone);
     }
 }

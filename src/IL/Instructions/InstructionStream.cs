@@ -1,4 +1,6 @@
-﻿namespace ScrubJay.Reflection.IL.Instructions;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
+
+namespace ScrubJay.Reflection.IL.Instructions;
 
 public interface IInstructions : IReadOnlyCollection<Instruction>
 {

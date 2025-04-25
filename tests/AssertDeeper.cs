@@ -55,7 +55,7 @@ public static class AssertDeeper
         {
             var fields = Mirror
                 .Reflect<T>()
-                .Instance.Fields
+                .Instance.Fields()
                 .AsList();
 
             foreach (var field in fields)

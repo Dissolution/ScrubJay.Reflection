@@ -1,8 +1,4 @@
-﻿#if NETFRAMEWORK || NETSTANDARD2_0
-using Polyfills;
-#endif
-
-namespace ScrubJay.Reflection.Utilities;
+﻿namespace ScrubJay.Reflection.Utilities;
 
 [PublicAPI]
 public static class TypeHelper
@@ -20,7 +16,7 @@ public static class TypeHelper
         if (!type.IsValueType)
             return true;
 
-        var fields = Reflect(type).Instance.Fields;
+        var fields = Reflect(type).Instance.Fields();
         foreach (var field in fields)
         {
             if (IsReferenceOrContainsReferences(field.FieldType))
@@ -36,7 +32,7 @@ public static class TypeHelper
     private static bool DetermineIsRef(Type type)
     {
         return Reflect(typeof(RuntimeHelpers))
-            .Public.Static.Methods
+            .Public.Static.Methods()
             .Named(nameof(RuntimeHelpers.IsReferenceOrContainsReferences))
             .GenericCount(1)
             .OneOrThrow("Could not find RuntimeHelpers.IsReferenceOrContainsReferences method")
@@ -83,5 +79,111 @@ public static class TypeHelper
             .GetAssemblies()
             .SelectMany(static assembly => Result.TryInvoke(assembly.GetTypes).OkOr([]))
             .ToHashSet();
+    }
+
+    private static bool Impl(Type? type, Type? checkType)
+    {
+        if ((object) checkType == null || (object) type == null)
+            return false;
+        if (type == checkType || checkType == typeof (object) && !type.IsPointer)
+            return true;
+        if (!checkType.IsGenericTypeDefinition)
+        {
+            if (checkType.IsInterface)
+            {
+                foreach (Type type1 in type.GetInterfaces())
+                {
+                    if (type1 == checkType)
+                        return true;
+                }
+                return false;
+            }
+            for (Type baseType = type.BaseType; (object) baseType != null; baseType = baseType.BaseType)
+            {
+                if (baseType == checkType)
+                    return true;
+            }
+            return false;
+        }
+        if (type.HasGenericTypeDefinition(checkType))
+            return true;
+        if (checkType.IsInterface)
+            Debugger.Break();
+        for (Type baseType = type.BaseType; (object) baseType != null; baseType = baseType.BaseType)
+        {
+            if (baseType.HasGenericTypeDefinition(checkType))
+                return true;
+        }
+        foreach (Type type2 in type.GetInterfaces())
+        {
+            if (type2.HasGenericTypeDefinition(checkType))
+                return true;
+        }
+        return false;
+    }
+
+    private static Option<int> CanCastValueTypeTo(Type valueType, Type targetType)
+    {
+        Debug.Assert(valueType.IsValueType);    // already verified
+        Debug.Assert(valueType != targetType);  // already verified
+        if (targetType.IsValueType)
+        {
+            // TODO: implicit unmanaged type conversions (byte -> int)
+            return None();
+        }
+        else if (targetType == typeof(object))
+        {
+            return Some(100);
+        }
+        else if (targetType.IsInterface)
+        {
+            foreach (Type interfaceType in valueType.GetInterfaces())
+            {
+                if (interfaceType == targetType)
+                    return Some(9 - interfaceType.GetGenericArguments().Length);
+            }
+            return None();
+        }
+        else
+        {
+            return None();
+        }
+    }
+
+    private static int GetObjectCastExactness() => 1_000_000;
+    private static int GetInterfaceCastExactness() => 0_001_000;
+    private static int GetClassCastExactNess() => 0_000_001;
+    
+    public static Option<int> CanCast(Type sourceType, Type targetType)
+    {
+        if (sourceType == targetType)
+            return Some(0); // baseline exactness
+
+        if (targetType.IsGenericTypeDefinition)
+            return None(); // we cannot cast to a definition
+        
+        if (sourceType.IsValueType)
+        {
+            return CanCastValueTypeTo(sourceType, targetType);
+        }
+        
+        if (sourceType == typeof(object))
+            return Some(100);
+        
+        if (targetType.IsInterface)
+        {
+            foreach (Type interfaceType in sourceType.GetInterfaces())
+            {
+                if (interfaceType == targetType)
+                    return Some(9 - interfaceType.GetGenericArguments().Length);
+            }
+            return None();
+        }
+        for (Type? baseType = sourceType.BaseType; baseType != null; baseType = baseType.BaseType)
+        {
+            if (baseType == targetType)
+                return Some(1);
+        }
+        return None();
     }
 }

@@ -45,7 +45,7 @@
         <Using Include="ScrubJay.Reflection.Prelude" Static="true"/>
         
         <Using Include="ScrubJay.Functional"/>
-
+        <Using Include="ScrubJay.Building"/>
         <Using Include="ScrubJay.Collections"/>
         <Using Include="ScrubJay.Collections.Pooling"/>
         <Using Include="ScrubJay.Comparison"/>
@@ -57,6 +57,8 @@
         <Using Include="ScrubJay.Validation"/>
         
         <Using Include="ScrubJay.Reflection.Extensions"/>
+        <Using Include="ScrubJay.Reflection.IL"/>
+        <Using Include="ScrubJay.Reflection.Runtime"/>
         <Using Include="ScrubJay.Reflection.Text"/>
 
     </ItemGroup>
@@ -64,7 +66,11 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
-        <PackageReference Include="ScrubJay.Core" Version="0.41.1-alpha" />
+        <PackageReference Include="ScrubJay.Core" Version="0.42.0-alpha" />
+
+        <PackageReference Include="Dunet" Version="1.11.2">
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         
         <PackageReference Include="Fody" Version="6.9.2">
             <PrivateAssets>all</PrivateAssets>

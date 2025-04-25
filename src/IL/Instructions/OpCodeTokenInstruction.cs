@@ -3,10 +3,10 @@
 [PublicAPI]
 public abstract class OpCodeTokenInstruction : OpCodeInstruction
 {
-    public int Token { get;  }
+    public int Token { get; }
 
     public override sealed int Size => OpCode.Size + sizeof(int);
-    
+
     protected internal OpCodeTokenInstruction(OpCode opCode, int token)
         : base(opCode)
     {
@@ -17,14 +17,33 @@ public abstract class OpCodeTokenInstruction : OpCodeInstruction
 [PublicAPI]
 public sealed class OpCodeFieldInstruction : OpCodeTokenInstruction
 {
-    public FieldInfo Field { get; }
-    
-    public OpCodeFieldInstruction(OpCode opCode, FieldInfo field) : base(opCode, field.MetadataToken)
+    public FieldInfo? Field { get; internal set; }
+
+    public OpCodeFieldInstruction(OpCode opCode, int token)
+        : base(opCode, token)
     {
         if (opCode.OperandType != OperandType.InlineField &&
             opCode.OperandType != OperandType.InlineTok)
             throw new ArgumentException(null, nameof(opCode));
-        this.Field = field.ThrowIfNull();
+        this.Field = null;
+    }
+
+    public OpCodeFieldInstruction(OpCode opCode, FieldInfo field)
+        : base(opCode, field.MetadataToken)
+    {
+        if (opCode.OperandType != OperandType.InlineField &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Field = field;
+    }
+
+    public OpCodeFieldInstruction(OpCode opCode, int token, FieldInfo? field)
+        : base(opCode, token)
+    {
+        if (opCode.OperandType != OperandType.InlineField &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Field = field;
     }
 
     public override void RenderTo<B>(B builder)
@@ -39,14 +58,33 @@ public sealed class OpCodeFieldInstruction : OpCodeTokenInstruction
 [PublicAPI]
 public sealed class OpCodeMethodInstruction : OpCodeTokenInstruction
 {
-    public MethodBase Method { get; }
-    
-    public OpCodeMethodInstruction(OpCode opCode, MethodBase method) : base(opCode, method.MetadataToken)
+    public MethodBase? Method { get; internal set; }
+
+    public OpCodeMethodInstruction(OpCode opCode, int token) 
+        : base(opCode, token)
     {
         if (opCode.OperandType != OperandType.InlineMethod &&
             opCode.OperandType != OperandType.InlineTok)
             throw new ArgumentException(null, nameof(opCode));
-        this.Method = method.ThrowIfNull();
+        this.Method = null;
+    }
+
+    public OpCodeMethodInstruction(OpCode opCode, MethodBase method) 
+        : base(opCode, method.MetadataToken)
+    {
+        if (opCode.OperandType != OperandType.InlineMethod &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Method = method;
+    }
+    
+    public OpCodeMethodInstruction(OpCode opCode, int token, MethodBase? method) 
+        : base(opCode, token)
+    {
+        if (opCode.OperandType != OperandType.InlineMethod &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Method = method;
     }
 
     public override void RenderTo<B>(B builder)
@@ -61,14 +99,30 @@ public sealed class OpCodeMethodInstruction : OpCodeTokenInstruction
 [PublicAPI]
 public sealed class OpCodeMemberInstruction : OpCodeTokenInstruction
 {
-    public MemberInfo Member { get; }
-    
-    public OpCodeMemberInstruction(OpCode opCode, MemberInfo member) 
+    public MemberInfo? Member { get; internal set; }
+
+    public OpCodeMemberInstruction(OpCode opCode, int token)
+        : base(opCode, token)
+    {
+        if (opCode != OpCodes.Ldtoken)
+            throw new ArgumentException(nameof(opCode));
+        this.Member = null;
+    }
+
+    public OpCodeMemberInstruction(OpCode opCode, MemberInfo member)
         : base(opCode, member.MetadataToken)
     {
         if (opCode != OpCodes.Ldtoken)
             throw new ArgumentException(nameof(opCode));
-        this.Member = member.ThrowIfNull();
+        this.Member = member;
+    }
+    
+    public OpCodeMemberInstruction(OpCode opCode, int token, MemberInfo? member)
+        : base(opCode, token)
+    {
+        if (opCode != OpCodes.Ldtoken)
+            throw new ArgumentException(nameof(opCode));
+        this.Member = member;
     }
 
     public override void RenderTo<B>(B builder)
@@ -83,14 +137,33 @@ public sealed class OpCodeMemberInstruction : OpCodeTokenInstruction
 [PublicAPI]
 public sealed class OpCodeTypeInstruction : OpCodeTokenInstruction
 {
-    public Type Type { get; }
-    
-    public OpCodeTypeInstruction(OpCode opCode, Type type) : base(opCode, type.MetadataToken)
+    public Type? Type { get; internal set; }
+
+    public OpCodeTypeInstruction(OpCode opCode, int token)
+        : base(opCode, token)
     {
         if (opCode.OperandType != OperandType.InlineType &&
             opCode.OperandType != OperandType.InlineTok)
             throw new ArgumentException(null, nameof(opCode));
-        this.Type = type.ThrowIfNull();
+        this.Type = null;
+    }
+
+    public OpCodeTypeInstruction(OpCode opCode, Type type)
+        : base(opCode, type.MetadataToken)
+    {
+        if (opCode.OperandType != OperandType.InlineType &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Type = type;
+    }
+    
+    public OpCodeTypeInstruction(OpCode opCode, int token, Type? type)
+        : base(opCode, token)
+    {
+        if (opCode.OperandType != OperandType.InlineType &&
+            opCode.OperandType != OperandType.InlineTok)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Type = type;
     }
 
     public override void RenderTo<B>(B builder)
@@ -105,11 +178,22 @@ public sealed class OpCodeTypeInstruction : OpCodeTokenInstruction
 [PublicAPI]
 public sealed class OpCodeSignatureInstruction : OpCodeTokenInstruction
 {
-    public byte[]? Signature { get; set; }
-    
-    public OpCodeSignatureInstruction(OpCode opCode, int token) : base(opCode, token)
+    public byte[]? Signature { get; internal set; }
+
+    public OpCodeSignatureInstruction(OpCode opCode, int token)
+        : base(opCode, token)
     {
-        Debug.Assert(opCode == OpCodes.Calli);
+        if (opCode != OpCodes.Calli)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Signature = null;
+    }
+    
+    public OpCodeSignatureInstruction(OpCode opCode, int token, byte[] signature)
+        : base(opCode, token)
+    {
+        if (opCode != OpCodes.Calli)
+            throw new ArgumentException(null, nameof(opCode));
+        this.Signature = signature;
     }
 
     public override void RenderTo<B>(B builder)
@@ -124,9 +208,18 @@ public sealed class OpCodeSignatureInstruction : OpCodeTokenInstruction
 [PublicAPI]
 public sealed class OpCodeStringInstruction : OpCodeTokenInstruction
 {
-    public string String { get; }
+    public string? String { get; internal set; }
+
+    public OpCodeStringInstruction(OpCode opCode, int token) 
+        : base(opCode, token)
+    {
+        if (opCode != OpCodes.Ldstr)
+            throw new ArgumentException(null, nameof(opCode));
+        String = null;
+    }
     
-    public OpCodeStringInstruction(OpCode opCode, string str) : base(opCode, str.GetMetadataToken())
+    public OpCodeStringInstruction(OpCode opCode, int token, string str) 
+        : base(opCode, token)
     {
         if (opCode != OpCodes.Ldstr)
             throw new ArgumentException(null, nameof(opCode));

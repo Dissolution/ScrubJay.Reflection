@@ -20,7 +20,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
 
     public static StaticTypeDynamicWrapper For(Type staticType)
     {
-        TypeAssert.IsStatic(staticType);
+        MemberAssert.IsStatic(staticType);
         return _cache.GetOrAdd(staticType, static type => new(type));
     }
 
@@ -367,7 +367,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
 
         // Method?
         var methods = members
-            .MethodBases
+            .MethodBases()
             .Only(argTypes, static (method, aTypes) => method.Parameters().CanAcceptA((aTypes)));
 
         if (returnType == typeof(void))

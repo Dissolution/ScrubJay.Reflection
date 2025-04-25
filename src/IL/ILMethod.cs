@@ -2,22 +2,47 @@
 
 namespace ScrubJay.Reflection.IL;
 
+[PublicAPI]
 public abstract class ILMethod
 {
     private Type[]? _parameterTypes;
     private readonly InstructionStream _instructionStream = [];
+    protected internal readonly List<ILLocal> _locals = [];
 
+    public Type? OwnerType { get; init; } = null;
+    public Type[] OwnerGenericTypes => OwnerType?.GenericTypes() ?? [];
+
+    public required MethodAttributes MethodAttributes { get; init; }
+
+    public bool IsStatic => MethodAttributes.HasFlags(MethodAttributes.Static);
+
+    public string? Name { get; init; } = null;
+
+    public Type[] GenericTypes { get; init; } = [];
+    public required ParameterInfo ReturnParameter { get; init; }
+    public required ParameterInfo[] Parameters { get; init; }
+    public Type[] ParameterTypes => _parameterTypes ??= Parameters.ConvertAll(static p => p.ParameterType);
+
+    public IReadOnlyList<ILLocal> Locals => _locals;
+    
+    public IInstructions Instructions => _instructionStream;
+
+    protected ILMethod()
+    {
+        
+    }
+    
     protected ILLocal? LocalOrNull(int index)
     {
-        if ((uint)index < (uint)Locals.Count)
-            return Locals[index];
+        if ((uint)index < (uint)_locals.Count)
+            return _locals[index];
         return null;
     }
 
     protected ILLocal LocalOrThrow(int index)
     {
-        if ((uint)index < (uint)Locals.Count)
-            return Locals[index];
+        if ((uint)index < (uint)_locals.Count)
+            return _locals[index];
         throw new ArgumentOutOfRangeException(nameof(index), index, $"Local at index [{index}] does not exist");
     }
 
@@ -35,100 +60,77 @@ public abstract class ILMethod
         throw new ArgumentOutOfRangeException(nameof(index), index, $"Parameter at index [{index}] does not exist");
     }
 
-    protected virtual OpCodeInstruction Inflate(OpCodeInstruction instruction)
+    private OpCodeInstruction Inflate(OpCodeInstruction opCodeInstr)
     {
-        var opCode = instruction.OpCode;
+        var opCode = opCodeInstr.OpCode;
+
         if (opCode.OperandType == OperandType.InlineNone)
         {
+            // ldloc.* stloc.*
             if (opCode.TargetsLocal().Flatten().IsSome(out int index))
             {
-                return new OpCodeLocalInstruction(opCode, index)
+                return new OpCodeLocalInstruction(opCode, Locals[index])
                 {
-                    Local = LocalOrThrow(index),
+                    Offset = opCodeInstr.Offset,
                 };
             }
-            
+
+            // ldarg* starg*
             if (opCode.TargetsArgument().Flatten().IsSome(out index))
             {
-                return new OpCodeParameterInstruction(opCode, index)
+                return new OpCodeParameterInstruction(opCode, Parameters[index])
                 {
-                    Parameter = ParameterOrThrow(index),
+                    Offset = opCodeInstr.Offset,
                 };
             }
-            
-            if (opCode.TargetsI32Const().IsSome(out index))
+
+            // ldc.i4.*
+            if (opCode.TargetsI32Const().IsSome(out var i32))
             {
-                return new OpCodeValueInstruction<int>(opCode, index);
+                return new OpCodeValueInstruction<int>(opCode, i32)
+                {
+                    Offset = opCodeInstr.Offset,
+                };
             }
 
-            return instruction;
-        }
-        
-        if (instruction is OpCodeLocalInstruction localInstr)
-        {
-            localInstr.Local ??= LocalOrThrow(localInstr.Index);
-            return localInstr;
-        }
-        
-        if (instruction is OpCodeParameterInstruction paramInstr)
-        {
-            paramInstr.Parameter ??= ParameterOrThrow(paramInstr.Index);
-            return paramInstr;
-        }
-
-        if (instruction is OpCodeBranchInstruction branchInstr)
-        {
-            var foundLabel = Labels.TryGetOne(lbl => lbl.Offset == branchInstr.TargetOffset);
-            if (!foundLabel.IsOk(out var label))
+            return new OpCodeNoneInstruction(opCode)
             {
-                label = new ILLabel(Labels.Count, branchInstr.TargetOffset);
-            }
-
-            branchInstr.Label = label;
+                Offset = opCodeInstr.Offset,
+            };
         }
-        
-        return instruction;
+
+
+
+        return opCodeInstr;
     }
-
-    protected virtual void AddInstruction(Instruction instruction)
+    
+    internal virtual void AddInstruction(Instruction instruction)
     {
-        Instruction toAdd;
-        if (instruction is OpCodeInstruction opCodeInstruction)
+        // We can inflate certain instructions to contain additional information
+        if (instruction is OpCodeInstruction opCodeInstr)
         {
-            toAdd = Inflate(opCodeInstruction);
+            instruction = Inflate(opCodeInstr);
         }
-        else if (instruction is ILGeneratorInstruction ilGenInstruction)
-        {
-            Debugger.Break();
-            toAdd = ilGenInstruction;
-        }
-        else
-        {
-            Debugger.Break();
-            toAdd = instruction;
-        }
-        
-        _instructionStream.Add(toAdd);
+        _instructionStream.Add(instruction);
     }
-
-    public required Type OwnerType { get; init; }
-    public Type[] OwnerGenericTypes => OwnerType.GenericTypes() ?? [];
-
     
-    public required MethodAttributes MethodAttributes { get; init; }
-
-    public bool IsStatic => MethodAttributes.HasFlags(MethodAttributes.Static);
-    
-    public string? Name { get; init; } = null;
-    
-    public Type[] GenericTypes { get; init; } = [];
-    public required ParameterInfo ReturnParameter { get; init; }
-    public required ParameterInfo[] Parameters { get; init; }
-    public Type[] ParameterTypes => _parameterTypes ??= Parameters.ConvertAll(static p => p.ParameterType);
-
-    public abstract IReadOnlyList<ILLocal> Locals { get; init;}
-    public abstract IReadOnlyList<ILLabel> Labels { get; init;}
-
-    public IInstructions Instructions => _instructionStream;
-
+    public override string ToString()
+    {
+        return TextBuilder.New
+            .AppendIf(MethodAttributes.HasFlags(MethodAttributes.Static), "static ")
+            .AppendType(OwnerType)
+            .Append('.')
+            .AppendNameAndGenericTypes(Name, GenericTypes)
+            .AppendLine('(')
+            .EnumerateAndDelimit(Parameters, 
+                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param),
+                static tb => tb.Append(',').NewLine())
+            .NewLine()
+            .Append(") => ").AppendParameter(ReturnParameter).NewLine()
+            .AppendLine("-- Locals")
+            .Enumerate(Locals, (tb, local) => tb.Append(local.Index).Append(": ").Render(local).NewLine())
+            .AppendLine("-- CIL")
+            .LineDelimit(Instructions, (tb, instr) => instr.RenderTo(tb))
+            .ToStringAndDispose();
+    }
 }

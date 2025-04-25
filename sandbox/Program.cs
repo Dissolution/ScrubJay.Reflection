@@ -8,16 +8,17 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ScrubJay.Debugging;
 using ScrubJay.Enums;
-using ScrubJay.Reflection.IL;
+using ScrubJay.Reflection.IL.Decompilation;
+using ScrubJay.Reflection.Runtime;
 using ScrubJay.Reflection.Utilities;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
 
-
+/* DECOMPILE EVERYTHING!
 var methods = TypeHelper
     .GetAllTypes()
-    .SelectMany(static type => Reflect(type).Methods.AsList())
+    .SelectMany(static type => Reflect(type).Methods().AsList())
     .Distinct()
     // Abstract methods cannot have a body
     .Where(static method => !method.IsAbstract)
@@ -27,9 +28,10 @@ var methods = TypeHelper
     .Where(static method => !method.MethodImplementationFlags.HasAnyFlags(
         MethodImplAttributes.InternalCall,
         MethodImplAttributes.Runtime))
-    .ToList();
+    .ToArray();
+Random.Shared.Shuffle(methods);
 
-int count = methods.Count;
+int count = methods.Length;
 for (var i = 0; i < count; i++)
 {
     var method = methods[i];
@@ -38,7 +40,7 @@ for (var i = 0; i < count; i++)
     if (tryDecompile.IsOkWithError(out var ok, out var error))
     {
         var display = ok.ToString();
-        if (ok.Instructions.Count >= 20)
+        if (ok.Instructions.Count >= 200)
         {
             Console.Clear();
             Console.WriteLine(display);
@@ -54,25 +56,14 @@ for (var i = 0; i < count; i++)
     }
 }
 
-
 Debugger.Break();
+*/
 
-//
-//var opCodes = OpCoding.AllOpCodes;
-//Debugger.Break();
-//
-//
-//DynamicMethod method = RuntimeBuilder.CreateDynamicMethod<Action>();
-//var gen = method.GetILGenerator();
-//gen.Emit(OpCodes.Ret);
-//var act = method.CreateDelegate<Action>();
-//act();
-//
-//byte[] il = ReflectionExtensions.GetILBytes(method);
-//
-//Expression<Func<int>> expr = () => 147;
-//var il2 = ReflectionExtensions.GetILBytes(expr.Compile().Method);
+
+
 
 Debugger.Break();
 return 0;
+
+
 

@@ -1,65 +1,79 @@
-﻿namespace ScrubJay.Reflection.IL.Instructions;
+﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
+
+namespace ScrubJay.Reflection.IL.Instructions;
 
 [PublicAPI]
-public sealed class OpCodeBranchInstruction : OpCodeInstruction
+public class OpCodeLabelInstruction : OpCodeBranchInstruction
 {
-    public int Delta { get; }
-    public int DeltaSize { get; }
-    
-    public ILOffset TargetOffset { get; }
-    public ILLabel? Label { get; set; }
+    public override int Delta => (int)(TargetOffset - Offset - DeltaTypeSize - 1);
 
-    public override sealed int Size => OpCode.Size + DeltaSize;
-  
+    public override ILOffset TargetOffset => Label.Offset;
+
+    public ILLabel Label { get; }
+
+    public OpCodeLabelInstruction(OpCode opCode, ILLabel label)
+        : base(opCode)
+    {
+        this.Label = label;
+    }
+    
+    public override void RenderTo<B>(B builder)
+    {
+        builder.Invoke(base.RenderTo!)
+            .Render(Label);
+    }
+}
+
+
+
+
+[PublicAPI]
+public class OpCodeBranchInstruction : OpCodeInstruction
+{
+    public virtual int Delta { get; }
+    
+    public int DeltaTypeSize { get; }
+    
+    public virtual ILOffset TargetOffset =>  Offset + Delta + DeltaTypeSize + 1;
+
+    public override sealed int Size => OpCode.Size + DeltaTypeSize;
+
+    protected OpCodeBranchInstruction(OpCode opCode)
+        : base(opCode)
+    {
+        this.DeltaTypeSize = opCode.OperandType switch
+        {
+            OperandType.InlineBrTarget => sizeof(int),
+            OperandType.ShortInlineBrTarget => sizeof(sbyte),
+            _ => throw new ArgumentException(null, nameof(OpCode)),
+        };
+    }
+    
     public OpCodeBranchInstruction(OpCode opCode, int delta)
         : base(opCode)
     {
-        if (opCode.OperandType == OperandType.InlineBrTarget)
+        switch (opCode.OperandType)
         {
-            this.Delta = delta;
-            this.DeltaSize = sizeof(int);
+            case OperandType.InlineBrTarget:
+                this.Delta = delta;
+                this.DeltaTypeSize = sizeof(int);
+                break;
+            case OperandType.ShortInlineBrTarget:
+                Validate.InBounds(delta, sbyte.MinValue, (int)sbyte.MaxValue + 1)
+                    .ThrowIfError();
+                this.Delta = (sbyte)delta;
+                this.DeltaTypeSize = sizeof(sbyte);
+                break;
+            default:
+                throw new ArgumentException(null, nameof(OpCode));
         }
-        else if (opCode.OperandType == OperandType.ShortInlineBrTarget)
-        {
-            Validate.InBounds(delta, sbyte.MinValue, (int)sbyte.MaxValue + 1)
-                .ThrowIfError();
-            this.Delta = (sbyte)delta;
-            this.DeltaSize = sizeof(sbyte);
-        }
-        else
-        {
-            throw new ArgumentException(null, nameof(OpCode));
-        }
-
-        this.TargetOffset = Offset + Delta + DeltaSize + 1;
     }
 
-    public OpCodeBranchInstruction(OpCode opCode, ILLabel label)
-        : base(opCode)
-    {
-        if (opCode.OperandType == OperandType.InlineBrTarget)
-        {
-            this.DeltaSize = sizeof(int);
-        }
-        else if (opCode.OperandType == OperandType.ShortInlineBrTarget)
-        {
-            this.DeltaSize = sizeof(sbyte);
-        }
-        else
-        {
-            throw new ArgumentException(null, nameof(OpCode));
-        }
-        
-        this.Label = label;
-        this.TargetOffset = label.Offset;
-        this.Delta = TargetOffset - Offset - DeltaSize - 1;
-    }
 
     public override void RenderTo<B>(B builder)
     {
         builder.Invoke(base.RenderTo!)
-            .If(Validate.IsNotNull(Label),
-                static (tb, lbl) => tb.Render(lbl),
-                (tb, _) => tb.Render(TargetOffset));
+            .Render(TargetOffset)
+            .Append(':');
     }
 }
