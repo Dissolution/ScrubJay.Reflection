@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Functional;
+using ScrubJay.Reflection.Adapting;
 using ScrubJay.Reflection.Runtime;
 
 namespace ScrubJay.Reflection.Tests.RuntimeTests.FieldThingsTests;
@@ -11,7 +12,7 @@ public class SetterTests
         public void ExactWorks()
         {
             var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var setter = FieldThings.CreateSetter<ClassEntity, Guid>(idField);
+            var setter = FieldSetterAdapter<ClassEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -28,7 +29,7 @@ public class SetterTests
         public void FromObjectWorks()
         {
             var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var setter = FieldThings.CreateSetter<ClassEntity, object>(idField);
+            var setter = FieldSetterAdapter<ClassEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -50,7 +51,7 @@ public class SetterTests
                 .Reflect<EntityHolder>()
                 .Fields<ClassEntity>()
                 .OneOrThrow();
-            var setter = FieldThings.CreateSetter<EntityHolder, NameStampClassEntity>(entityField);
+            var setter = FieldSetterAdapter<EntityHolder, NameStampClassEntity>.Instance.TryAdapt(entityField).OkOrThrow();
             Assert.NotNull(setter);
 
             int i = 0;
@@ -73,7 +74,7 @@ public class SetterTests
         public void ExactWorks()
         {
             var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var setter = FieldThings.CreateSetter<StructEntity, Guid>(idField);
+            var setter = FieldSetterAdapter<StructEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -90,7 +91,7 @@ public class SetterTests
         public void FromObjectWorks()
         {
             var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var setter = FieldThings.CreateSetter<StructEntity, object>(idField);
+            var setter = FieldSetterAdapter<StructEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -111,7 +112,7 @@ public class SetterTests
     public void StaticExactSetterWorks()
     {
         var idField = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
-        var setter = FieldThings.CreateSetter<None, Guid>(idField);
+        var setter = FieldSetterAdapter<None, Guid>.Instance.TryAdapt(idField).OkOrThrow();
         Assert.NotNull(setter);
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))

@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Runtime.Conversion;
-
-namespace ScrubJay.Reflection.IL.Emission.Adapting;
+﻿namespace ScrubJay.Reflection.Adapting;
 
 public delegate T Getter<I, out T>([AllowNull, Instance] ref I instance);
 public delegate void Setter<I, in T>([AllowNull, Instance] ref I instance, T value);

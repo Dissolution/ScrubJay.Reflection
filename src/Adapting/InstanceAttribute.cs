@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.Runtime.Conversion;
+﻿namespace ScrubJay.Reflection.Adapting;
 
 /// <summary>
 /// Marker attribute to specify the parameter of a delegate is the instance

@@ -1,9 +1,9 @@
-﻿using ScrubJay.Reflection.IL.Emission.Arguments;
+﻿using ScrubJay.Reflection.Adapting.Arguments;
 using ScrubJay.Reflection.Naming;
 
-namespace ScrubJay.Reflection.IL.Emission.Adapting;
+namespace ScrubJay.Reflection.Adapting;
 
-public class FieldSetterAdapter<I, T> : MemberDelegateAdapter<FieldInfo, Setter<I, T>>
+public class FieldSetterAdapter<I, T> : MemberDelegateAdapter<FieldSetterAdapter<I, T>, FieldInfo, Setter<I, T>>
 {
     public override Result<Setter<I, T>> TryAdapt(FieldInfo field)
     {

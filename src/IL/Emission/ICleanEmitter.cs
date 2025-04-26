@@ -1,4 +1,5 @@
-﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
+﻿using ScrubJay.Reflection.IL.Instructions;
+using ScrubJay.Reflection.IL.LabelOffSetManagement;
 
 namespace ScrubJay.Reflection.IL.Emission;
 
@@ -18,6 +19,8 @@ public interface ICleanEmitter<E> : IEmitter<E>
     E Compare(CompareOp op, bool unsigned = false);
 
     E Push<T>(T value);
+    E PushDefault<T>();
+    E PushDefaultAddr<T>();
 
     E LoadArg(int index);
     E LoadArg(ParameterInfo parameter);
@@ -60,7 +63,7 @@ public interface ICleanEmitter<E> : IEmitter<E>
     
     
     // try/catch/finally
-    //TryCatchFinallyBuilder<E> Try()
+    ITryCatchFinally<E> Try(Action<E, ILLabel> tryBlock);
     E Leave(ILLabel label);
 
     E Throw();
@@ -72,24 +75,31 @@ public interface ICleanEmitter<E> : IEmitter<E>
 }
 
 
-public class CleanEmitter : 
-    CleanEmitterBase<CleanEmitter>, 
+public class CleanEmitter : CleanEmitterBase<CleanEmitter, Emitter>,
     ICleanEmitter<CleanEmitter>
 {
-
-    public CleanEmitter(DynamicMethodBuilder method, ILGenerator ilGenerator) : base(method, ilGenerator)
+    public Emitter Simple => _emitter;
+    
+    public CleanEmitter(Emitter emitter) : base(emitter)
     {
+        
     }
 }
 
 
-public class CleanEmitterBase<E> : EmitterBase<E>, ICleanEmitter<E>
-    where E : CleanEmitterBase<E>
+public class CleanEmitterBase<E, W> : BuilderBase<E>, ICleanEmitter<E>
+    where E : CleanEmitterBase<E, W>
+    where W : ISimpleEmitter<W>
 {
-    protected internal CleanEmitterBase(DynamicMethodBuilder method, ILGenerator ilGenerator) 
-        : base(method, ilGenerator)
+    protected readonly W _emitter;
+    
+    protected internal CleanEmitterBase(W emitter)
     {
+        _emitter = emitter;
     }
+
+    public IInstructions Instructions => _emitter.Instructions;
+    
     
     public E Math(MathOp op, bool overflowCheck = false, bool unsigned = false) => throw new NotImplementedException();
 
@@ -106,6 +116,10 @@ public class CleanEmitterBase<E> : EmitterBase<E>, ICleanEmitter<E>
     public E Compare(CompareOp op, bool unsigned = false) => throw new NotImplementedException();
 
     public E Push<T>(T value) => throw new NotImplementedException();
+
+    public E PushDefault<T>() => throw new NotImplementedException();
+
+    public E PushDefaultAddr<T>() => throw new NotImplementedException();
 
     public E LoadArg(int index) => throw new NotImplementedException();
 
@@ -157,9 +171,19 @@ public class CleanEmitterBase<E> : EmitterBase<E>, ICleanEmitter<E>
 
     public E Return() => throw new NotImplementedException();
 
+    public E Box<T>() => throw new NotImplementedException();
+
+    public E Castclass<C>() where C : class => throw new NotImplementedException();
+
+    public E Unbox<T>() => throw new NotImplementedException();
+
     public E BoxIfNeeded<T>() => throw new NotImplementedException();
 
     public E Conv<T>(bool overflowCheck = false, bool unsigned = false) => throw new NotImplementedException();
+
+    public ITryCatchFinally<E> Try(Action<E, ILLabel> tryBlock) => throw new NotImplementedException();
+
+    public E Leave(ILLabel label) => throw new NotImplementedException();
 
     public E Throw() => throw new NotImplementedException();
 

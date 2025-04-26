@@ -3,7 +3,8 @@ using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
 
-public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<TryCatchFinally<E>, E>
+public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<ITryCatchFinally<E>, E>,
+    ITryCatchFinally<E> 
     where E : IGenEmitter<E>
 {
     internal TryCatchFinally(E emitter) : base(emitter)
@@ -12,18 +13,38 @@ public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<TryCatchFinally<
     }
 }
 
-public abstract class TryCatchFinallyBuilder<B, E> : BuilderBase<B>
-    where B : TryCatchFinallyBuilder<B, E>
+
+public interface ITryCatchFinally<E> : ITryCatchFinallyBuilder<ITryCatchFinally<E>, E>;
+
+public interface ITryCatchFinallyBuilder<B, E> : IBuilder<B>
+    where B : ITryCatchFinallyBuilder<B, E>
+{
+    B Try(Action<E, ILLabel> emitTryBlock);
+
+    B Catch<X>(Action<E, ILLabel> emitCatchBlock)
+        where X : Exception;
+
+    B Catch(Type exceptionType, Action<E, ILLabel> emitCatchBlock);
+
+    E Finally();
+
+    E Finally(Action<E, ILLabel> emitFinallyBlock);
+}
+
+public abstract class TryCatchFinallyBuilder<B, E> : IBuilder<B>,
+    ITryCatchFinallyBuilder<B,E> 
+    where B : ITryCatchFinallyBuilder<B, E>
     where E : IGenEmitter<E>
 {
+    private readonly B _builder;
     private readonly E _emitter;
     private readonly ILLabel _endLabel;
 
     public ILLabel EndLabel => _endLabel;
 
     protected TryCatchFinallyBuilder(E emitter)
-        : base()
     {
+        _builder = (B)(ITryCatchFinallyBuilder<B,E>)this;
         _emitter = emitter;
         _emitter.BeginExceptionBlock(out _endLabel);
     }

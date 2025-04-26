@@ -1,4 +1,5 @@
-﻿using ScrubJay.Reflection.Searching;
+﻿using ScrubJay.Reflection.MosDef;
+using ScrubJay.Reflection.Searching;
 #if NETFRAMEWORK || NETSTANDARD2_0
 using System.Runtime.Serialization;
 #endif
@@ -10,9 +11,9 @@ public static class EmissionHelper
 {
     public static MethodInfo Type_GetTypeFromHandle_Method { get; }
     public static MethodInfo Method_GetMethodFromHandle_Method { get; }
-    
     public static MethodInfo GetUninitializedObject_Method { get; }
-
+    public static MethodInfo Delegate_GetInvocationList_Method { get; }
+    
     static EmissionHelper()
     {
         Type_GetTypeFromHandle_Method = Reflect<Type>()
@@ -24,6 +25,13 @@ public static class EmissionHelper
             .Public.Static.Methods()
             .Named(nameof(MethodBase.GetMethodFromHandle))
             .ParamCount(1)
+            .OneOrThrow();
+
+        Delegate_GetInvocationList_Method = Reflect<Delegate>()
+            .Instance.Methods()
+            .Named(nameof(Delegate.GetInvocationList))
+            .NoParams
+            .Returning<Delegate[]>()
             .OneOrThrow();
         
         

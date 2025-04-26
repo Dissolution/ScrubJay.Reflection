@@ -1,9 +1,9 @@
-﻿using ScrubJay.Reflection.IL.Emission.Arguments;
+﻿using ScrubJay.Reflection.Adapting.Arguments;
 using ScrubJay.Reflection.Naming;
 
-namespace ScrubJay.Reflection.IL.Emission.Adapting;
+namespace ScrubJay.Reflection.Adapting;
 
-public class FieldGetterAdapter<I, T> : MemberDelegateAdapter<FieldInfo, Getter<I, T>>
+public class FieldGetterAdapter<I, T> : MemberDelegateAdapter<FieldGetterAdapter<I, T>, FieldInfo, Getter<I, T>>
 {
     public override Result<Getter<I, T>> TryAdapt(FieldInfo field)
     {

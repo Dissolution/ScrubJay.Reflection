@@ -53,7 +53,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     IOpCodeEmitter<E>,
     IGenEmitter<E>,
     IOperationEmitter<E>
-    where E : IEmitter<E>
+    where E : EmitterBase<E>
 {
     protected readonly E _emitter;
 
@@ -484,90 +484,84 @@ public abstract class EmitterBase<E> : EmitterBase,
 #region Branching
 
 #region Comparison
-
-    public E Beq(ILLabel label)
-    {
-        return Emit(OpCodes.Beq, label);
-    }
-
+    public E Brtrue(ILLabel label) => Emit(OpCodes.Brtrue, label);
+    public E Brtrue_S(ILLabel label) => Brtrue(label);
+    public E Brfalse(ILLabel label) => Emit(OpCodes.Brfalse, label);
+    public E Brfalse_S(ILLabel label) => Brfalse(label);
+    
+    public E Beq(ILLabel label) => Emit(OpCodes.Beq, label);
     public E Beq_S(ILLabel label) => Beq(label);
-
-    public E Bge(ILLabel label)
-    {
-        return Emit(OpCodes.Bge, label);
-    }
-
-    public E Bge_S(ILLabel label) => Bge(label);
-
-    public E Bge_Un(ILLabel label)
-    {
-        return Emit(OpCodes.Bge_Un, label);
-    }
-
-    public E Bge_Un_S(ILLabel label) => Bge_Un(label);
-
-    public E Bgt(ILLabel label)
-    {
-        return Emit(OpCodes.Bgt, label);
-    }
-
+    public E Bne_Un(ILLabel label) => Emit(OpCodes.Bne_Un, label);
+    public E Bne_Un_S(ILLabel label) => Bne_Un(label);
+    
+    public E Bgt(ILLabel label) => Emit(OpCodes.Bgt, label);
     public E Bgt_S(ILLabel label) => Bgt(label);
-
-    public E Bgt_Un(ILLabel label)
-    {
-        return Emit(OpCodes.Bgt_Un, label);
-    }
-
+    public E Bgt_Un(ILLabel label) => Emit(OpCodes.Bgt_Un, label);
     public E Bgt_Un_S(ILLabel label) => Bgt_Un(label);
-
-    public E Ble(ILLabel label)
-    {
-        return Emit(OpCodes.Ble, label);
-    }
-
+    
+    public E Bge(ILLabel label) => Emit(OpCodes.Bge, label);
+    public E Bge_S(ILLabel label) => Bge(label);
+    public E Bge_Un(ILLabel label) => Emit(OpCodes.Bge_Un, label);
+    public E Bge_Un_S(ILLabel label) => Bge_Un(label);
+    
+    public E Blt(ILLabel label) => Emit(OpCodes.Blt, label);
+    public E Blt_S(ILLabel label) => Blt(label);
+    public E Blt_Un(ILLabel label) => Emit(OpCodes.Blt_Un, label);
+    public E Blt_Un_S(ILLabel label) => Blt_Un(label);
+    
+    public E Ble(ILLabel label) => Emit(OpCodes.Ble, label);
     public E Ble_S(ILLabel label) => Ble(label);
-
-    public E Ble_Un(ILLabel label)
-    {
-        return Emit(OpCodes.Ble_Un, label);
-    }
-
+    public E Ble_Un(ILLabel label) => Emit(OpCodes.Ble_Un, label);
     public E Ble_Un_S(ILLabel label) => Ble_Un(label);
 
-    public E Blt(ILLabel label)
+    public E Branch(ILLabel label) => Br(label);
+
+    public E Branch(out ILLabel label,
+        [CallerArgumentExpression(nameof(label))]
+        string? labelName = null)
+        => DefineLabel(out label, labelName).Branch(label);
+    
+    public E Branch(CompareOp comparison, ILLabel label, bool unsigned = false)
     {
-        return Emit(OpCodes.Blt, label);
+        if (comparison is CompareOp.NotEqual or (CompareOp.LessThan | CompareOp.GreaterThan))
+            return Bne_Un(label);
+        if (comparison == CompareOp.Equal)
+            return Beq(label);
+        if (comparison == CompareOp.LessThan)
+            return unsigned ? Blt_Un(label) : Blt(label);
+        if (comparison == CompareOp.LessThanOrEqual)
+            return unsigned ? Ble_Un(label) : Ble(label);
+        if (comparison == CompareOp.GreaterThan)
+            return unsigned ? Bgt_Un(label) : Bgt(label);
+        if (comparison == CompareOp.GreaterThanOrEqual)
+            return unsigned ?  Bge_Un(label) : Bge(label);
+        if (comparison == CompareOp.Unconditional)
+            return Br(label);
+        throw InvalidEnumException.Create(comparison);
     }
 
-    public E Blt_S(ILLabel label) => Blt(label);
-
-    public E Blt_Un(ILLabel label)
+    public E Branch(CompareOp comparison, out ILLabel label, bool unsigned = false,
+        [CallerArgumentExpression(nameof(label))]
+        string? labelName = null)
     {
-        return Emit(OpCodes.Blt_Un, label);
+        return DefineLabel(out label, labelName)
+            .Branch(comparison, label, unsigned);
     }
 
-    public E Blt_Un_S(ILLabel label) => Blt_Un(label);
-
-    public E Bne_Un(ILLabel label)
+    public E Branch(bool boolean, ILLabel label)
     {
-        return Emit(OpCodes.Bne_Un, label);
+        if (boolean)
+            return Brtrue(label);
+        return Brfalse(label);
     }
-
-    public E Bne_Un_S(ILLabel label) => Bne_Un(label);
-
-    public E Brfalse(ILLabel label)
+    
+    public E Branch(bool boolean, out ILLabel label,
+        [CallerArgumentExpression(nameof(label))]
+        string? labelName = null)
     {
-        return Emit(OpCodes.Brfalse, label);
+        return DefineLabel(out label, labelName)
+            .Branch(boolean, label);
     }
-
-    public E Brfalse_S(ILLabel label) => Brfalse(label);
-
-    public E Brtrue(ILLabel label)
-    {
-        return Emit(OpCodes.Brtrue, label);
-    }
-
-    public E Brtrue_S(ILLabel label) => Brtrue(label);
 
 #endregion
 
@@ -1364,40 +1358,55 @@ public abstract class EmitterBase<E> : EmitterBase,
 
 #region Custom Helpers
 
-//    /// <summary>
-//    /// Pushes a <typeparamref name="T"/> value onto the stream using the appropriate operations
-//    /// </summary>
-//    /// <param name="value"></param>
-//    /// <typeparam name="T"></typeparam>
-//    /// <returns></returns>
-//    /// <exception cref="NotImplementedException"></exception>
-//    public E PushValue<T>(T? value)
-//    {
-//        return value switch
-//        {
-//            null => Ldnull(),
-//            bool boolean => boolean ? Ldc_I4_1() : Ldc_I4_0(),
-//            sbyte i8 => Ldc_I4_S(i8),
-//            byte u8 => Ldc_I4(u8),
-//            short i16 => Ldc_I4(i16),
-//            ushort u16 => Ldc_I4(u16),
-//            int i32 => Ldc_I4(i32),
-//            uint u32 => Ldc_I8(u32),
-//            long i64 => Ldc_I8(i64),
-//            ulong u64 => Ldc_I8((long)u64).Conv_U8(),
-//            float f32 => Ldc_R4(f32),
-//            double f64 => Ldc_R8(f64),
-//            string str => Ldstr(str),
-//            Type type => Ldtoken(type).Call(EmissionHelper.Type_GetTypeFromHandle_Method),
-//            MethodInfo method => Ldtoken(method).Call(EmissionHelper.Method_GetMethodFromHandle_Method),
-//            ILLocal local => Ldloc(local),
-//            _ => throw new NotImplementedException(),
-//        };
-//    }
+    /// <summary>
+    /// Pushes a <typeparamref name="T"/> value onto the stream using the appropriate operations
+    /// </summary>
+    /// <param name="value"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    /// <exception cref="NotImplementedException"></exception>
+    public E PushValue<T>(T? value)
+    {
+        return value switch
+        {
+            null => Ldnull(),
+            bool boolean => boolean ? Ldc_I4_1() : Ldc_I4_0(),
+            sbyte i8 => Ldc_I4_S(i8),
+            byte u8 => Ldc_I4(u8),
+            short i16 => Ldc_I4(i16),
+            ushort u16 => Ldc_I4(u16),
+            int i32 => Ldc_I4(i32),
+            uint u32 => Ldc_I8(u32),
+            long i64 => Ldc_I8(i64),
+            ulong u64 => Ldc_I8((long)u64).Conv_U8(),
+            float f32 => Ldc_R4(f32),
+            double f64 => Ldc_R8(f64),
+            string str => Ldstr(str),
+            Type type => Ldtoken(type).Call(EmissionHelper.Type_GetTypeFromHandle_Method),
+            MethodInfo method => Ldtoken(method).Call(EmissionHelper.Method_GetMethodFromHandle_Method),
+            ILLocal local => Ldloc(local),
+            _ => throw new NotImplementedException(),
+        };
+    }
 
+    public E PushDefault(Type type)
+    {
+        if (type.IsValueType)
+        {
+            // we have to use a local
+            return DeclareLocal(type, out var temp)
+                .Ldloca(temp)
+                .Initobj(type)
+                .Ldloc(temp);
+        }
+        else
+        {
+            // defalt is null
+            return Ldnull();
+        }
+    }
 
-
-    public E PushDefault<T>() => EmitterExtensions.PushDefault<E>(_emitter, typeof(T));
+    public E PushDefault<T>() => PushDefault(typeof(T));
 
     public E PushDefaultAddr(Type type)
     {
@@ -1429,28 +1438,9 @@ public abstract class EmitterBase<E> : EmitterBase,
         return DefineLabel(out label, labelName)
             .MarkLabel(label);
     }
+    
 
-
-    public E Branch(CompareOp comparison, ILLabel label)
-    {
-        if (comparison is CompareOp.NotEqual or (CompareOp.LessThan | CompareOp.GreaterThan))
-            return Bne_Un(label);
-        if (comparison == CompareOp.Equal)
-            return Beq(label);
-        if (comparison == CompareOp.LessThan)
-            return Blt(label);
-        if (comparison == CompareOp.LessThanOrEqual)
-            return Ble(label);
-        if (comparison == CompareOp.GreaterThan)
-            return Bgt(label);
-        if (comparison == CompareOp.GreaterThanOrEqual)
-            return Bge(label);
-        if (comparison == CompareOp.Unconditional)
-            return Br(label);
-        throw InvalidEnumException.Create(comparison);
-    }
-
-    public TryCatchFinally<E> Try(Action<E, ILLabel> tryBlock)
+    public ITryCatchFinally<E> Try(Action<E, ILLabel> tryBlock)
     {
         return new TryCatchFinally<E>(_emitter)
             .Try(tryBlock);

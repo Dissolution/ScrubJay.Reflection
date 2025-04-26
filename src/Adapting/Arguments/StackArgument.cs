@@ -1,7 +1,6 @@
 ﻿using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.IL.Emission.Arguments;
 
-namespace ScrubJay.Reflection.Runtime;
+namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
 public sealed class StackArgument : Argument,

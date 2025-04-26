@@ -16,9 +16,7 @@ using ScrubJay.Reflection.Utilities;
 
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-
-var emitter = new CleanEmitter(default!, default!);
-emitter.
+var emitter = new CleanEmitter(default!);
 
 
 /* DECOMPILE EVERYTHING!

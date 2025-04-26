@@ -1,10 +1,13 @@
-﻿using ScrubJay.Reflection.Validation;
+﻿using ScrubJay.Reflection.IL.Emission;
+using ScrubJay.Reflection.Validation;
 
-namespace ScrubJay.Reflection.IL.Emission.Arguments;
+namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
-public abstract class Argument : 
+public abstract class Argument :
+#if NET7_0_OR_GREATER
     IEqualityOperators<Argument, Argument, bool>,
+#endif
     IEquatable<Argument>,
     IRenderable
 {
@@ -30,15 +33,15 @@ public abstract class Argument :
     public abstract Emitter LoadAddr(Emitter emitter);
 
     public abstract Emitter Store(Emitter emitter);
-    
+
     public abstract bool Equals(Argument? other);
 
     public abstract void RenderTo<B>(B builder)
         where B : TextBuilderBase<B>;
-    
-    
+
+
     public bool IsByRef() => Type.IsByRef;
-    
+
     public bool IsByRef(out Type rawType)
     {
         if (Type.IsByRef)
@@ -49,7 +52,7 @@ public abstract class Argument :
         rawType = Type;
         return false;
     }
-    
+
     public virtual Emitter LoadAsInstance(Emitter emitter)
     {
         // is this arg a ref?
@@ -86,7 +89,7 @@ public abstract class Argument :
             return Equals(argument);
         return false;
     }
-    
+
     public override sealed string ToString()
     {
         return TextBuilder.Build(RenderTo);

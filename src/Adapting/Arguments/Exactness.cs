@@ -1,10 +1,12 @@
-﻿namespace ScrubJay.Reflection.IL.Emission.Arguments;
+﻿namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
 [StructLayout(LayoutKind.Explicit, Size = 4)]
 public readonly struct Exactness :
+#if NET7_0_OR_GREATER
     IEqualityOperators<Exactness, Exactness, bool>,
     IComparisonOperators<Exactness, Exactness, bool>,
+#endif
     IEquatable<Exactness>,
     IComparable<Exactness>
 {
@@ -31,14 +33,14 @@ public readonly struct Exactness :
     public static Exactness BaseClass(int levels)
     {
         if (levels < 1)
-            throw new ArgumentOutOfRangeException(nameof(levels), levels, "There must be at least one level of base class nesting")
+            throw new ArgumentOutOfRangeException(nameof(levels), levels, "There must be at least one level of base class nesting");
         return new(BASE_CLASS_OFFSET * (uint)levels);
     }
 
     public static Exactness Interface(int levels)
     {
         if (levels < 1)
-            throw new ArgumentOutOfRangeException(nameof(levels), levels, "There must be at least one level of base class nesting")
+            throw new ArgumentOutOfRangeException(nameof(levels), levels, "There must be at least one level of base class nesting");
         return new(INTERFACE_OFFSET * (uint)levels);
     }
 

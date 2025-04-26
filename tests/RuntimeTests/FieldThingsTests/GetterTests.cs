@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Functional;
+using ScrubJay.Reflection.Adapting;
 using ScrubJay.Reflection.Runtime;
 
 namespace ScrubJay.Reflection.Tests.RuntimeTests.FieldThingsTests;
@@ -11,7 +12,7 @@ public class GetterTests
         public void ExactWorks()
         {
             var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldThings.CreateGetter<ClassEntity, Guid>(idField);
+            var getter = FieldGetterAdapter<ClassEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -28,7 +29,7 @@ public class GetterTests
         public void AsObjectWorks()
         {
             var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldThings.CreateGetter<ClassEntity, object>(idField);
+            var getter = FieldGetterAdapter<ClassEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -50,7 +51,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = FieldThings.CreateGetter<EntityHolder, ClassEntity>(entityField);
+            var getter = FieldGetterAdapter<EntityHolder, ClassEntity>.Instance.TryAdapt(entityField).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -71,7 +72,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = FieldThings.CreateGetter<EntityHolder, IEntity>(entityField);
+            var getter = FieldGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(entityField).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -92,7 +93,7 @@ public class GetterTests
         public void ExactWorks()
         {
             var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldThings.CreateGetter<StructEntity, Guid>(idField);
+            var getter = FieldGetterAdapter<StructEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -109,7 +110,7 @@ public class GetterTests
         public void AsObjectWorks()
         {
             var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldThings.CreateGetter<StructEntity, object>(idField);
+            var getter = FieldGetterAdapter<StructEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -119,7 +120,7 @@ public class GetterTests
 
                 object? result = getter(ref entity);
                 Assert.NotNull(result);
-                Assert.IsType(typeof(Guid), result);
+                Assert.IsType<Guid>(result);
                 Assert.Equal(guid, (Guid)result);
             }
         }
@@ -131,7 +132,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Fields<StructEntity>()
                 .OneOrThrow();
-            var getter = FieldThings.CreateGetter<EntityHolder, IEntity>(entityField);
+            var getter = FieldGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(entityField).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -151,7 +152,7 @@ public class GetterTests
     public void StaticExactGetterWorks()
     {
         var idField = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
-        var getter = FieldThings.CreateGetter<None, Guid>(idField);
+        var getter = FieldGetterAdapter<None, Guid>.Instance.TryAdapt(idField).OkOrThrow();
         Assert.NotNull(getter);
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))

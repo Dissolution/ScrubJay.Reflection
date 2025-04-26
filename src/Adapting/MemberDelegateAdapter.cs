@@ -1,7 +1,4 @@
-﻿using System.Collections.Concurrent;
-using ScrubJay.Reflection.Collections;
-
-namespace ScrubJay.Reflection.IL.Emission.Adapting;
+﻿namespace ScrubJay.Reflection.Adapting;
 
 public abstract class MemberDelegateAdapter<S, M, D>
     where S : MemberDelegateAdapter<S, M, D>

@@ -1,7 +1,7 @@
 ﻿using ScrubJay.Debugging;
 using Emit = System.Action<ScrubJay.Reflection.IL.Emission.Emitter>;
 
-namespace ScrubJay.Reflection.IL.Emission.Arguments;
+namespace ScrubJay.Reflection.Adapting.Arguments;
 
 public class ArgumentConverter
 {
@@ -144,7 +144,7 @@ public class ArgumentConverter
                 return Ok<Emit>(emitter => emitter.Pop());
             }
 
-            return Ok<Emit>(emitter => emitter);
+            return Ok<Emit>(_ => { });
         }
 
         notyet:

@@ -6,8 +6,12 @@ public interface ISimpleEmitter<E> : IGenEmitter<E>, IOperationEmitter<E>, IEmit
 
 public sealed class Emitter : EmitterBase<Emitter>, ISimpleEmitter<Emitter>
 {
+    public CleanEmitter Clean => new(this);
+    
     public Emitter(DynamicMethodBuilder method, ILGenerator ilGenerator) 
         : base(method, ilGenerator)
     {
     }
+    
+    
 }
