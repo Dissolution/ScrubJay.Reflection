@@ -9,6 +9,15 @@ public static class ParameterInfoExtensions
     public static bool IsParams(this ParameterInfo parameter)
         => Attribute.IsDefined(parameter, typeof(ParamArrayAttribute), inherit: true);
 
+    /// <summary>
+    /// Is this <see cref="ParameterInfo"/> for an <see cref="object"/> <see cref="Array"/>?
+    /// </summary>
+    public static bool IsObjectArray(this ParameterInfo parameter)
+    {
+        return parameter is { IsIn: false, IsOut: false } &&
+            parameter.ParameterType == typeof(object[]);
+    }
+    
     public static TRK TypeRefKind(this ParameterInfo? parameter)
     {
         TRK kind = TRK.Default;

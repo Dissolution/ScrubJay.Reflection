@@ -8,15 +8,40 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using ScrubJay.Debugging;
 using ScrubJay.Enums;
+using ScrubJay.Reflection.Cloning;
 using ScrubJay.Reflection.Expressions;
 using ScrubJay.Reflection.IL.Decompilation;
 using ScrubJay.Reflection.IL.Emission;
 using ScrubJay.Reflection.Runtime;
+using ScrubJay.Reflection.Sandbox;
 using ScrubJay.Reflection.Utilities;
 
-Console.OutputEncoding = System.Text.Encoding.UTF8;
+//Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-var emitter = new CleanEmitter(default!);
+
+
+
+
+
+
+
+
+/*
+var dict = new Dictionary<string, object?>(StringComparer.OrdinalIgnoreCase)
+{
+    { "TJ", 147 },
+    { "Id", Guid.NewGuid() },
+    { "arr", new byte[3] { 1, 4, 7 } },
+};
+
+var json = DeepJson.Render(dict);
+
+json = DeepJson.Render(new Exception());
+
+Console.WriteLine(json);
+Debugger.Break();
+*/
+
 
 
 /* DECOMPILE EVERYTHING!

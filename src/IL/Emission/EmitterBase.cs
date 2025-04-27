@@ -59,7 +59,7 @@ public abstract class EmitterBase<E> : EmitterBase,
 
     public IInstructions Instructions => _method.Instructions;
 
-    protected EmitterBase(DynamicMethodBuilder method, ILGenerator ilGenerator)
+    protected EmitterBase(DynamicILMethod method, ILGenerator ilGenerator)
         : base(method, ilGenerator)
     {
         _emitter = (E)(IEmitter<E>)this;

@@ -41,7 +41,7 @@ public class ILGeneratorInstruction : Instruction
 {
     public ILGeneratorMethod ILGenMethod { get;  }
 
-    public sealed override int Size => 0;
+    public override sealed int Size => 0;
     
     public ILGeneratorInstruction(ILGeneratorMethod ilGenMethod)
     {

@@ -1,4 +1,7 @@
-﻿namespace ScrubJay.Reflection.Extensions;
+﻿using ScrubJay.Reflection.IL.Emission;
+using ScrubJay.Reflection.Utilities;
+
+namespace ScrubJay.Reflection.Extensions;
 
 [PublicAPI]
 public static class TypeExtensions
@@ -51,6 +54,13 @@ public static class TypeExtensions
     {
         if (type is null || type == typeof(void))
             return null;
+        return type;
+    }
+    
+    public static Type VoidIfNull(this Type? type)
+    {
+        if (type is null)
+            return typeof(void);
         return type;
     }
 
@@ -129,6 +139,7 @@ public static class TypeExtensions
 
 #endregion
     
+    #region ValueTuple
     private static readonly HashSet<Type> _valueTupleTypes =
     [
         typeof(ValueTuple),
@@ -149,5 +160,18 @@ public static class TypeExtensions
         return type is not null &&
             type.IsGenericType &&
             _valueTupleTypes.Contains(type.GetGenericTypeDefinition());
+    }
+    #endregion
+    
+    public static object? GetDefault(this Type type)
+    {
+        if (type.IsValueType)
+            return Activator.CreateInstance(type);
+        return null;
+    }
+
+    public static object GetUninitialized(this Type type)
+    {
+        return RuntimeBuilder.GetUninitialized(type);
     }
 }

@@ -16,7 +16,7 @@ public static class EventInfoExtensions
     {
         if (eventInfo is null) return null;
         
-        BF flags = BF.DeclaredOnly | BF.Public | BF.NonPublic;
+        BF flags = BF.DeclaredOnly | BF.NonPublic;
         
         if (eventInfo.IsStatic())
         {

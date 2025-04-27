@@ -1,4 +1,6 @@
-﻿namespace ScrubJay.Reflection.Utilities;
+﻿using ScrubJay.Reflection.Comparison;
+
+namespace ScrubJay.Reflection.Utilities;
 
 [PublicAPI]
 public static class TypeHelper
@@ -80,47 +82,31 @@ public static class TypeHelper
             .SelectMany(static assembly => Result.TryInvoke(assembly.GetTypes).OkOr([]))
             .ToHashSet();
     }
-
-    private static bool Impl(Type? type, Type? checkType)
+    
+    public static IReadOnlyList<Type> GetImplementedTypes(Type? type)
     {
-        if ((object) checkType == null || (object) type == null)
-            return false;
-        if (type == checkType || checkType == typeof (object) && !type.IsPointer)
-            return true;
-        if (!checkType.IsGenericTypeDefinition)
+        if (type is null)
+            return [];
+        
+        var types = new HashSet<Type>();
+        
+        // add all interfaces
+        type.GetInterfaces().Consume(it => types.Add(it));
+       
+        // Add base types
+        type = type.BaseType;
+        while (type is not null)
         {
-            if (checkType.IsInterface)
-            {
-                foreach (Type type1 in type.GetInterfaces())
-                {
-                    if (type1 == checkType)
-                        return true;
-                }
-                return false;
-            }
-            for (Type baseType = type.BaseType; (object) baseType != null; baseType = baseType.BaseType)
-            {
-                if (baseType == checkType)
-                    return true;
-            }
-            return false;
+            types.Add(type);
+            type = type.BaseType;
         }
-        if (type.HasGenericTypeDefinition(checkType))
-            return true;
-        if (checkType.IsInterface)
-            Debugger.Break();
-        for (Type baseType = type.BaseType; (object) baseType != null; baseType = baseType.BaseType)
-        {
-            if (baseType.HasGenericTypeDefinition(checkType))
-                return true;
-        }
-        foreach (Type type2 in type.GetInterfaces())
-        {
-            if (type2.HasGenericTypeDefinition(checkType))
-                return true;
-        }
-        return false;
+       
+        // return sorted!
+        return types
+            .OrderByDescending(static t => t, TypeComplexityComparer.Default)
+            .ToList();
     }
+    
 
     private static Option<int> CanCastValueTypeTo(Type valueType, Type targetType)
     {

@@ -6,8 +6,11 @@ namespace ScrubJay.Reflection.Adapting;
 public class EventAdderAdapter<I, H> : MemberDelegateAdapter<EventAdderAdapter<I, H>, EventInfo, AddHandler<I, H>>
     where H : Delegate
 {
-    public override Result<AddHandler<I, H>> TryAdapt(EventInfo eventInfo)
+    public override Result<AddHandler<I, H>> TryAdapt(EventInfo? eventInfo)
     {
+        if (eventInfo is null)
+            return GetEx(eventInfo);
+        
         // find the add method
         var addMethod = eventInfo.AddMethod;
         if (addMethod is not null)
@@ -29,8 +32,11 @@ public class EventAdderAdapter<I, H> : MemberDelegateAdapter<EventAdderAdapter<I
 public class EventRemoverAdapter<I, H> : MemberDelegateAdapter<EventRemoverAdapter<I, H>, EventInfo, RemoveHandler<I, H>>
     where H : Delegate
 {
-    public override Result<RemoveHandler<I, H>> TryAdapt(EventInfo eventInfo)
+    public override Result<RemoveHandler<I, H>> TryAdapt(EventInfo? eventInfo)
     {
+        if (eventInfo is null)
+            return GetEx(eventInfo);
+        
         // find the remove method
         var addMethod = eventInfo.RemoveMethod;
         if (addMethod is not null)
@@ -51,8 +57,11 @@ public class EventRemoverAdapter<I, H> : MemberDelegateAdapter<EventRemoverAdapt
 
 public class EventRaiseAdapter<I> : MemberDelegateAdapter<EventRaiseAdapter<I>, EventInfo, RaiseHandler<I>>
 {
-    public override Result<RaiseHandler<I>> TryAdapt(EventInfo eventInfo)
+    public override Result<RaiseHandler<I>> TryAdapt(EventInfo? eventInfo)
     {
+        if (eventInfo is null)
+            return GetEx(eventInfo);
+        
         // Find Raiser
         var raise = eventInfo.RaiseMethod;
         if (raise is not null)

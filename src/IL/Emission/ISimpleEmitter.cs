@@ -8,7 +8,7 @@ public sealed class Emitter : EmitterBase<Emitter>, ISimpleEmitter<Emitter>
 {
     public CleanEmitter Clean => new(this);
     
-    public Emitter(DynamicMethodBuilder method, ILGenerator ilGenerator) 
+    public Emitter(DynamicILMethod method, ILGenerator ilGenerator) 
         : base(method, ilGenerator)
     {
     }

@@ -32,6 +32,8 @@ public class Mirror : ReflectingMemberInfos<Mirror, MemberInfo>, ICloneable<Mirr
             .Where(member => member.DeclaringType == typeof(T));
         return new Mirror(members);
     }
+    
+  
 
     
     public Mirror(IEnumerable<MemberInfo> members)

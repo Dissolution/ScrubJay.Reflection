@@ -4,20 +4,20 @@ using ScrubJay.Reflection.Validation;
 namespace ScrubJay.Reflection.MosDef;
 
 [PublicAPI]
-public sealed record class DelegateInfo
+public sealed record class DelegateInfo : IRenderable
 {
-    public static DelegateInfo Create<D>()
+    public static DelegateInfo Create<D>(string? name = null)
         where D : Delegate
-        => Create(typeof(D));
+        => Create(typeof(D), name);
     
-    public static DelegateInfo Create(Type delegateType)
+    public static DelegateInfo Create(Type delegateType, string? name = null)
     {
         MemberAssert.IsDelegateType(delegateType);
         var invokeMethod = delegateType.InvokeMethod().SomeOrThrow();
         DelegateInfo info = new()
         {
             Attributes = Attribute.GetCustomAttributes(delegateType),
-            Name = delegateType.Name,
+            Name = name ?? delegateType.Name,
             GenericTypes = delegateType.GetGenericArguments(),
             ReturnParameter = invokeMethod.ReturnParameter,
             Parameters = invokeMethod.GetParameters(),
@@ -26,13 +26,13 @@ public sealed record class DelegateInfo
         return info;
     }
 
-    public static DelegateInfo Create(MethodInfo method)
+    public static DelegateInfo Create(MethodInfo method, string? name = null)
     {
         Throw.IfNull(method);
         DelegateInfo info = new()
         {
             Attributes = Attribute.GetCustomAttributes(method),
-            Name = method.Name,
+            Name = name ?? method.Name,
             GenericTypes = method.GetGenericArguments(),
             ReturnParameter = method.ReturnParameter,
             Parameters = method.GetParameters(),
@@ -81,14 +81,16 @@ public sealed record class DelegateInfo
         
     }
 
-    public override string ToString() => TextBuilder.New
-        .IfNotEmpty(Attributes,
-            static (tb, attrs) => tb.Append('[').Delimit(", ", attrs, static (t, a) => t.AppendAttribute(a)).Append("] "))
-        .AppendParameter(ReturnParameter)
-        .Append(' ')
-        .AppendNameAndGenericTypes(Name, GenericTypes)
-        .AppendParameters(Parameters)
-        .ToStringAndDispose();
+    public void RenderTo<B>(B builder) where B : TextBuilderBase<B>
+    {
+        builder
+            .IfNotEmpty(Attributes,
+                static (tb, attrs) => tb.Append('[').Delimit(", ", attrs, static (t, a) => t.AppendAttribute(a)).Append("] "))
+            .AppendParameter(ReturnParameter)
+            .Append(' ')
+            .AppendNameAndGenericTypes(Name, GenericTypes)
+            .AppendParameters(Parameters);
+    }
 
-
+    public override string ToString() => TextBuilder.Build(RenderTo);
 }

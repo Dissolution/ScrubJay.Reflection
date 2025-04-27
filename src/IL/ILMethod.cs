@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Reflection.IL.Instructions;
+using ScrubJay.Reflection.MosDef;
 
 namespace ScrubJay.Reflection.IL;
 
@@ -19,10 +20,14 @@ public abstract class ILMethod
     public string? Name { get; init; } = null;
 
     public Type[] GenericTypes { get; init; } = [];
+    
     public required ParameterInfo ReturnParameter { get; init; }
+    public Type ReturnType => ReturnParameter.ParameterType;
+    
     public required ParameterInfo[] Parameters { get; init; }
     public Type[] ParameterTypes => _parameterTypes ??= Parameters.ConvertAll(static p => p.ParameterType);
-
+    public int ParameterCount => Parameters.Length;
+    
     public IReadOnlyList<ILLocal> Locals => _locals;
     
     public IInstructions Instructions => _instructionStream;

@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Reflection.IL.Emission;
+using ScrubJay.Reflection.MosDef;
 using ScrubJay.Reflection.Naming;
 using ScrubJay.Reflection.Utilities;
 using ScrubJay.Reflection.Validation;
@@ -69,21 +70,38 @@ public static class RuntimeBuilder
         return CreateDynamicMethod(name, methodSignature.ReturnType, methodSignature.GetParameterTypes());
     }
     
+    public static DynamicMethod CreateDynamicMethod(DelegateInfo info)
+    {
+        Throw.IfNull(info);
+        var dm = CreateDynamicMethod(info.Name, info.ReturnType, info.ParameterTypes);
+        dm.DefineParameter(0, info.ReturnParameter.Attributes, info.ReturnParameter.Name);
+        var infoParams = info.Parameters;
+        foreach (var ip in infoParams)
+        {
+            dm.DefineParameter(ip.Position + 1, ip.Attributes, ip.Name);
+        }
+        return dm;
+    }
+    
 #endregion
 
-    public static DynamicMethodBuilder BuildDynamicMethod(Type delegateType, string? name = null)
+    public static DynamicILMethod BuildDynamicMethod(Type delegateType, string? name = null)
     {
         MemberAssert.IsDelegateType(delegateType);
-        return new DynamicMethodBuilder(delegateType, name);
+        return new DynamicILMethod(delegateType, name);
     }
     
-    public static DynamicMethodBuilder<D> BuildDynamicMethod<D>(string? name = null)
+    public static DynamicILMethod BuildDynamicMethod(DelegateInfo delegateInfo, string? name = null)
+    {
+        return new DynamicILMethod(delegateInfo, name);
+    }
+    
+    public static DynamicILMethod<D> BuildDynamicMethod<D>(string? name = null)
         where D : Delegate
     {
-        return new DynamicMethodBuilder<D>(name);
+        return new DynamicILMethod<D>(name);
     }
 
-    
     
     
 #region Create Delegate

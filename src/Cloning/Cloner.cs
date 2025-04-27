@@ -128,7 +128,7 @@ public static class Cloner
         if (fields.Count == 0)
             throw new NotImplementedException();
         
-        var methodBuilder = new DynamicMethodBuilder(typeof(DeepCloneValue<>).MakeGenericType(type));
+        var methodBuilder = new DynamicILMethod(typeof(DeepCloneValue<>).MakeGenericType(type));
         var emitter = methodBuilder.Emitter;
         
         // declare the clone

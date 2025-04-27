@@ -5,7 +5,7 @@ namespace ScrubJay.Reflection.IL.Emission;
 
 public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<ITryCatchFinally<E>, E>,
     ITryCatchFinally<E> 
-    where E : IGenEmitter<E>
+    where E : IGenEmitter<E>, IOperationEmitter<E>
 {
     internal TryCatchFinally(E emitter) : base(emitter)
     {
@@ -26,6 +26,11 @@ public interface ITryCatchFinallyBuilder<B, E> : IBuilder<B>
 
     B Catch(Type exceptionType, Action<E, ILLabel> emitCatchBlock);
 
+    B Swallow<X>()
+        where X : Exception;
+
+    B Swallow(Type exceptionType);
+    
     E Finally();
 
     E Finally(Action<E, ILLabel> emitFinallyBlock);
@@ -34,7 +39,7 @@ public interface ITryCatchFinallyBuilder<B, E> : IBuilder<B>
 public abstract class TryCatchFinallyBuilder<B, E> : IBuilder<B>,
     ITryCatchFinallyBuilder<B,E> 
     where B : ITryCatchFinallyBuilder<B, E>
-    where E : IGenEmitter<E>
+    where E : IGenEmitter<E>, IOperationEmitter<E>
 {
     private readonly B _builder;
     private readonly E _emitter;
@@ -72,6 +77,18 @@ public abstract class TryCatchFinallyBuilder<B, E> : IBuilder<B>,
         var emitter = _emitter.BeginCatchBlock(exceptionType);
         emitCatchBlock(emitter, EndLabel);
         return _builder;
+    }
+
+    public B Swallow<X>()
+        where X : Exception
+    {
+        return Catch<X>(static (emitter, end) => emitter.Pop().Leave(end));
+    }
+
+    public B Swallow(Type exceptionType)
+    {
+        MemberAssert.IsExceptionType(exceptionType);
+        return Catch(exceptionType, static (emitter, end) => emitter.Pop().Leave(end));
     }
 
     /// <summary>

@@ -34,6 +34,26 @@ public static class MemberAssert
             throw new ArgumentOutOfRangeException(typeName, type, "Type is not a ValueType");
     }
     
+    public static void IsClassType([AllowNull, NotNull] Type? type,
+        [CallerArgumentExpression(nameof(type))]
+        string? typeName = null)
+    {
+        if (type is null)
+            throw new ArgumentNullException(typeName);
+        if (!type.IsClass)
+            throw new ArgumentOutOfRangeException(typeName, type, "Type is not a class type");
+    }
+    
+    public static void IsInterfaceType([AllowNull, NotNull] Type? type,
+        [CallerArgumentExpression(nameof(type))]
+        string? typeName = null)
+    {
+        if (type is null)
+            throw new ArgumentNullException(typeName);
+        if (!type.IsInterface)
+            throw new ArgumentOutOfRangeException(typeName, type, "Type is not an interface type");
+    }
+    
     public static void IsClassOrInterfaceType([AllowNull, NotNull] Type? type,
         [CallerArgumentExpression(nameof(type))]
         string? typeName = null)
