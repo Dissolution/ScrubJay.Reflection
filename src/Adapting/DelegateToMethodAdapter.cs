@@ -1,65 +1,26 @@
 ﻿using ScrubJay.Reflection.Adapting.Arguments;
 using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.MosDef;
-using ScrubJay.Reflection.Naming;
-
 using Emit = System.Action<ScrubJay.Reflection.IL.Emission.Emitter>;
 
 namespace ScrubJay.Reflection.Adapting;
 
-public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdapter<D>, MethodBase, D>
-    where D : Delegate
+[PublicAPI]
+public abstract class DelegateToMethodAdapter : DelegateToMemberAdapter,
+    IDelegateToMemberAdapter<MethodBase>
 {
-    public override Result<D> TryAdapt(MethodBase? method)
-    {
-        if (method is null)
-            return GetEx(method);
-
-        //DelegateInfo delInfo = DelegateInfo.Create<D>();
-
-
-        DynamicILMethod<D> dm = RuntimeBuilder.BuildDynamicMethod<D>($"{typeof(D).NameOf()} wraps {method.NameOf()}");
-
-        if (!TryLoadInstance(dm, method).IsOkWithError(out var emitLoadInstance, out var error))
-            return error;
-
-        if (!TryLoadArgs(dm, method, emitLoadInstance.Skip).IsOkWithError(out var emitLoadArgs, out error))
-            return error;
-
-        if (!TryCall(dm, method).IsOkWithError(out var emitCall, out error))
-            return error;
-
-        if (!TryStoreReturn(dm, method).IsOkWithError(out var emitReturn, out error))
-            return error;
-
-        dm.Emitter
-            .Invoke(emitLoadInstance.Emit)
-            .Invoke(emitLoadArgs)
-            .Invoke(emitCall)
-            .Invoke(emitReturn)
-            .Ret();
-
-        string str = dm.ToString();
-        Debug.WriteLine(str);
-        
-        return dm.TryCreateDelegate();
-    }
-
-
-
-    private Result<(bool Skip, Emit Emit)> TryLoadInstance(DynamicILMethod<D> builder, MethodBase method)
+    private static Result<(bool Skip, Emit Emit)> TryLoadInstance(MethodBase method, DelegateInfo delInfo)
     {
         // static?
         if (method.IsStatic)
         {
-            if (builder.ParameterCount == 0)
+            if (delInfo.ParameterCount == 0)
             {
                 // do nothing
                 return Ok(false);
             }
             
             // check if the first param is something we can skip
-            var firstParam = builder.Parameters[0];
+            var firstParam = delInfo.Parameters[0];
 
             // anything marked with [Instance] we can skip
             if (firstParam.HasAttribute<InstanceAttribute>())
@@ -75,9 +36,9 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
         }
         else
         {
-            if (builder.ParameterCount == 0)
+            if (delInfo.ParameterCount == 0)
             {
-                return GetEx(method, "Delegate does not have required instance parameter");
+                return GetError(method, delInfo, "Delegate does not have required instance parameter");
             }
 
             Argument instance;
@@ -91,7 +52,7 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
                 instance = owner;
             }
             
-            var firstParam = builder.Parameters[0];
+            var firstParam = delInfo.Parameters[0];
 
             if (!firstParam.HasAttribute<InstanceAttribute>())
                 throw new InvalidOperationException();
@@ -100,13 +61,13 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
             if (firstParam.IsParams())
                 throw new NotImplementedException();
             
-            var canConvert = ArgumentConverter.CanConvert(firstParam, instance);
+            var canConvert = ArgumentCaster.LoadCastStore(firstParam, instance);
             if (canConvert.IsOk(out var emit))
             {
                 return Ok(true, emit);
             }
 
-            return GetEx(method, "Delegate Instance parameter cannot be adapter to method instance");
+            return GetError(method, delInfo, "Delegate Instance parameter cannot be adapter to method instance");
         }
 
         
@@ -116,9 +77,9 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
         }
     }
 
-    private Result<Emit> TryLoadArgs(DynamicILMethod<D> builder, MethodBase method, bool skip)
+    private static Result<Emit> TryLoadArgs(MethodBase method, DelegateInfo delInfo, bool skip)
     {
-        ReadOnlySpan<ParameterInfo> builderParameters = builder.Parameters;
+        ReadOnlySpan<ParameterInfo> builderParameters = delInfo.Parameters;
         if (skip)
         {
             builderParameters = builderParameters[1..];
@@ -154,7 +115,7 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
             var builderParam = builderParameters[i];
             var methodParam = methodParameters[i];
             
-            var result = ArgumentConverter.CanConvert(builderParam, new StackArgument(methodParam.ParameterType));
+            var result = ArgumentCaster.LoadCastStore(builderParam, new StackArgument(methodParam.ParameterType));
             if (!result.IsOkWithError(out var paramEmit, out var error))
                 return error;
 
@@ -164,14 +125,12 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
         }
         
         
-        
-        
         methodExcess:
         delegateExcess:
         throw new NotImplementedException();
     }
 
-    private Result<Emit> TryCall(DynamicILMethod<D> builder, MethodBase method)
+    private static Result<Emit> TryCall(MethodBase method)
     {
         if (method is ConstructorInfo ctor)
             return Ok<Emit>(emitter => emitter.Newobj(ctor));
@@ -180,16 +139,40 @@ public class MethodDelegateAdapter<D> : MemberDelegateAdapter<MethodDelegateAdap
         return new ArgumentException(null, nameof(method));
     }
     
-    private Result<Emit> TryStoreReturn(DynamicILMethod<D> builder, MethodBase method)
+    private static Result<Emit> TryStoreReturn(MethodBase method, DelegateInfo delInfo)
     {
-        var methodReturn = method.ReturnType();
+        return ArgumentCaster.LoadCastStore(method.ReturnType(), delInfo.ReturnType);
+    }
+    
+    
+    public static Result<D> TryAdapt<D>(MethodBase method)
+        where D : Delegate
+    {
+        if (method is null)
+            return new ArgumentNullException(nameof(method));
 
-        var delegateReturn = builder.ReturnType;
-
-        var result = ArgumentConverter.CanConvert(methodReturn, delegateReturn);
-        if (!result.IsOkWithError(out var emit, out var error))
+        DelegateInfo delInfo = DelegateInfo.New<D>();
+        
+        if (!TryLoadInstance(method, delInfo).IsOkWithError(out var emitLoadInstance, out var error))
             return error;
 
-        return Ok<Emit>(emit);
+        if (!TryLoadArgs(method, delInfo, emitLoadInstance.Skip).IsOkWithError(out var emitLoadArgs, out error))
+            return error;
+
+        if (!TryCall(method).IsOkWithError(out var emitCall, out error))
+            return error;
+
+        if (!TryStoreReturn(method, delInfo).IsOkWithError(out var emitReturn, out error))
+            return error;
+
+        var dm = NewDynamicILMethod<D>($"adapt<{delInfo}>{method.NameOf()}");
+        dm.Emitter
+            .Invoke(emitLoadInstance.Emit)
+            .Invoke(emitLoadArgs)
+            .Invoke(emitCall)
+            .Invoke(emitReturn)
+            .Ret();
+
+        return dm.TryCreateDelegate();
     }
 }

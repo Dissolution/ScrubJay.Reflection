@@ -58,4 +58,15 @@ public static class MethodBaseExtensions
             _ => throw new ArgumentException("Invalid Method", nameof(method)),
         };
     }
+    
+    public static ParameterInfo ReturnParameter(this MethodBase method)
+    {
+        return method switch
+        {
+            MethodInfo info => info.ReturnParameter,
+            ConstructorInfo { IsStatic: true } => new ReturnParameterInfo(method, typeof(void)),
+            ConstructorInfo ctor => new ReturnParameterInfo(ctor, ctor.DeclaringType!),
+            _ => throw new ArgumentException("Invalid Method", nameof(method)),
+        };
+    }
 }

@@ -1,7 +1,5 @@
 ﻿using ScrubJay.Debugging;
 using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.Utilities;
-
 using static InlineIL.IL;
 
 namespace ScrubJay.Reflection.Cloning;
@@ -53,7 +51,7 @@ public static class Cloner
         
         var deepCloneItemMethod = _deepCloneMethod.MakeGenericMethod(elementType);
 
-        var methodBuilder =RuntimeBuilder.BuildDynamicMethod(
+        var methodBuilder =RuntimeBuilder.CreateDynamicILMethod(
             typeof(DeepCloneValue<>).MakeGenericType(arrayType));
         methodBuilder.Emitter
         // load the array's length and store it

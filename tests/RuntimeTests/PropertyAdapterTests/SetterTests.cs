@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Functional;
-using ScrubJay.Reflection.Adapting;
 
 namespace ScrubJay.Reflection.Tests.RuntimeTests.PropertyAdapterTests;
 

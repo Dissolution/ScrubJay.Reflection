@@ -5,24 +5,11 @@ global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute
 global using text = System.ReadOnlySpan<char>;
 
 using System.Diagnostics;
-using System.Runtime.InteropServices;
-using ScrubJay.Debugging;
-using ScrubJay.Enums;
-using ScrubJay.Reflection.Cloning;
-using ScrubJay.Reflection.Expressions;
-using ScrubJay.Reflection.IL.Decompilation;
 using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.Runtime;
-using ScrubJay.Reflection.Sandbox;
-using ScrubJay.Reflection.Utilities;
 
 //Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-
-
-
-
-
+Emitter emitter = default!;
 
 
 

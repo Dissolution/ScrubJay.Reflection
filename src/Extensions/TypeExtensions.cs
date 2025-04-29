@@ -1,7 +1,4 @@
-﻿using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.Utilities;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 [PublicAPI]
 public static class TypeExtensions
@@ -39,6 +36,20 @@ public static class TypeExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNullOrVoid([NotNullWhen(false)] this Type? type) => type is null || type == typeof(void);
 
+    public static bool IsVoidLike([AllowNull, NotNullWhen(false)] this Type? type)
+    {
+        if (type is null)
+            return true;
+        if (type == typeof(void))
+            return true;
+        if (type == typeof(None))
+            return true;
+        if (type == typeof(Unit))
+            return true;
+        return false;
+    }
+    
+    
     /// <summary>
     /// If <paramref name="types"/> is <c>null</c> or empty (Length == 0), return <c>null</c>;<br/>
     /// otherwise, returns <paramref name="types"/>

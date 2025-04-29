@@ -11,3 +11,5 @@ public delegate void RemoveHandler<I, in H>([AllowNull, Instance] ref I instance
     where H : Delegate;
 
 public delegate void RaiseHandler<I>([AllowNull, Instance] ref I instance, params object?[] eventArgs);
+
+public delegate void BoxInvoke([Instance] object? instance, params object?[] args);

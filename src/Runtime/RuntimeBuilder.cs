@@ -1,7 +1,4 @@
 ﻿using ScrubJay.Reflection.IL.Emission;
-using ScrubJay.Reflection.MosDef;
-using ScrubJay.Reflection.Naming;
-using ScrubJay.Reflection.Utilities;
 using ScrubJay.Reflection.Validation;
 
 #if NETFRAMEWORK || NETSTANDARD2_0
@@ -85,18 +82,18 @@ public static class RuntimeBuilder
     
 #endregion
 
-    public static DynamicILMethod BuildDynamicMethod(Type delegateType, string? name = null)
+    public static DynamicILMethod CreateDynamicILMethod(Type delegateType, string? name = null)
     {
         MemberAssert.IsDelegateType(delegateType);
         return new DynamicILMethod(delegateType, name);
     }
     
-    public static DynamicILMethod BuildDynamicMethod(DelegateInfo delegateInfo, string? name = null)
+    public static DynamicILMethod CreateDynamicILMethod(DelegateInfo delegateInfo, string? name = null)
     {
         return new DynamicILMethod(delegateInfo, name);
     }
     
-    public static DynamicILMethod<D> BuildDynamicMethod<D>(string? name = null)
+    public static DynamicILMethod<D> CreateDynamicILMethod<D>(string? name = null)
         where D : Delegate
     {
         return new DynamicILMethod<D>(name);
@@ -125,7 +122,7 @@ public static class RuntimeBuilder
     public static Result<D> TryEmitDelegate<D>(Action<Emitter> emit)
         where D : Delegate
     {
-        var dm = BuildDynamicMethod<D>();
+        var dm = CreateDynamicILMethod<D>();
         dm.Emitter.Invoke(emit);
         return dm.TryCreateDelegate();
     }

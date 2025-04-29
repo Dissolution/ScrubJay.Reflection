@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.MosDef;
-using ScrubJay.Reflection.Utilities;
-using ScrubJay.Reflection.Validation;
+﻿using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
 
@@ -65,7 +63,7 @@ public class DynamicILMethod<D> : DynamicILMethod
 {
     [SetsRequiredMembers]
     public DynamicILMethod(string? name = null) 
-        : base(DelegateInfo.Create<D>(), name)
+        : base(DelegateInfo.New<D>(), name)
     {
         
     }

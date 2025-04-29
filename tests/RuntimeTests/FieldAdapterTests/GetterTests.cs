@@ -10,8 +10,11 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldGetterAdapter<ClassEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
+            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<ClassEntity, Guid>>(field)
+                .OkOrThrow();
+            
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -27,8 +30,10 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var idField = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldGetterAdapter<ClassEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
+            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<ClassEntity, object>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -46,11 +51,13 @@ public class GetterTests
         [Fact]
         public void AsSubTypeWorks()
         {
-            var entityField = Prelude
+            var field = Prelude
                 .Reflect<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = FieldGetterAdapter<EntityHolder, ClassEntity>.Instance.TryAdapt(entityField).OkOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<EntityHolder, ClassEntity>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -67,11 +74,13 @@ public class GetterTests
         [Fact]
         public void AsInterfaceWorks()
         {
-            var entityField = Prelude
+            var field = Prelude
                 .Reflect<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = FieldGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(entityField).OkOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<EntityHolder, IEntity>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -91,8 +100,10 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldGetterAdapter<StructEntity, Guid>.Instance.TryAdapt(idField).OkOrThrow();
+            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<StructEntity, Guid>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -108,8 +119,10 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var idField = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
-            var getter = FieldGetterAdapter<StructEntity, object>.Instance.TryAdapt(idField).OkOrThrow();
+            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<StructEntity, object>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -127,11 +140,13 @@ public class GetterTests
         [Fact]
         public void AsInterfaceWorks()
         {
-            var entityField = Prelude
+            var field = Prelude
                 .Reflect<EntityHolder>()
                 .Fields<StructEntity>()
                 .OneOrThrow();
-            var getter = FieldGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(entityField).OkOrThrow();
+            var getter = DelegateToFieldAdapter
+                .TryAdapt<Getter<EntityHolder, IEntity>>(field)
+                .OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -150,8 +165,10 @@ public class GetterTests
     [Fact]
     public void StaticExactGetterWorks()
     {
-        var idField = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
-        var getter = FieldGetterAdapter<None, Guid>.Instance.TryAdapt(idField).OkOrThrow();
+        var field = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
+        var getter = DelegateToFieldAdapter
+            .TryAdapt<Getter<None, Guid>>(field)
+            .OkOrThrow();
         Assert.NotNull(getter);
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))

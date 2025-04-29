@@ -58,8 +58,10 @@
         
         <Using Include="ScrubJay.Reflection.Extensions"/>
         <Using Include="ScrubJay.Reflection.IL"/>
+        <Using Include="ScrubJay.Reflection.Naming"/>
         <Using Include="ScrubJay.Reflection.Runtime"/>
         <Using Include="ScrubJay.Reflection.Text"/>
+        <Using Include="ScrubJay.Reflection.Utilities"/>
 
     </ItemGroup>
 

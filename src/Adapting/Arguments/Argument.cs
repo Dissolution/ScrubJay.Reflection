@@ -4,7 +4,7 @@ using ScrubJay.Reflection.Validation;
 namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
-public abstract class Argument :
+public abstract partial class Argument :
 #if NET7_0_OR_GREATER
     IEqualityOperators<Argument, Argument, bool>,
 #endif
@@ -27,6 +27,21 @@ public abstract class Argument :
         MemberAssert.IsInstance(type);
         Type = type;
     }
+
+    public void Deconstruct(out bool isByRef, out Type rawType)
+    {
+        if (Type.IsByRef)
+        {
+            isByRef = true;
+            rawType = Type.GetElementType()!;
+        }
+        else
+        {
+            isByRef = false;
+            rawType = Type;
+        }
+    }
+
 
     public abstract Emitter Load(Emitter emitter);
 

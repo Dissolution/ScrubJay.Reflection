@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.MosDef;
+﻿namespace ScrubJay.Reflection;
 
 public sealed class ThisParameterInfo : ParameterInfo
 {

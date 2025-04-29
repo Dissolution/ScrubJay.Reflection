@@ -1,6 +1,3 @@
-using ScrubJay.Reflection.MosDef;
-using ScrubJay.Reflection.Naming;
-
 namespace ScrubJay.Reflection.Extensions;
 
 [PublicAPI]

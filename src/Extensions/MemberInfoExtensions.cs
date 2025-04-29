@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Utilities;
-
-namespace ScrubJay.Reflection.Extensions;
+﻿namespace ScrubJay.Reflection.Extensions;
 
 /// <summary>
 /// Extensions on <see cref="MemberInfo"/>

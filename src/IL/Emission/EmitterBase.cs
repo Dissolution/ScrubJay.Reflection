@@ -7,9 +7,6 @@ using Polyfills;
 
 using ScrubJay.Reflection.IL.Instructions;
 using ScrubJay.Reflection.IL.LabelOffSetManagement;
-using ScrubJay.Reflection.Naming;
-using ScrubJay.Reflection.Utilities;
-using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
 
@@ -53,11 +50,12 @@ public abstract class EmitterBase<E> : EmitterBase,
     IOpCodeEmitter<E>,
     IGenEmitter<E>,
     IOperationEmitter<E>
-    where E : EmitterBase<E>
+    where E : IGenEmitter<E>, IOperationEmitter<E>, IOpCodeEmitter<E>
 {
     protected readonly E _emitter;
 
     public IInstructions Instructions => _method.Instructions;
+
 
     protected EmitterBase(DynamicILMethod method, ILGenerator ilGenerator)
         : base(method, ilGenerator)
@@ -519,7 +517,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     public E Branch(out ILLabel label,
         [CallerArgumentExpression(nameof(label))]
         string? labelName = null)
-        => DefineLabel(out label, labelName).Branch(label);
+        => DefineLabel(out label, labelName).Br(label);
     
     public E Branch(CompareOp comparison, ILLabel label, bool unsigned = false)
     {
@@ -544,8 +542,9 @@ public abstract class EmitterBase<E> : EmitterBase,
         [CallerArgumentExpression(nameof(label))]
         string? labelName = null)
     {
-        return DefineLabel(out label, labelName)
-            .Branch(comparison, label, unsigned);
+        DefineLabel(out label, labelName);
+        Branch(comparison, label, unsigned);
+        return _emitter;
     }
 
     public E Branch(bool boolean, ILLabel label)
@@ -559,8 +558,9 @@ public abstract class EmitterBase<E> : EmitterBase,
         [CallerArgumentExpression(nameof(label))]
         string? labelName = null)
     {
-        return DefineLabel(out label, labelName)
-            .Branch(boolean, label);
+        DefineLabel(out label, labelName); 
+        Branch(boolean, label);
+        return _emitter;
     }
 
 #endregion

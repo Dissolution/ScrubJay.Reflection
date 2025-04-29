@@ -1,5 +1,4 @@
-﻿using ScrubJay.Reflection.MosDef;
-using ScrubJay.Reflection.Searching;
+﻿using ScrubJay.Reflection.Searching;
 #if NETFRAMEWORK || NETSTANDARD2_0
 using System.Runtime.Serialization;
 #endif

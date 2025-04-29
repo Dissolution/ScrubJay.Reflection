@@ -1,5 +1,4 @@
 ﻿using System.Collections.Concurrent;
-using ScrubJay.Reflection.Utilities;
 
 namespace ScrubJay.Reflection.Collections;
 

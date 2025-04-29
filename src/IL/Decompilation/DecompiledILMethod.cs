@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Reflection.IL.Instructions;
-using ScrubJay.Reflection.MosDef;
 
 namespace ScrubJay.Reflection.IL.Decompilation;
 

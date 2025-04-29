@@ -47,7 +47,7 @@ internal class ILThrowExceptionDemo
             .GetMethod("WriteLine", [typeof(string), typeof(object)])
             .ThrowIfNull();
 
-        var builder = RuntimeBuilder.BuildDynamicMethod<Func<int, int, int>>();
+        var builder = RuntimeBuilder.CreateDynamicILMethod<Func<int, int, int>>();
         ILGenerator gen = builder.ILGenerator;
 
 

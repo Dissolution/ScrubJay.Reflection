@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.Naming;
-
-namespace ScrubJay.Reflection.Validation;
+﻿namespace ScrubJay.Reflection.Validation;
 
 [PublicAPI]
 public static class MemberAssert
