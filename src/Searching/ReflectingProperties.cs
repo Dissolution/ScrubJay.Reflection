@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public enum SetKind
 {
     Set,
@@ -7,32 +8,33 @@ public enum SetKind
     Ctor,
 }
 
+[PublicAPI]
 public sealed class ReflectingProperties : ReflectingPropertyInfos<ReflectingProperties>
 {
-    public ReflectingProperties(IEnumerable<PropertyInfo> properties) 
+    public ReflectingProperties(IEnumerable<PropertyInfo> properties)
         : base(properties)
     {
     }
 }
 
-
+[PublicAPI]
 public abstract class ReflectingPropertyInfos<B> : ReflectingMemberBases<B, PropertyInfo>
     where B : ReflectingPropertyInfos<B>
 {
-    protected ReflectingPropertyInfos(IEnumerable<PropertyInfo> properties) 
+    protected ReflectingPropertyInfos(IEnumerable<PropertyInfo> properties)
         : base(properties)
     {
     }
 
     public B Containing(Type type)
     {
-        return Only(type, static (prop,t) => prop.PropertyType == t);
+        return Only(type, static (prop, t) => prop.PropertyType == t);
     }
 
     public B Containing(Type type, TypeMatch match)
     {
         return Only(type, match,
-            static (field,t,m) => field.PropertyType.Matches(t,m));
+            static (field, t, m) => field.PropertyType.Matches(t, m));
     }
 
     public B Containing<T>() => Containing(typeof(T));
@@ -51,11 +53,11 @@ public abstract class ReflectingPropertyInfos<B> : ReflectingMemberBases<B, Prop
 
     public B Gettable(Viz visibility)
     {
-        return Only(visibility, static (prop,viz) => prop.GetMethod is not null &&
+        return Only(visibility, static (prop, viz) => prop.GetMethod is not null &&
             prop.GetMethod.Visibility().HasFlags(viz));
     }
-    
-    
+
+
     public B Settable()
     {
         return Only(prop => prop.SetMethod is not null);
@@ -68,10 +70,10 @@ public abstract class ReflectingPropertyInfos<B> : ReflectingMemberBases<B, Prop
 
     public B Settable(Viz visibility)
     {
-        return Only(visibility, static (prop,viz) => prop.SetMethod is not null &&
+        return Only(visibility, static (prop, viz) => prop.SetMethod is not null &&
             prop.SetMethod.Visibility().HasFlags(viz));
     }
-    
+
     public B Settable(SetKind kind)
     {
         return Only(kind, static (prop, k) =>
@@ -93,33 +95,33 @@ public abstract class ReflectingPropertyInfos<B> : ReflectingMemberBases<B, Prop
             return Only(static prop => prop.GetIndexParameters().Length == 0);
         }
     }
-    
+
     public B Indexer(params Type[]? types)
     {
         if (types == null)
             return Only(static property => property.GetIndexParameters().Length == 0);
-        
-        return Only(types, static (property, ts) =>
-            {
-                var indexerParameters = property.GetIndexParameters();
-                if (indexerParameters.Length != ts.Length)
-                    return false;
-                for (int i = 0; i < indexerParameters.Length; i++)
-                {
-                    if (indexerParameters[i].ParameterType != ts[i])
-                        return false;
-                }
 
-                return true;
-            });
+        return Only(types, static (property, ts) =>
+        {
+            var indexerParameters = property.GetIndexParameters();
+            if (indexerParameters.Length != ts.Length)
+                return false;
+            for (int i = 0; i < indexerParameters.Length; i++)
+            {
+                if (indexerParameters[i].ParameterType != ts[i])
+                    return false;
+            }
+
+            return true;
+        });
     }
-    
+
     public B Indexer(Type[]? types, TypeMatch match)
     {
         if (types == null)
             return Only(static property => property.GetIndexParameters().Length == 0);
-        
-        return Only(types, match, static (property,t,m) =>
+
+        return Only(types, match, static (property, t, m) =>
         {
             var indexerParameters = property.GetIndexParameters();
             if (indexerParameters.Length != t.Length)
@@ -133,7 +135,7 @@ public abstract class ReflectingPropertyInfos<B> : ReflectingMemberBases<B, Prop
             return true;
         });
     }
-    
+
     public B Indexer<T1>() => Indexer(typeof(T1));
     public B Indexer<T1, T2>() => Indexer(typeof(T1), typeof(T2));
     public B Indexer<T1, T2, T3>() => Indexer(typeof(T1), typeof(T2), typeof(T3));

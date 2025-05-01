@@ -1,6 +1,7 @@
 ﻿namespace ScrubJay.Reflection;
 
-public sealed class SigParameterInfo : ParameterInfo
+[PublicAPI]
+public sealed class OverridableParameterInfo : ParameterInfo
 {
     public new ParameterAttributes Attributes
     {
@@ -35,12 +36,12 @@ public sealed class SigParameterInfo : ParameterInfo
 
     public override object? RawDefaultValue => Default.SomeOr(DBNull.Value);
     
-    public SigParameterInfo()
+    public OverridableParameterInfo()
     {
         
     }
 
-    public SigParameterInfo(ParameterInfo parameter)
+    public OverridableParameterInfo(ParameterInfo parameter)
     {
         base.AttrsImpl = parameter.Attributes;
         base.ClassImpl = parameter.ParameterType;
@@ -50,9 +51,5 @@ public sealed class SigParameterInfo : ParameterInfo
         this.CustomAttributes = parameter.CustomAttributes;
     }
 
-    // public override object[] GetCustomAttributes(bool inherit) => base.GetCustomAttributes(inherit);
-    // public override object[] GetCustomAttributes(Type attributeType, bool inherit) => base.GetCustomAttributes(attributeType, inherit);
-    // public override IList<CustomAttributeData> GetCustomAttributesData() => base.GetCustomAttributesData();
-    // public override bool IsDefined(Type attributeType, bool inherit) => base.IsDefined(attributeType, inherit);
-    public override IEnumerable<CustomAttributeData> CustomAttributes { get; }
+    public override IEnumerable<CustomAttributeData> CustomAttributes { get; } = [];
 }

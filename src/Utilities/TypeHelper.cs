@@ -70,9 +70,6 @@ public static class TypeHelper
     }
 
     public static bool IsUnmanaged<T>() => IsUnmanaged(typeof(T));
-//    {
-//        return !IsReferenceOrContainsReferences<T>();
-//    }
 
 
     public static HashSet<Type> GetAllTypes()
@@ -107,7 +104,7 @@ public static class TypeHelper
             .ToList();
     }
     
-
+/*
     private static Option<int> CanCastValueTypeTo(Type valueType, Type targetType)
     {
         Debug.Assert(valueType.IsValueType);    // already verified
@@ -172,4 +169,5 @@ public static class TypeHelper
         }
         return None();
     }
+    */
 }

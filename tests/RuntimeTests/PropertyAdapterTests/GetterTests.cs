@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Functional;
+using ScrubJay.Reflection.Adapting;
 
 namespace ScrubJay.Reflection.Tests.RuntimeTests.PropertyAdapterTests;
 
@@ -10,7 +11,7 @@ public class GetterTests
         public void ExactWorks()
         {
             var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
-            var getter = PropertyGetterAdapter<ClassEntity, Guid>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<ClassEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -27,7 +28,7 @@ public class GetterTests
         public void AsObjectWorks()
         {
             var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
-            var getter = PropertyGetterAdapter<ClassEntity, object>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<ClassEntity, object>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -37,7 +38,7 @@ public class GetterTests
 
                 object? result = getter(ref entity);
                 Assert.NotNull(result);
-                Assert.IsType(typeof(Guid), result);
+                Assert.IsType<Guid>(result);
                 Assert.Equal(guid, (Guid)result);
             }
         }
@@ -49,7 +50,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Properties<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = PropertyGetterAdapter<EntityHolder, ClassEntity>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, ClassEntity>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -70,7 +71,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Properties<NameStampClassEntity>()
                 .OneOrThrow();
-            var getter = PropertyGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, IEntity>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -91,7 +92,7 @@ public class GetterTests
         public void ExactWorks()
         {
             var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
-            var getter = PropertyGetterAdapter<StructEntity, Guid>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<StructEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -108,7 +109,7 @@ public class GetterTests
         public void AsObjectWorks()
         {
             var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
-            var getter = PropertyGetterAdapter<StructEntity, object>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<StructEntity, object>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -130,7 +131,7 @@ public class GetterTests
                 .Reflect<EntityHolder>()
                 .Properties<StructEntity>()
                 .OneOrThrow();
-            var getter = PropertyGetterAdapter<EntityHolder, IEntity>.Instance.TryAdapt(property).OkOrThrow();
+            var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, IEntity>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
             int i = 0;
@@ -150,7 +151,7 @@ public class GetterTests
     public void StaticExactGetterWorks()
     {
         var property = Prelude.Reflect(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
-        var getter = PropertyGetterAdapter<None, Guid>.Instance.TryAdapt(property).OkOrThrow();
+        var getter = DelegateToPropertyAdapter.TryAdapt<Getter<None, Guid>>(property).OkOrThrow();
         Assert.NotNull(getter);
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))

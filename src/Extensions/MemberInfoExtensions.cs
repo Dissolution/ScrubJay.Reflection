@@ -91,16 +91,16 @@ public static class MemberInfoExtensions
         _ => throw new ArgumentOutOfRangeException(nameof(member)),
     };
 
-    public static Type[]? GenericTypes(this MemberInfo? member) => member switch
+    public static Type[] GenericTypes(this MemberInfo? member)
     {
-        null => null,
-        MethodBase method => method.GetGenericArguments(),
-        FieldInfo fieldInfo => null,
-        PropertyInfo propertyInfo => null,
-        EventInfo eventInfo => null,
-        Type type => type.GetGenericArguments(),
-        _ => throw new ArgumentOutOfRangeException(nameof(member)),
-    };
+        return member switch
+        {
+            DynamicMethod => [],
+            MethodBase method => method.GetGenericArguments(),
+            Type type => type.GetGenericArguments(),
+            _ => [],
+        };
+    }
 
     public static ParameterInfo[] Parameters(this MemberInfo? member)
     {

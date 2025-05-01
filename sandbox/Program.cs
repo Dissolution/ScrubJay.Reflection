@@ -5,11 +5,22 @@ global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute
 global using text = System.ReadOnlySpan<char>;
 
 using System.Diagnostics;
+using System.Reflection.Emit;
 using ScrubJay.Reflection.IL.Emission;
+using ScrubJay.Reflection.Runtime;
 
 //Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-Emitter emitter = default!;
+var mb = new DynamicILMethod<Func<int>>();
+mb.Emitter.PushValue(147)
+    .PushValue("abc")
+    .Pop()
+    .Ret();
+var del = mb.TryCreateDelegate().OkOrThrow();
+
+var decompiledMethod = mb.DynamicMethod.Decompile();
+var str = decompiledMethod.ToString();
+Debugger.Break();
 
 
 

@@ -3,6 +3,7 @@ using ScrubJay.Reflection.IL.Instructions;
 
 namespace ScrubJay.Reflection.Extensions;
 
+[PublicAPI]
 public static class PropertyInfoExtensions
 {
     internal static bool IsInitOnly(MethodInfo? setMethod)

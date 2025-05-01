@@ -4,13 +4,23 @@ namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
 public sealed class FieldArgument : Argument,
+#if NET7_0_OR_GREATER
+    IEqualityOperators<FieldArgument, FieldArgument, bool>,
+#endif
     IEquatable<FieldArgument>
 {
-    public static implicit operator FieldArgument(FieldInfo field) => new FieldArgument(field);
-    
-    public required FieldInfo Field { get; init; }
+    public static implicit operator FieldArgument(FieldInfo field) 
+        => new FieldArgument(field);
 
-    [SetsRequiredMembers]
+    public static bool operator ==(FieldArgument? left, FieldArgument? right)
+        => Equate.EquatableValues(left, right);
+
+    public static bool operator !=(FieldArgument? left, FieldArgument? right)
+        => !Equate.EquatableValues(left, right);
+
+
+    public FieldInfo Field { get; }
+    
     public FieldArgument(FieldInfo field) : base(field.FieldType)
     {
         this.Field = field;
@@ -54,20 +64,15 @@ public sealed class FieldArgument : Argument,
         }
     }
 
-    public override void RenderTo<B>(B builder)
-    {
-        builder.Render(Field);
-    }
+ 
 
-    public bool Equals(FieldArgument? other)
-    {
-        return other is not null &&
-            other.Field == this.Field;
-    }
+    public bool Equals(FieldArgument? other) => other is not null && other.Field == this.Field;
 
-    public override bool Equals(Argument? other)
-    {
-        return other is FieldArgument fieldArg &&
-            Equals(fieldArg);
-    }
+    public override bool Equals(Argument? other) => other is FieldArgument fieldArg && Equals(fieldArg);
+
+    public override bool Equals(object? obj) => obj is FieldArgument fieldArg && Equals(fieldArg);
+
+    public override int GetHashCode() => Hasher.HashMany(typeof(FieldArgument), Type, Field);
+    
+    public override void RenderTo<B>(B builder) => builder.Render(Field);
 }

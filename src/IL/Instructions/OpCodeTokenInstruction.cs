@@ -226,6 +226,14 @@ public sealed class OpCodeStringInstruction : OpCodeTokenInstruction
         String = str;
     }
 
+    public OpCodeStringInstruction(OpCode opCode, string str)
+        : base(opCode, -1)
+    {
+        if (opCode != OpCodes.Ldstr)
+            throw new ArgumentException(null, nameof(opCode));
+        String = str;
+    }
+
     public override void RenderTo<B>(B builder)
     {
         builder.Invoke(b => base.RenderTo(b))

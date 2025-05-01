@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Extensions;
 
+[PublicAPI]
 public static class GuidExtensions
 {
     public static string ToUpperDigitsString(this Guid guid)

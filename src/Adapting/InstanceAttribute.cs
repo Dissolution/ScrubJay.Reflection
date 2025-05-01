@@ -1,7 +1,7 @@
 ﻿namespace ScrubJay.Reflection.Adapting;
 
 /// <summary>
-/// Marker attribute to specify the parameter of a delegate is the instance
+/// Marker attribute to specify the parameter of a delegate holds an instance
 /// </summary>
 [PublicAPI]
 [AttributeUsage(AttributeTargets.Parameter)]

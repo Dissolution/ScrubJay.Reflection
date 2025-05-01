@@ -21,6 +21,7 @@ public class EntityHolder
 public static class StaticEntity
 {
     public static Guid Id { get; set; } = Guid.NewGuid();
+    
     public static string? Name { get; set; }
 }
 

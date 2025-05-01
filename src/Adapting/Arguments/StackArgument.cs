@@ -4,11 +4,20 @@ namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
 public sealed class StackArgument : Argument,
+#if NET7_0_OR_GREATER
+    IEqualityOperators<StackArgument, StackArgument, bool>,
+#endif
     IEquatable<StackArgument>
 {
     public static implicit operator StackArgument(Type type) => new(type);
+
+    public static bool operator ==(StackArgument? left, StackArgument? right)
+        => Equate.EquatableValues(left, right);
+
+    public static bool operator !=(StackArgument? left, StackArgument? right)
+        => !Equate.EquatableValues(left, right);
+
     
-    [SetsRequiredMembers]
     public StackArgument(Type type) : base(type)
     {
     }
@@ -48,12 +57,14 @@ public sealed class StackArgument : Argument,
         return emitter;
     }
 
-    public override void RenderTo<B>(B builder) 
+    public bool Equals(StackArgument? other) => other?.Type == Type;
+
+    public override bool Equals(Argument? other) => other is StackArgument stackArg && Equals(stackArg);
+
+    public override bool Equals(object? obj) => obj is StackArgument stackArg && Equals(stackArg);
+
+    public override int GetHashCode() => Hasher.HashMany(typeof(StackArgument), Type);
+
+    public override void RenderTo<B>(B builder)
         => builder.AppendType(Type);
-
-    public override bool Equals(Argument? other)
-        => other is StackArgument stackArg && Equals(stackArg);
-
-    public bool Equals(StackArgument? other)
-        => other?.Type == Type;
 }

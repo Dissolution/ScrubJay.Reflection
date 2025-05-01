@@ -4,13 +4,22 @@ namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
 public sealed class LocalArgument : Argument,
+#if NET7_0_OR_GREATER
+    IEqualityOperators<LocalArgument, LocalArgument, bool>,
+#endif
     IEquatable<LocalArgument>
 {
     public static implicit operator LocalArgument(ILLocal local) => new LocalArgument(local);
-    
-    public required ILLocal Local { get; init; }
 
-    [SetsRequiredMembers]
+    public static bool operator ==(LocalArgument? left, LocalArgument? right)
+        => Equate.EquatableValues(left, right);
+
+    public static bool operator !=(LocalArgument? left, LocalArgument? right)
+        => !Equate.EquatableValues(left, right);
+
+    
+    public ILLocal Local { get; }
+
     public LocalArgument(ILLocal local) : base(local.Type)
     {
         Local = local;
@@ -31,20 +40,13 @@ public sealed class LocalArgument : Argument,
         return emitter.Stloc(Local);
     }
     
-    public override void RenderTo<B>(B builder)
-    {
-        builder.Render(Local);
-    }
+    public bool Equals(LocalArgument? other) => other is not null && other.Local == Local;
 
-    public bool Equals(LocalArgument? other)
-    {
-        return other is not null &&
-            other.Local == Local;
-    }
+    public override bool Equals(Argument? other) => other is LocalArgument localArg && Equals(localArg);
 
-    public override bool Equals(Argument? other)
-    {
-        return other is LocalArgument localArg &&
-            Equals(localArg);
-    }
+    public override bool Equals(object? obj) => obj is LocalArgument localArg && Equals(localArg);
+
+    public override int GetHashCode() => Hasher.HashMany(typeof(LocalArgument), Type, Local);
+    
+    public override void RenderTo<B>(B builder) => builder.Render(Local);
 }

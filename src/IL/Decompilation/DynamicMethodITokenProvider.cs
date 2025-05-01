@@ -1,4 +1,11 @@
-﻿namespace ScrubJay.Reflection.IL.Decompilation;
+﻿
+#if NETFRAMEWORK || NETSTANDARD || NETCOREAPP
+using Polyfills;
+#endif
+
+using ScrubJay.Text.Comparison;
+
+namespace ScrubJay.Reflection.IL.Decompilation;
 
 public sealed class DynamicMethodITokenProvider : ITokenProvider
 {
@@ -18,26 +25,71 @@ public sealed class DynamicMethodITokenProvider : ITokenProvider
 
     public DynamicMethodITokenProvider(DynamicMethod dynamicMethod)
     {
+        var resolverField = Reflect<DynamicMethod>()
+            .Fields().Instance.NonPublic
+            .Named("resolver", new StringMatch(StringComparison.Ordinal) { Contains = true })
+            .OneOrThrow();
+        var resolver = resolverField.GetValue(dynamicMethod);
+        if (resolver is null) 
+            throw new ArgumentException("The DynamicMethod's IL has not been finalized", nameof(dynamicMethod));
+
+        var resolveTokenMethod = ReflectOn(resolver)
+            .Methods()
+            .Instance.NonPublic
+            .Named("ResolveToken")
+            .OneOrThrow();
+        _tokenResolver = resolveTokenMethod.CreateDelegate<TokenResolver>(resolver);
+
+        var getStringLiteralMethod = ReflectOn(resolver)
+            .Methods().Instance.NonPublic
+            .Named("GetStringLiteral")
+            .OneOrThrow();
+        _stringResolver = getStringLiteralMethod.CreateDelegate<StringResolver>(resolver);
+
+        var resolveSignatureMethod = ReflectOn(resolver)
+            .Methods().Instance.NonPublic
+            .Named("ResolveSignature")
+            .OneOrThrow();
+        _signatureResolver = resolveSignatureMethod.CreateDelegate<SignatureResolver>(resolver);
+
+        var getTypeFromHandleUnsafeMethod = Reflect<Type>()
+            .Methods().Static
+            .Named("GetTypeFromHandleUnsafe")
+            .Parameters<IntPtr>()
+            .OneOrThrow();
+        _getTypeFromHandleUnsafe = getTypeFromHandleUnsafeMethod.CreateDelegate<GetTypeFromHandleUnsafe>();
+
+        var runtimeType = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeType")
+            .ThrowIfNull();
+
+        var runtimeMethodHandleInternal = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeMethodHandleInternal")
+            .ThrowIfNull();
+
+        _getMethodBase = Reflect(runtimeType)
+            .Methods().Static
+            .Named("GetMethodBase")
+            .Parameters(runtimeType, runtimeMethodHandleInternal)
+            .OneOrThrow();
         
+        _runtimeMethodHandleInternalCtor = Reflect(runtimeMethodHandleInternal)
+            .Instance.NonPublic
+            .Constructors()
+            .Parameters<IntPtr>()
+            .OneOrThrow();
+
+        var runtimeFieldInfoStub = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeFieldInfoStub").ThrowIfNull();
         
-        
-        var resolver = typeof(DynamicMethod).GetField("m_resolver", BF.Instance | BF.NonPublic).GetValue(dynamicMethod);
-        if (resolver == null) throw new ArgumentException("The dynamic method's IL has not been finalized.");
+        _runtimeFieldHandleStubCtor = Reflect(runtimeFieldInfoStub)
+            .Instance.Public
+            .Constructors()
+            //.Parameters<IntPtr, object>()
+            .OneOrThrow();
 
-        _tokenResolver = (TokenResolver)resolver.GetType().GetMethod("ResolveToken", BF.Instance | BF.NonPublic).CreateDelegate(typeof(TokenResolver), resolver);
-        _stringResolver = (StringResolver)resolver.GetType().GetMethod("GetStringLiteral", BF.Instance | BF.NonPublic).CreateDelegate(typeof(StringResolver), resolver);
-        _signatureResolver = (SignatureResolver)resolver.GetType().GetMethod("ResolveSignature", BF.Instance | BF.NonPublic).CreateDelegate(typeof(SignatureResolver), resolver);
-
-        _getTypeFromHandleUnsafe = (GetTypeFromHandleUnsafe)typeof(Type).GetMethod("GetTypeFromHandleUnsafe", BF.Static | BF.NonPublic, null, new[] { typeof(IntPtr) }, null).CreateDelegate(typeof(GetTypeFromHandleUnsafe), null);
-        var runtimeType = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeType");
-
-        var runtimeMethodHandleInternal = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeMethodHandleInternal");
-        _getMethodBase = runtimeType.GetMethod("GetMethodBase", BF.Static | BF.NonPublic, null, new[] { runtimeType, runtimeMethodHandleInternal }, null);
-        _runtimeMethodHandleInternalCtor = runtimeMethodHandleInternal.GetConstructor(BF.Instance | BF.NonPublic, null, new[] { typeof(IntPtr) }, null);
-
-        var runtimeFieldInfoStub = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeFieldInfoStub");
-        _runtimeFieldHandleStubCtor = runtimeFieldInfoStub.GetConstructor(BF.Instance | BF.Public, null, new[] { typeof(IntPtr), typeof(object) }, null);
-        _getFieldInfo = runtimeType.GetMethod("GetFieldInfo", BF.Static | BF.NonPublic, null, new[] { runtimeType, typeof(RuntimeTypeHandle).Assembly.GetType("System.IRuntimeFieldInfo") }, null);
+        _getFieldInfo = Reflect(runtimeType)
+            .Static.Methods()
+            .Named("GetFieldInfo")
+            .Parameters(runtimeType, typeof(RuntimeTypeHandle).Assembly.GetType("System.IRuntimeFieldInfo").ThrowIfNull())
+            .OneOrThrow();
     }
 
     public Result<Type> ResolveType(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments)

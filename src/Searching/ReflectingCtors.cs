@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public sealed class ReflectingCtors : ReflectingConstructorInfos<ReflectingCtors>
 {
     public ReflectingCtors(IEnumerable<ConstructorInfo> constructors) 
@@ -8,6 +9,7 @@ public sealed class ReflectingCtors : ReflectingConstructorInfos<ReflectingCtors
     }
 }
 
+[PublicAPI]
 public abstract class ReflectingConstructorInfos<B> : ReflectingMethodBases<B, ConstructorInfo>
     where B : ReflectingConstructorInfos<B>
 {

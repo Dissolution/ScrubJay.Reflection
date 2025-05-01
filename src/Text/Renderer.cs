@@ -1,16 +1,7 @@
 ﻿using ScrubJay.Debugging;
 using ScrubJay.Reflection.Collections;
-#if NETFRAMEWORK || NETSTANDARD2_0
-using Polyfills;
-#endif
 
 namespace ScrubJay.Reflection.Text;
-
-public interface IRenderable
-{
-    void RenderTo<B>(B builder)
-        where B : TextBuilderBase<B>;
-}
 
 public static class Renderer
 {
@@ -124,7 +115,6 @@ public static class Renderer
             default:
             {
                 string? str = value.ToString();
-                Debugger.Break();
                 return builder.Append(str);
             }
         }

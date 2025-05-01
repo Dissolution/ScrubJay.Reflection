@@ -1,5 +1,8 @@
 ﻿namespace ScrubJay.Reflection.IL.Decompilation;
-
+/// <summary>
+/// An <see cref="ITokenProvider"/> that uses a <see cref="Module"/>
+/// </summary>
+[PublicAPI]
 public sealed class ModuleTokenProvider : ITokenProvider
 {
     private readonly Module _module;
@@ -8,7 +11,7 @@ public sealed class ModuleTokenProvider : ITokenProvider
     {
         _module = module;
     }
-
+    
     public Result<FieldInfo> ResolveField(int metadataToken, Type[]? genericTypeArguments, Type[]? genericMethodArguments)
     {
         FieldInfo? field;
@@ -22,7 +25,9 @@ public sealed class ModuleTokenProvider : ITokenProvider
         }
 
         if (field is null)
+        {
             return new InvalidOperationException($"Could not find Field #{metadataToken}");
+        }
         
         return Ok(field);
     }
@@ -40,7 +45,9 @@ public sealed class ModuleTokenProvider : ITokenProvider
         }
 
         if (method is null)
+        {
             return new InvalidOperationException($"Could not find Method #{metadataToken}");
+        }
         
         return Ok(method);
     }
@@ -58,7 +65,9 @@ public sealed class ModuleTokenProvider : ITokenProvider
         }
 
         if (type is null)
+        {
             return new InvalidOperationException($"Could not find Type #{metadataToken}");
+        }
         
         return Ok(type);
     }
@@ -76,7 +85,9 @@ public sealed class ModuleTokenProvider : ITokenProvider
         }
 
         if (member is null)
+        {
             return new InvalidOperationException($"Could not find Member #{metadataToken}");
+        }
         
         return Ok(member);
     }
@@ -84,26 +95,42 @@ public sealed class ModuleTokenProvider : ITokenProvider
 
     public Result<byte[]> ResolveSignature(int metadataToken)
     {
+        byte[]? signature;
         try
         {
-            return _module.ResolveSignature(metadataToken);
+            signature = _module.ResolveSignature(metadataToken);
         }
         catch (Exception ex)
         {
             return ex;
         }
+
+        if (signature is null)
+        {
+            return new InvalidOperationException($"Could not find Signature #{metadataToken}");
+        }
+
+        return Ok(signature);
     }
 
 
     public Result<string> ResolveString(int metadataToken)
     {
+        string? str;
         try
         {
-            return _module.ResolveString(metadataToken);
+            str = _module.ResolveString(metadataToken);
         }
         catch (Exception ex)
         {
             return ex;
         }
+        
+        if (str is null)
+        {
+            return new InvalidOperationException($"Could not find String #{metadataToken}");
+        }
+
+        return Ok(str);
     }
 }

@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public sealed class MirrorMethodBases : ReflectingMethodBases<MirrorMethodBases, MethodBase>
 {
     public MirrorMethodBases(IEnumerable<MethodBase> methods) 
@@ -9,6 +10,7 @@ public sealed class MirrorMethodBases : ReflectingMethodBases<MirrorMethodBases,
     }
 }
 
+[PublicAPI]
 public abstract class ReflectingMethodBases<B, M> : ReflectingMemberBases<B, M>
     where B : ReflectingMethodBases<B, M>
     where M : MethodBase

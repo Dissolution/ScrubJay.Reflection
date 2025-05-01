@@ -3,6 +3,7 @@
 /// <summary>
 /// Extensions related to <see cref="System.Reflection.NullabilityInfo"/>
 /// </summary>
+[PublicAPI]
 public static class NullabilityInfoExtensions
 {
     private static readonly ThreadLocal<NullabilityInfoContext> _nullabilityContexts = new(() => new());

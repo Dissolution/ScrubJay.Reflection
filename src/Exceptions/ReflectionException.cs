@@ -2,7 +2,7 @@
 using ScrubJay.Debugging;
 using ScrubJay.Text.Comparison;
 
-namespace ScrubJay.Reflection;
+namespace ScrubJay.Reflection.Exceptions;
 
 /// <summary>
 /// An <see cref="Exception"/> thrown during Reflection operations

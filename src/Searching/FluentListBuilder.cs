@@ -1,7 +1,5 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
-
-
 [PublicAPI]
 public abstract class FluentListBuilder<B, T> : BuilderBase<B>, IEnumerable<T>
     where B : FluentListBuilder<B, T>

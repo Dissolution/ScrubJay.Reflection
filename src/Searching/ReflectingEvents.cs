@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public sealed class ReflectingEvents : ReflectingEventInfos<ReflectingEvents>
 {
     public ReflectingEvents(IEnumerable<EventInfo> members) 
@@ -8,6 +9,7 @@ public sealed class ReflectingEvents : ReflectingEventInfos<ReflectingEvents>
     }
 }
 
+[PublicAPI]
 public abstract class ReflectingEventInfos<B> : ReflectingMemberBases<B, EventInfo>
     where B : ReflectingEventInfos<B>
 {

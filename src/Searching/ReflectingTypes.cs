@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public sealed class ReflectingTypes : ReflectingTypeInfos<ReflectingTypes>
 {
     public ReflectingTypes(IEnumerable<Type> types) 
@@ -8,6 +9,7 @@ public sealed class ReflectingTypes : ReflectingTypeInfos<ReflectingTypes>
     }
 }
 
+[PublicAPI]
 public abstract class ReflectingTypeInfos<B> : ReflectingMemberBases<B, Type>
     where B : ReflectingTypeInfos<B>
 {

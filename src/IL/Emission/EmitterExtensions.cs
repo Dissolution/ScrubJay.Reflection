@@ -36,41 +36,6 @@ public static class EmitterExtensions
     }
     */
 
-    
-    public static Emitter EmitLoadAsInstance(this Emitter emitter, Argument instance)
-    {
-        return instance.LoadAsInstance(emitter);
-    }
-    
-
-    public static Emitter EmitLoadParams(this Emitter emitter,
-        ParameterInfo paramsParameter,
-        ReadOnlySpan<ParameterInfo> destParameters)
-    {
-        int len = destParameters.Length;
-        // None to load?
-        if (len == 0)
-            return emitter;
-
-        // Params -> Params?
-        if (len == 1 && destParameters[0].IsParams())
-        {
-            emitter.Ldarg(paramsParameter);
-        }
-        else
-        {
-            // extract each parameter in turn
-            for (var i = 0; i < len; i++)
-            {
-                emitter.Ldarg(paramsParameter)
-                    .Ldc_I4(i)
-                    .Ldelem(destParameters[i].ParameterType);
-            }
-        }
-
-        // Everything will be loaded!
-        return emitter;
-    }
 
 
     public static E EmitThrowException<E, X>(this E emitter, params object?[] exceptionArgs)

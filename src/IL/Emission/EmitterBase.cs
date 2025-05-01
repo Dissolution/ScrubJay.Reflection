@@ -5,6 +5,7 @@
 using Polyfills;
 #endif
 
+using ScrubJay.Reflection.IL.Decompilation;
 using ScrubJay.Reflection.IL.Instructions;
 using ScrubJay.Reflection.IL.LabelOffSetManagement;
 
@@ -117,7 +118,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     public E Emit(OpCode opCode, int i32)
     {
         _ilGenerator.Emit(opCode, i32);
-        Debugger.Break();
+        AddInstruction(new OpCodeValueInstruction<int>(opCode, i32));
         return _emitter;
     }
 
@@ -146,7 +147,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(str);
         _ilGenerator.Emit(opCode, str);
-        Debugger.Break();
+        AddInstruction(new OpCodeStringInstruction(opCode, str));
         return _emitter;
     }
 

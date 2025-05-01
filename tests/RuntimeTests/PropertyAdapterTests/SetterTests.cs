@@ -1,4 +1,5 @@
 ﻿using ScrubJay.Functional;
+using ScrubJay.Reflection.Adapting;
 
 namespace ScrubJay.Reflection.Tests.RuntimeTests.PropertyAdapterTests;
 
@@ -9,8 +10,8 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var idProperty = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
-            var setter = PropertySetterAdapter<ClassEntity, Guid>.Instance.TryAdapt(idProperty).OkOrThrow();
+            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var setter = DelegateToPropertyAdapter.TryAdapt<Setter<ClassEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -26,8 +27,8 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var idProperty = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
-            var setter = PropertySetterAdapter<ClassEntity, object>.Instance.TryAdapt(idProperty).OkOrThrow();
+            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var setter = DelegateToPropertyAdapter.TryAdapt<Setter<ClassEntity, object>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -45,11 +46,11 @@ public class SetterTests
         [Fact]
         public void FromSuperTypeWorks()
         {
-            var entityProperty = Prelude
+            var property = Prelude
                 .Reflect<EntityHolder>()
                 .Properties<ClassEntity>()
                 .OneOrThrow();
-            var setter = PropertySetterAdapter<EntityHolder, NameStampClassEntity>.Instance.TryAdapt(entityProperty).OkOrThrow();
+            var setter = DelegateToPropertyAdapter.TryAdapt<Setter<EntityHolder, NameStampClassEntity>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
             int i = 0;
@@ -71,8 +72,8 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var idProperty = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
-            var setter = PropertySetterAdapter<StructEntity, Guid>.Instance.TryAdapt(idProperty).OkOrThrow();
+            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var setter = DelegateToPropertyAdapter.TryAdapt<Setter<StructEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -88,8 +89,8 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var idProperty = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
-            var setter = PropertySetterAdapter<StructEntity, object>.Instance.TryAdapt(idProperty).OkOrThrow();
+            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var setter = DelegateToPropertyAdapter.TryAdapt<Setter<StructEntity, object>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
             foreach (var guid in TestData.InfiniteGuids().Take(10))
@@ -109,8 +110,8 @@ public class SetterTests
     [Fact]
     public void StaticExactSetterWorks()
     {
-        var idProperty = Prelude.Reflect(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
-        var setter = PropertySetterAdapter<None, Guid>.Instance.TryAdapt(idProperty).OkOrThrow();
+        var property = Prelude.Reflect(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
+        var setter = DelegateToPropertyAdapter.TryAdapt<Setter<None, Guid>>(property).OkOrThrow();
         Assert.NotNull(setter);
 
         foreach (var guid in TestData.InfiniteGuids().Take(10))

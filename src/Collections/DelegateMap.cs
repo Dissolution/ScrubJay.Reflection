@@ -1,21 +1,7 @@
 ﻿using System.Collections.Concurrent;
+using ScrubJay.Reflection.Comparison;
 
 namespace ScrubJay.Reflection.Collections;
-
-internal sealed class TypeArrayEqualityComparer : IEqualityComparer<Type[]>, IHasDefault<TypeArrayEqualityComparer>
-{
-    public static TypeArrayEqualityComparer Default { get; } = new();
-
-    public bool Equals(Type[]? x, Type[]? y)
-    {
-        return Sequence.Equal(x, y);
-    }
-    public int GetHashCode(Type[]? types)
-    {
-        return Hasher.HashMany<Type>(types);
-    }
-}
-
 
 public class DelegateMap : IEnumerable<Delegate>
 {

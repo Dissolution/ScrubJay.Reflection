@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public sealed class ReflectingFields : ReflectingFieldInfos<ReflectingFields>
 {
     public ReflectingFields(IEnumerable<FieldInfo> fields) 
@@ -8,6 +9,7 @@ public sealed class ReflectingFields : ReflectingFieldInfos<ReflectingFields>
     }
 }
 
+[PublicAPI]
 public abstract class ReflectingFieldInfos<B> : ReflectingMemberBases<B, FieldInfo>
     where B : ReflectingFieldInfos<B>
 {

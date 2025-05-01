@@ -7,7 +7,7 @@ public abstract class ILMethod
 {
     private Type[]? _parameterTypes;
     private readonly InstructionStream _instructionStream = [];
-    protected internal readonly List<ILLocal> _locals = [];
+    internal protected readonly List<ILLocal> _locals = [];
 
     public Type? OwnerType { get; init; } = null;
     public Type[] OwnerGenericTypes => OwnerType?.GenericTypes() ?? [];
@@ -64,7 +64,7 @@ public abstract class ILMethod
         throw new ArgumentOutOfRangeException(nameof(index), index, $"Parameter at index [{index}] does not exist");
     }
 
-    private OpCodeInstruction Inflate(OpCodeInstruction opCodeInstr)
+    protected virtual OpCodeInstruction Inflate(OpCodeInstruction opCodeInstr)
     {
         var opCode = opCodeInstr.OpCode;
 
@@ -103,12 +103,10 @@ public abstract class ILMethod
             };
         }
 
-
-
         return opCodeInstr;
     }
     
-    internal virtual void AddInstruction(Instruction instruction)
+    internal void AddInstruction(Instruction instruction)
     {
         // We can inflate certain instructions to contain additional information
         if (instruction is OpCodeInstruction opCodeInstr)

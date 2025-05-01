@@ -1,4 +1,5 @@
-﻿using Emit = System.Action<ScrubJay.Reflection.IL.Emission.Emitter>;
+﻿using ScrubJay.Reflection.IL.Emission;
+using Emit = System.Action<ScrubJay.Reflection.IL.Emission.Emitter>;
 
 namespace ScrubJay.Reflection.Adapting.Arguments;
 
@@ -290,4 +291,53 @@ public static class ArgumentCaster
         Debugger.Break();
         return new NotImplementedException();
     }
+    
+    public static Result<Emit> LoadParamsCastStore(
+        ParameterInfo paramsParameter,
+        ReadOnlySpan<Argument> destArgs)
+    {
+        if (paramsParameter is null)
+            return new ArgumentNullException(nameof(paramsParameter));
+        if (!paramsParameter.IsParams())
+            return new ArgumentException(null, nameof(paramsParameter));
+
+        var paramsArrayElementType = paramsParameter
+            .ParameterType
+            .GetElementType()
+            .ThrowIfNull();
+        
+        int destArgCount = destArgs.Length;
+        
+        // None to load?
+        if (destArgCount == 0)
+            return Ok<Emit>(_ => { });
+
+        Emissions emissions = [];
+        
+        // each destArg in turn
+        for (var i = 0; i < destArgCount; i++)
+        {
+            if (!LoadParamsToArg(i, destArgs[i])
+                .IsOkWithError(out var emit, out var error))
+                return error;
+            emissions.Add(emit);
+        }
+
+        // Everything will be loaded!
+        return Ok<Emit>(emissions.Combine());
+
+        Result<Emit> LoadParamsToArg(int index, Argument destArg)
+        {
+            if (!LoadCastStore(paramsArrayElementType, destArg)
+                .IsOkWithError(out var emitLCS, out var error))
+                return error;
+
+            return Ok<Emit>(emitter => emitter
+                .Ldarg(paramsParameter)
+                .PushValue(index)
+                .Ldelem(paramsArrayElementType)
+                .Invoke(emitLCS));
+        }
+    }
+
 }

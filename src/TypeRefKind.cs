@@ -16,10 +16,12 @@ public enum TypeRefKind
     /// <c>ref</c>
     /// </summary>
     Ref = 1 << 1,
+    
     /// <summary>
     /// <c>in</c>
     /// </summary>
     In = (1 << 2) | Ref,
+    
     /// <summary>
     /// <c>out</c>
     /// </summary>

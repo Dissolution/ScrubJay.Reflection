@@ -2,6 +2,9 @@
 
 namespace ScrubJay.Reflection;
 
+/// <summary>
+/// Information about a <see cref="Delegate"/>
+/// </summary>
 [PublicAPI]
 public sealed record class DelegateInfo : IRenderable
 {
@@ -50,6 +53,7 @@ public sealed record class DelegateInfo : IRenderable
     public DelegateInfo(Type delegateType, string? name = null)
     {
         MemberAssert.IsDelegateType(delegateType);
+        
         var invokeMethod = delegateType.InvokeMethod().SomeOrThrow();
         Attributes = Attribute.GetCustomAttributes(delegateType);
         Name = name ?? delegateType.Name;
@@ -71,8 +75,8 @@ public sealed record class DelegateInfo : IRenderable
         Parameters = method.GetParameters();
     }
 
-
-    public void RenderTo<B>(B builder) where B : TextBuilderBase<B>
+    public void RenderTo<B>(B builder) 
+        where B : TextBuilderBase<B>
     {
         builder
             .IfNotEmpty(Attributes,

@@ -4,7 +4,7 @@ using ScrubJay.Reflection.Validation;
 namespace ScrubJay.Reflection.Adapting.Arguments;
 
 [PublicAPI]
-public abstract partial class Argument :
+public abstract class Argument :
 #if NET7_0_OR_GREATER
     IEqualityOperators<Argument, Argument, bool>,
 #endif
@@ -18,7 +18,6 @@ public abstract partial class Argument :
 
     public static bool operator ==(Argument? left, Argument? right) => Equate.EquatableValues(left, right);
     public static bool operator !=(Argument? left, Argument? right) => !Equate.EquatableValues(left, right);
-
 
     public Type Type { get; }
 
@@ -61,7 +60,7 @@ public abstract partial class Argument :
     {
         if (Type.IsByRef)
         {
-            rawType = Type.GetElementType().ThrowIfNull();
+            rawType = Type.GetElementType()!;
             return true;
         }
         rawType = Type;
@@ -98,12 +97,9 @@ public abstract partial class Argument :
         }
     }
 
-    public override sealed bool Equals([NotNullWhen(true)] object? obj)
-    {
-        if (obj is Argument argument)
-            return Equals(argument);
-        return false;
-    }
+    public override bool Equals(object? obj) => obj is Argument arg && Equals(arg);
+
+    public override int GetHashCode() => Hasher.HashMany(GetType(), Type);
 
     public override sealed string ToString()
     {

@@ -4,6 +4,7 @@ using static InlineIL.IL;
 
 namespace ScrubJay.Reflection.Cloning;
 
+[PublicAPI]
 public static class Cloner
 {
     [return: NotNullIfNotNull(nameof(value))]

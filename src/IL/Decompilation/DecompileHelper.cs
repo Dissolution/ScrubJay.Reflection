@@ -15,7 +15,8 @@ public static class DecompileHelper
     {
         if (method is DynamicMethod dm)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            return [];
         }
 
         var body = method.GetMethodBody();

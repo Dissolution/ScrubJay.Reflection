@@ -1,3 +1,5 @@
+using ScrubJay.Reflection.IL.Decompilation;
+
 namespace ScrubJay.Reflection.Extensions;
 
 [PublicAPI]
@@ -24,8 +26,6 @@ public static class MethodBaseExtensions
             return false;
         return typeof(IAsyncStateMachine).IsAssignableFrom(method.DeclaringType);
     }
-    
-    
     
     /// <summary>
     /// Get the <see cref="Type">Types</see> of the parameters in this <see cref="MethodBase"/>
@@ -58,15 +58,29 @@ public static class MethodBaseExtensions
             _ => throw new ArgumentException("Invalid Method", nameof(method)),
         };
     }
-    
+
     public static ParameterInfo ReturnParameter(this MethodBase method)
     {
-        return method switch
+        if (method is MethodInfo methodInfo)
         {
-            MethodInfo info => info.ReturnParameter,
-            ConstructorInfo { IsStatic: true } => new ReturnParameterInfo(method, typeof(void)),
-            ConstructorInfo ctor => new ReturnParameterInfo(ctor, ctor.DeclaringType!),
-            _ => throw new ArgumentException("Invalid Method", nameof(method)),
-        };
+            var parameter = methodInfo.ReturnParameter;
+            return parameter ?? new ReturnParameterInfo(methodInfo, methodInfo.ReturnType);
+        }
+
+        if (method is ConstructorInfo constructorInfo)
+        {
+            if (constructorInfo.IsStatic)
+            {
+                return new ReturnParameterInfo(constructorInfo, typeof(void));
+            }
+            else
+            {
+                return new ReturnParameterInfo(constructorInfo, constructorInfo.DeclaringType!);
+            }
+        }
+
+        throw new ArgumentException("Invalid Method", nameof(method));
     }
+
+    public static DecompiledILMethod Decompile(this MethodBase method) => DecompiledILMethod.Decompile(method);
 }

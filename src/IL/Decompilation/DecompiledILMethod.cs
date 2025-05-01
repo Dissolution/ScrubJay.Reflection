@@ -52,7 +52,7 @@ public class DecompiledILMethod : ILMethod
         var dim = new DecompiledILMethod()
         {
             OwnerType = method.OwnerType(),
-            GenericTypes = method.GetGenericArguments(),
+            GenericTypes = method.GenericTypes(),
             ReturnParameter = returnParam,
             Parameters = parameters,
             MethodAttributes = method.Attributes,
@@ -70,7 +70,7 @@ public class DecompiledILMethod : ILMethod
     {
         return Result.TryInvoke(() => Decompile(method));
     }
-    
+
     private OpCodeInstruction ReadOpCodeInstruction(ref SpanReader<byte> reader)
     {
         int offset = reader.Position;
@@ -360,10 +360,8 @@ public class DecompiledILMethod : ILMethod
             .Append('.')
             .AppendNameAndGenericTypes(Name, GenericTypes)
             .AppendLine('(')
-            .EnumerateAndDelimit(Parameters, 
-                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param),
-                static tb => tb.Append(',').NewLine())
-            .NewLine()
+            .Enumerate(Parameters,
+                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param).Append(',').NewLine())
             .Append(") => ").AppendParameter(ReturnParameter).NewLine()
             .AppendLine("-- Locals")
             .Enumerate(Locals, (tb, local) => tb.Append(local.Index).Append(": ").Render(local).NewLine())

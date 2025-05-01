@@ -1,4 +1,6 @@
-﻿using ScrubJay.Reflection.IL.Emission;
+﻿using ScrubJay.Reflection.Adapting.Arguments;
+using ScrubJay.Reflection.Exceptions;
+using ScrubJay.Reflection.IL.Emission;
 
 namespace ScrubJay.Reflection.Adapting;
 
@@ -18,11 +20,11 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
     private static Result<RaiseHandler<I>> TryAdaptRaiserToField<I>(FieldInfo backingField, DelegateInfo delInfo)
     {
         var eventHandlerType = backingField.FieldType;
-        
+
         var invokeMethod = eventHandlerType
             .InvokeMethod()
             .SomeOrThrow();
-        
+
         var dm = NewDynamicILMethod<RaiseHandler<I>>($"raise_{backingField.NameOf()}");
 
         // The event field is a Delegate with the signature of the event
@@ -30,7 +32,7 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
         // We can access its parts!
         var emitter = dm.Emitter
             .If<Emitter>(!backingField.IsStatic,
-                e => e.EmitLoadAsInstance(dm.Parameters[0]))
+                e => new ParameterArgument(dm.Parameters[0]).LoadAsInstance(e))
             .Ldfld(backingField)
             .DeclareLocal(eventHandlerType, out var eventHandler)
             .Stloc(eventHandler)
@@ -51,8 +53,15 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
             .MarkLabel(out var doStart)
             .Ldloc(delegates)
             .Ldloc(i)
-            .Ldelem<Delegate>()
-            .EmitLoadParams(dm.Parameters[1], invokeMethod.GetParameters())
+            .Ldelem<Delegate>();
+
+        if (!ArgumentCaster.LoadParamsCastStore(
+                dm.Parameters[1],
+                invokeMethod.GetParameters().ConvertAll(p => new StackArgument(p.ParameterType)))
+            .IsOkWithError(out var emitLPCS, out var error)) 
+            return error;
+
+        emitter.Invoke(emitLPCS)
             .Call(invokeMethod)
             .If(invokeMethod.ReturnType != typeof(void), e => e.Pop())
             .Ldloc(i)
@@ -65,6 +74,7 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
             .Blt(doStart)
             .MarkLabel(finished)
             .Ret();
+
 
         string il = emitter.ToString()!;
         Debugger.Break();

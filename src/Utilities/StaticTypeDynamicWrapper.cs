@@ -5,6 +5,7 @@ using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.Utilities;
 
+[PublicAPI]
 public abstract class DynamicWrapper
 {
     public static dynamic WrapStaticType(Type staticType)
@@ -13,6 +14,7 @@ public abstract class DynamicWrapper
     }
 }
 
+[PublicAPI]
 public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObjectProvider
 {
     private static readonly ConcurrentTypeMap<StaticTypeDynamicWrapper> _cache = [];
@@ -119,7 +121,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         
         for (var i = 0; i < count; i++)
         {
-            ParameterInfo param = new SigParameterInfo()
+            ParameterInfo param = new OverridableParameterInfo()
             {
                 Position = i,
                 Name = argNames[i],
@@ -293,7 +295,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
             {
                 // field getter
                 object? value = field.GetValue(null);
-                Debug.Assert(value.CanBeA(returnType));
+                Debug.Assert(value.As(returnType).IsSome());
                 result = value;
                 return true;
             }
@@ -307,7 +309,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
             {
                 // property getter
                 object? value = property.GetValue(null);
-                Debug.Assert(value.CanBeA(returnType));
+                Debug.Assert(value.As(returnType).IsSome());
                 result = value;
                 return true;
             }
@@ -320,7 +322,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
                     .IsOk(out var method))
             {
                 object? value = method.Invoke(null, null);
-                Debug.Assert(value.CanBeA(returnType));
+                Debug.Assert(value.As(returnType).IsSome());
                 result = value;
                 return true;
             }
@@ -375,7 +377,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
             if (methods.TryGetFirst().IsOk(out var method))
             {
                 object? value = method.Invoke(null, args);
-                Debug.Assert(value.CanBeA(returnType));
+                Debug.Assert(value.As(returnType).IsSome());
                 result = value;
                 return true;
             }

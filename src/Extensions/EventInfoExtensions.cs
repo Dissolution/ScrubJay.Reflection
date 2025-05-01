@@ -26,6 +26,6 @@ public static class EventInfoExtensions
         {
             flags |= BF.Instance;
         }
-        return eventInfo.OwnerType()?.GetField(eventInfo.Name, flags);
+        return eventInfo.OwnerType().GetField(eventInfo.Name, flags);
     }
 }

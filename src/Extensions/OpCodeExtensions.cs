@@ -1,3 +1,0 @@
-﻿namespace ScrubJay.Reflection.Extensions;
-
-

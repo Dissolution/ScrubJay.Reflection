@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
+[PublicAPI]
 public abstract class ReflectingMemberInfos<B, M> : ReflectingMemberBases<B, M>
     where B : ReflectingMemberInfos<B, M>
     where M : MemberInfo

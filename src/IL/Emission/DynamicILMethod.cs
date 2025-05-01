@@ -1,4 +1,5 @@
-﻿using ScrubJay.Reflection.Validation;
+﻿using ScrubJay.Reflection.IL.Instructions;
+using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
 
@@ -43,8 +44,25 @@ public class DynamicILMethod : ILMethod
         this.Parameters = info.Parameters;
         this.ReturnParameter = info.ReturnParameter;
     }
-    
-    
+
+//    protected override OpCodeInstruction Inflate(OpCodeInstruction opCodeInstr)
+//    {
+//        var instr = base.Inflate(opCodeInstr);
+//        if (instr is OpCodeStringInstruction stringInstr)
+//        {
+//            var mb = _dynamicMethod.Module;// as ModuleBuilder;
+//            var meth = ReflectOn(mb)
+//                .Methods()
+//                .Named("GetStringMetadataToken")
+//                .AsList();
+//            
+//            //var token = mb?.GetStringMetadataToken(stringInstr.String);
+//            Debugger.Break();
+//        }
+//
+//        return instr;
+//    }
+
     public Result<Delegate> TryCreateDelegate()
     {
         try
