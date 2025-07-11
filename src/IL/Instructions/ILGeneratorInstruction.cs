@@ -48,10 +48,10 @@ public class ILGeneratorInstruction : Instruction
         ILGenMethod = ilGenMethod;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Align(ILGenMethod.AsString().AsSpan(), 22, alignment: Alignment.Right)
-            .AppendIf(!ILGenMethod.HasArgs(), "()");
+            .IfAppend(!ILGenMethod.HasArgs(), "()");
     }
 }
 
@@ -65,7 +65,7 @@ public sealed class ILGeneratorMarkLabelInstruction : ILGeneratorInstruction
         Label = label;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Append('(')
@@ -84,7 +84,7 @@ public sealed class ILGeneratorDefineLabelInstruction : ILGeneratorInstruction
         Label = label;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Append('(')
@@ -103,7 +103,7 @@ public sealed class ILGeneratorBeginExceptionBlockInstruction : ILGeneratorInstr
         Label = label;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Append('(')
@@ -122,7 +122,7 @@ public sealed class ILGeneratorDeclareLocalInstruction : ILGeneratorInstruction
         Local = local;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Append('(')
@@ -145,16 +145,10 @@ public sealed class ILGeneratorCallVarargsInstruction : ILGeneratorInstruction
         OptionalParameterTypes = optionalParameterTypes;        
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(')
-            .Append(OpCode)
-            .Append(", ")
-            .Render(Method)
-            .Append(", ")
-            .Render(OptionalParameterTypes)
-            .Append(')');
+            .Append($"({OpCode:@}, {Method:@}, {OptionalParameterTypes:@})");
     }
 }
 
@@ -172,16 +166,10 @@ public sealed class ILGeneratorCallUnmanagedInstruction : ILGeneratorInstruction
         ParameterTypes = parameterTypes;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(')
-            .Append(CallingConvention)
-            .Append(", ")
-            .Render(ReturnType)
-            .Append(", ")
-            .Render(ParameterTypes)
-            .Append(')');
+            .Append($"({CallingConvention:@}, {ReturnType:@}, {ParameterTypes:@})");
     }
 }
 
@@ -201,18 +189,10 @@ public sealed class ILGeneratorCallManagedInstruction : ILGeneratorInstruction
         OptionalParameterTypes = optionalParameterTypes;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(')
-            .Append(CallingConventions)
-            .Append(", ")
-            .Render(ReturnType)
-            .Append(", ")
-            .Render(ParameterTypes)
-            .Append(", ")
-            .Render(OptionalParameterTypes)
-            .Append(')');
+            .Append($"({CallingConventions:@}, {ReturnType:@}, {ParameterTypes:@}, {OptionalParameterTypes:@})");
     }
 }
     
@@ -228,10 +208,10 @@ public sealed class ILGeneratorBeginCatchBlockInstruction : ILGeneratorInstructi
         this.ExceptionType = exceptionType;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(').AppendType(ExceptionType).Append(')');
+            .Append($"({ExceptionType:@})");
     }
 }
 
@@ -244,10 +224,10 @@ public sealed class ILGeneratorThrowExceptionInstruction : ILGeneratorInstructio
         this.ExceptionType = exceptionType;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(').AppendType(ExceptionType).Append(')');
+            .Append($"({ExceptionType:@})");
     }
 }
 
@@ -260,10 +240,10 @@ public sealed class ILGeneratorWriteLineInstruction : ILGeneratorInstruction
         this.Text = text;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(').Render(Text).Append(')');
+            .Append($"(\"{Text}\")");
     }
 }
 
@@ -276,9 +256,9 @@ public sealed class ILGeneratorUsingNamespaceInstruction : ILGeneratorInstructio
         this.Namespace = @namespace;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
-            .Append('(').Render(Namespace).Append(')');
+            .Append($"(\"{Namespace}\")");
     }
 }

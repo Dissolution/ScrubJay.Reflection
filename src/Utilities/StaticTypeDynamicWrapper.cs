@@ -433,6 +433,6 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
     
     public override string ToString()
     {
-        return $"dynamic_static({_type.NameOf()})";
+        return $"dynamic_static({_type.Render()})";
     }
 }

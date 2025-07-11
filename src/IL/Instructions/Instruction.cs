@@ -12,10 +12,9 @@ public abstract class Instruction : IRenderable
     protected internal Instruction() { }
     
     public override sealed int GetHashCode()
-        => Throw.NotSupported<int>($"An {GetType().NameOf()} should only be stored in an {typeof(InstructionStream).NameOf()}");
+        => Throw.NotSupported<int>($"An {GetType().Render()} should only be stored in an {typeof(InstructionStream).Render()}");
 
-    public virtual void RenderTo<B>(B builder) 
-        where B : TextBuilderBase<B>
+    public virtual void RenderTo(TextBuilder builder)
     {
         builder.Render(Offset).Append(": ");
     }

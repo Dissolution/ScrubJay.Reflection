@@ -5,7 +5,6 @@
 using Polyfills;
 #endif
 
-using ScrubJay.Reflection.IL.Decompilation;
 using ScrubJay.Reflection.IL.Instructions;
 using ScrubJay.Reflection.IL.LabelOffSetManagement;
 
@@ -46,7 +45,7 @@ public abstract class EmitterBase
 }
 
 public abstract class EmitterBase<E> : EmitterBase,
-    IBuilder<E>,
+    IFluentBuilder<E>,
     IEmitter<E>,
     IOpCodeEmitter<E>,
     IGenEmitter<E>,
@@ -54,6 +53,8 @@ public abstract class EmitterBase<E> : EmitterBase,
     where E : IGenEmitter<E>, IOperationEmitter<E>, IOpCodeEmitter<E>
 {
     protected readonly E _emitter;
+
+    E IFluentBuilder<E>.Self => _emitter;
 
     public IInstructions Instructions => _method.Instructions;
 
@@ -252,7 +253,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(exceptionType);
         if (!exceptionType.Implements<Exception>())
-            throw new ArgumentException($"Exception Type '{exceptionType.NameOf()}' is not an Exception", nameof(exceptionType));
+            throw new ArgumentException($"Exception Type '{exceptionType.Render()}' is not an Exception", nameof(exceptionType));
         _ilGenerator.BeginCatchBlock(exceptionType);
         AddInstruction(new ILGeneratorBeginCatchBlockInstruction(exceptionType));
         return _emitter;

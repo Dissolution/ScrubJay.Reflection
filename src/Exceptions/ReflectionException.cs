@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Collections.NonGeneric;
-using ScrubJay.Debugging;
 using ScrubJay.Text.Comparison;
 
 namespace ScrubJay.Reflection.Exceptions;
@@ -8,7 +7,7 @@ namespace ScrubJay.Reflection.Exceptions;
 /// An <see cref="Exception"/> thrown during Reflection operations
 /// </summary>
 [PublicAPI]
-public class ReflectionException : Exception
+public class ReflectionException : Exception, IRenderable
 {
     private static readonly Action<Exception, string?> _setExceptionMessage;
     private static readonly Action<Exception, Exception?> _setExceptionInnerException;
@@ -59,9 +58,14 @@ public class ReflectionException : Exception
     public ReflectionException() : base(message: null) { }
 
     public ReflectionException(string? message) : base(message) { }
+
+    public void RenderTo(TextBuilder builder)
+    {
+        builder.Render(this);
+    }
     
     public override string ToString()
     {
-        return this.Dump();
+        return this.Render();
     }
 }

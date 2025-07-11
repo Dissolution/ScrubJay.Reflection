@@ -129,6 +129,7 @@ public static class CodeHelper
             if (ch != '.' && !IsValidMemberNameFirstCharacter(ch)) // assumed
                 return false;
         }
+
         return true;
     }
 
@@ -157,7 +158,7 @@ public static class CodeHelper
             return GetDefinedName(memberTypes);
 
         return TextBuilder.New
-            .Delimit('_', flags, static (tb, f) => tb.Append(GetDefinedName(f)))
+            .EnumerateAndDelimit(flags, static (tb, f) => tb.Append(GetDefinedName(f)), '_')
             .ToString();
 
         static string GetDefinedName(MemberTypes mt) => mt switch
@@ -172,11 +173,10 @@ public static class CodeHelper
             MemberTypes.NestedType => "nested",
             _ => throw InvalidEnumException.Create(mt, "Must be a defined MemberTypes")
         };
-
     }
 
     private static readonly ConcurrentDictionary<MemberTypes, ulong> _generatedNameCounts = new();
-    private const           char                                     REPLACE_CHAR         = '_';
+    private const char REPLACE_CHAR = '_';
 
 
     public static string GetValidMemberName(MemberTypes memberType, string? suggestion)
@@ -186,66 +186,63 @@ public static class CodeHelper
 
         // reading from suggestion
         SpanReader<char> reader = new(suggestion.AsSpan());
-        if (reader.RemainingCount == 0)
+        if (reader.IsCompleted)
             goto getNewName;
-        
+
         // the name we're building
-        Buffer<char> buffer = stackalloc char[reader.RemainingCount];
-        SpanReadResult<char> result;
-        
+        Buffer<char> buffer = stackalloc char[reader.Next.Length];
+
         // skip past invalid name characters (not just first name validity)
-        result= reader.TryTakeWhile(static ch => !IsValidMemberNameCharacter(ch));
+        _ = reader.TakeWhile(static ch => !IsValidMemberNameCharacter(ch));
         // if we hit the end, this isn't valid
-        if (result.StopReason == StopReason.EndOfSpan || reader.RemainingCount == 0)
+        if (reader.IsCompleted)
             goto getNewName;
-        
+
         // We know we have a first character
         char first = reader.Take();
-        
+
         // If it is not a valid _first_ character
         if (!IsValidMemberNameFirstCharacter(first))
         {
             // we have to preface with our replace
-            buffer.Write(REPLACE_CHAR);
+            buffer.Add(REPLACE_CHAR);
         }
-        
+
         // add this char
-        buffer.Write(first);
+        buffer.Add(first);
 
         // now cycle processing
-        while (reader.RemainingCount > 0)
+        while (!reader.IsCompleted)
         {
             // take any amount of bad characters
-            result= reader.TryTakeWhile(static ch => !IsValidMemberNameCharacter(ch));
-            
+            var bad = reader.TakeWhile(static ch => !IsValidMemberNameCharacter(ch));
+
             // if they were all bad, append nothing and be done
-            if (result.StopReason == StopReason.EndOfSpan)
+            if (reader.IsCompleted)
                 break;
-            
+
             // if we did, replace them with a single REPLACE
-            if (result.Span.Length > 0)
+            if (bad.Length > 0)
             {
-                buffer.Write(REPLACE_CHAR);
+                buffer.Add(REPLACE_CHAR);
             }
-            
+
             // now take any amount of good characters
-            result = reader.TryTakeWhile(static ch => IsValidMemberNameCharacter(ch));
-            
+            var good = reader.TakeWhile(static ch => IsValidMemberNameCharacter(ch));
+
             // write them
-            buffer.Write(result.Span);
-            
-            if (result.StopReason == StopReason.EndOfSpan)
-                break;
+            buffer.AddMany(good);
         }
 
         string name = buffer.ToString();
+        buffer.Dispose();
         if (_keywords.Contains(name))
         {
-            buffer.TryInsert(0, '@').OkOrThrow();
+            return '@' + name;
         }
 
-        return buffer.ToStringAndDispose();
-        
+        return name;
+
         // all else failed, generate a new name
         getNewName:
         ulong index = _generatedNameCounts.AddOrUpdate(memberType, 1UL, static (_, count) => count + 1UL);

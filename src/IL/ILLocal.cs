@@ -62,12 +62,11 @@ public readonly struct ILLocal :
     public override int GetHashCode() 
         => Hasher.HashMany(Index, Type, IsPinned);
 
-    public void RenderTo<B>(B builder) 
-        where B : TextBuilderBase<B>
+    public void RenderTo(TextBuilder builder)
     {
         builder//.Append($"[{Index}] ")
-            .AppendIf(IsPinned, "fixed ")
-            .AppendType(Type)
+            .IfAppend(IsPinned, "fixed ")
+            .Render(Type)
             .IfNotNull(Name, static (tb, name) => tb.Append(' ').Append(name));
     }
 

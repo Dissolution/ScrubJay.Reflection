@@ -75,16 +75,19 @@ public sealed record class DelegateInfo : IRenderable
         Parameters = method.GetParameters();
     }
 
-    public void RenderTo<B>(B builder) 
-        where B : TextBuilderBase<B>
+    
+    
+    public void RenderTo(TextBuilder builder)
     {
         builder
             .IfNotEmpty(Attributes,
-                static (tb, attrs) => tb.Append('[').Delimit(", ", attrs, static (t, a) => t.AppendAttribute(a)).Append("] "))
-            .AppendParameter(ReturnParameter)
+                static (tb, attrs) => tb
+                    .Append('[')
+                    .EnumerateAndDelimit(attrs, static (t, a) => t.Render(a), ", ")
+                    .Append(']'))
+            .Render(ReturnParameter)
             .Append(' ')
-            .AppendNameAndGenericTypes(Name, GenericTypes)
-            .AppendParameters(Parameters);
+            .NameGenericsParameters(Name, GenericTypes, Parameters);
     }
 
     public override string ToString() => TextBuilder.Build(RenderTo);

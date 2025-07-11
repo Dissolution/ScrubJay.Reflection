@@ -30,8 +30,7 @@ public sealed class ILLabel :
 
     public override int GetHashCode() => Throw.NotSupported<int>();
 
-    public void RenderTo<B>(B builder)
-        where B : TextBuilderBase<B>
+    public void RenderTo(TextBuilder builder)
     {
         if (Offset.IsUnknown)
         {

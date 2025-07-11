@@ -1,6 +1,5 @@
 ﻿
 #if NETFRAMEWORK || NETSTANDARD || NETCOREAPP
-using Polyfills;
 #endif
 
 using ScrubJay.Text.Comparison;

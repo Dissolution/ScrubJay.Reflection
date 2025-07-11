@@ -63,11 +63,11 @@ public sealed class OpCodeSwitchInstruction : OpCodeInstruction
         this.Deltas = deltas;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(b => base.RenderTo(b))
             .Append('[')
-            .Delimit(", ", TargetOffsets, static (t, off) => off.RenderTo(t))
+            .EnumerateAndDelimit(TargetOffsets, static (t, off) => off.RenderTo(t), ", ")
             .Append(']');
     }
 }

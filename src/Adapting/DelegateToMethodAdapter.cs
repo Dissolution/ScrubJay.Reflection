@@ -165,7 +165,7 @@ public abstract class DelegateToMethodAdapter : DelegateToMemberAdapter,
         if (!TryStoreReturn(method, delInfo).IsOkWithError(out var emitReturn, out error))
             return error;
 
-        var dm = NewDynamicILMethod<D>($"adapt<{delInfo}>{method.NameOf()}");
+        var dm = NewDynamicILMethod<D>($"adapt<{delInfo}>{method.Render()}");
         dm.Emitter
             .Invoke(emitLoadInstance.Emit)
             .Invoke(emitLoadArgs)

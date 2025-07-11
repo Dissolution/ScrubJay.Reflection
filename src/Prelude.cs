@@ -13,9 +13,12 @@ namespace ScrubJay.Reflection;
 [PublicAPI]
 public static class Prelude
 {
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Mirror Reflect(Type type) => Mirror.Reflect(type);
     
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Mirror<T> Reflect<T>() => Mirror.Reflect<T>();
     
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static Mirror ReflectOn(object obj) => Reflect(obj.GetType());
 }

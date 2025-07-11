@@ -16,12 +16,7 @@ public abstract class DelegateToMemberAdapter
         string? memberName = null)
     {
         string exMessage = TextBuilder.New
-            .Append("Cannot adapt ")
-            .Render(delInfo)
-            .Append(" to interact with ")
-            .Append(member.MemberType)
-            .Append(' ')
-            .AppendMember(member)
+            .Append($"Cannot adapt {delInfo:@} to interface with {member.MemberType:@} {member:@}")
             .IfNotNull(additionalInfo,
                 static (tb, msg) => tb.Append(": ").Append(msg))
             .ToStringAndDispose();

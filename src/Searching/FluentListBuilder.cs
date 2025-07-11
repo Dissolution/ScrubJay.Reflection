@@ -1,7 +1,7 @@
 ﻿namespace ScrubJay.Reflection.Searching;
 
 [PublicAPI]
-public abstract class FluentListBuilder<B, T> : BuilderBase<B>, IEnumerable<T>
+public abstract class FluentListBuilder<B, T> : FluentBuilderBase<B>, IEnumerable<T>
     where B : FluentListBuilder<B, T>
 {
     protected readonly List<T> _values;
@@ -103,7 +103,7 @@ public abstract class FluentListBuilder<B, T> : BuilderBase<B>, IEnumerable<T>
             return _values[0];
 
         var error = TextBuilder.New
-            .LineDelimitAppend(_restrictions)
+            .EnumerateFormatAndDelimitLines(_restrictions)
             .IfNotNull(message, static (tb,msg) => tb.NewLine().Append($"Info: {msg}"))
             .ToStringAndDispose();
         throw new InvalidOperationException(error);
@@ -111,7 +111,7 @@ public abstract class FluentListBuilder<B, T> : BuilderBase<B>, IEnumerable<T>
 
     public override string ToString() => TextBuilder.New
         .Append('[')
-        .DelimitAppend(", ", _values)
+        .EnumerateFormatAndDelimit(_values, ", ")
         .Append(']')
         .ToStringAndDispose();
 

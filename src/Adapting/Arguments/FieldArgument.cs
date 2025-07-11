@@ -13,10 +13,10 @@ public sealed class FieldArgument : Argument,
         => new FieldArgument(field);
 
     public static bool operator ==(FieldArgument? left, FieldArgument? right)
-        => Equate.EquatableValues(left, right);
+        => Equate.EquatableValues<FieldArgument>(left, right);
 
     public static bool operator !=(FieldArgument? left, FieldArgument? right)
-        => !Equate.EquatableValues(left, right);
+        => !Equate.EquatableValues<FieldArgument>(left, right);
 
 
     public FieldInfo Field { get; }
@@ -74,5 +74,5 @@ public sealed class FieldArgument : Argument,
 
     public override int GetHashCode() => Hasher.HashMany(typeof(FieldArgument), Type, Field);
     
-    public override void RenderTo<B>(B builder) => builder.Render(Field);
+    public override void RenderTo(TextBuilder builder) => builder.Render(Field);
 }

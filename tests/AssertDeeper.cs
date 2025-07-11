@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using ScrubJay.Debugging;
 using ScrubJay.Reflection.Searching;
 using ScrubJay.Reflection.Utilities;
+using ScrubJay.Text.Rendering;
 using ScrubJay.Utilities;
 
 
@@ -29,7 +29,7 @@ public static class AssertDeeper
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Dump());
+            Console.WriteLine(ex.Render());
             Debugger.Break();
         }
        

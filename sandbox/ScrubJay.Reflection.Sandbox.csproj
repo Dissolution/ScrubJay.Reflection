@@ -20,7 +20,7 @@
         <Using Include="ScrubJay.Text.Comparison"/>
         <Using Include="ScrubJay.Validation"/>
         
-        <Using Include="ScrubJay.Functional.Prelude" Static="true"/>
+        <Using Include="ScrubJay.Prelude" Static="true"/>
         <Using Include="ScrubJay.Reflection.Prelude" Static="true"/>
     </ItemGroup>
     

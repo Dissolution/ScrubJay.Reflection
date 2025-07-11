@@ -50,7 +50,7 @@ public abstract class ReflectingMemberBases<B, M> : FluentListBuilder<B, M>, IRe
     {
         Throw.IfNull(attributeType);
         if (!attributeType.Implements<Attribute>())
-            throw new ArgumentException($"{attributeType.NameOf()} does not implement Attribute", nameof(attributeType));
+            throw new ArgumentException($"{attributeType.Render()} does not implement Attribute", nameof(attributeType));
         return Only(attributeType, static (member, at) => member.HasAttribute(at));
     }
     
@@ -68,16 +68,15 @@ public abstract class ReflectingMemberBases<B, M> : FluentListBuilder<B, M>, IRe
         });
     }
 
-    public virtual void RenderTo<TB>(TB builder) 
-        where TB : TextBuilderBase<TB>
+    public virtual void RenderTo(TextBuilder builder)
     {
         builder.Append('[')
             .If(Validate.IsNotEmpty<M>(_values),
                 (tb, members) => tb
                     .NewLine()
-                    .Enumerate(members, static (t, m) => t.Append("    ").AppendMember(m).NewLine()))
+                    .Enumerate(members, static (t, m) => t.Append("    ").Render(m).NewLine()))
             .Append(']');
     }
 
-    public sealed override string ToString() => TextBuilder.Build(RenderTo);
+    public override sealed string ToString() => this.Render();
 }

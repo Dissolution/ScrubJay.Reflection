@@ -12,10 +12,10 @@ public sealed class StackArgument : Argument,
     public static implicit operator StackArgument(Type type) => new(type);
 
     public static bool operator ==(StackArgument? left, StackArgument? right)
-        => Equate.EquatableValues(left, right);
+        => Equate.EquatableValues<StackArgument>(left, right);
 
     public static bool operator !=(StackArgument? left, StackArgument? right)
-        => !Equate.EquatableValues(left, right);
+        => !Equate.EquatableValues<StackArgument>(left, right);
 
     
     public StackArgument(Type type) : base(type)
@@ -31,7 +31,7 @@ public sealed class StackArgument : Argument,
             return emitter.Ldind_Ref();
         }
 
-        // value is already on the the stack
+        // value is already on the stack
         return emitter;
     }
 
@@ -65,6 +65,6 @@ public sealed class StackArgument : Argument,
 
     public override int GetHashCode() => Hasher.HashMany(typeof(StackArgument), Type);
 
-    public override void RenderTo<B>(B builder)
-        => builder.AppendType(Type);
+    public override void RenderTo(TextBuilder builder)
+        => builder.Render(Type);
 }

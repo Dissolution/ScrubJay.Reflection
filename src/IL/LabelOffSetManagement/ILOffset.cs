@@ -68,12 +68,11 @@ public readonly struct ILOffset :
         }
     }
 
-    public void RenderTo<B>(B builder)
-        where B : TextBuilderBase<B>
+    public void RenderTo(TextBuilder builder)
     {
         builder.Append("IL_")
             .If(_offset, static off => off >= 0,
-                static (tb, off) => tb.Append(off, "X4"),
+                static (tb, off) => tb.Format(off, "X4"),
                 static (tb, _) => tb.Append("????"));
     }
 

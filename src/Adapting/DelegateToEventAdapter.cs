@@ -25,7 +25,7 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
             .InvokeMethod()
             .SomeOrThrow();
 
-        var dm = NewDynamicILMethod<RaiseHandler<I>>($"raise_{backingField.NameOf()}");
+        var dm = NewDynamicILMethod<RaiseHandler<I>>($"raise_{backingField.Render()}");
 
         // The event field is a Delegate with the signature of the event
         // e.g. EventHandler<T> is (object?,EventArgs<T>)

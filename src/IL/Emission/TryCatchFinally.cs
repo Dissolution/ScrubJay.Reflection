@@ -16,7 +16,7 @@ public sealed class TryCatchFinally<E> : TryCatchFinallyBuilder<ITryCatchFinally
 
 public interface ITryCatchFinally<E> : ITryCatchFinallyBuilder<ITryCatchFinally<E>, E>;
 
-public interface ITryCatchFinallyBuilder<B, E> : IBuilder<B>
+public interface ITryCatchFinallyBuilder<B, E> : IFluentBuilder<B>
     where B : ITryCatchFinallyBuilder<B, E>
 {
     B Try(Action<E, ILLabel> emitTryBlock);
@@ -36,7 +36,7 @@ public interface ITryCatchFinallyBuilder<B, E> : IBuilder<B>
     E Finally(Action<E, ILLabel> emitFinallyBlock);
 }
 
-public abstract class TryCatchFinallyBuilder<B, E> : IBuilder<B>,
+public abstract class TryCatchFinallyBuilder<B, E> : IFluentBuilder<B>,
     ITryCatchFinallyBuilder<B,E> 
     where B : ITryCatchFinallyBuilder<B, E>
     where E : IGenEmitter<E>, IOperationEmitter<E>
@@ -44,6 +44,8 @@ public abstract class TryCatchFinallyBuilder<B, E> : IBuilder<B>,
     private readonly B _builder;
     private readonly E _emitter;
     private readonly ILLabel _endLabel;
+
+    B IFluentBuilder<B>.Self => _builder;
 
     public ILLabel EndLabel => _endLabel;
 

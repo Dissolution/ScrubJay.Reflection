@@ -119,20 +119,17 @@ public abstract class ILMethod
     public override string ToString()
     {
         return TextBuilder.New
-            .AppendIf(MethodAttributes.HasFlags(MethodAttributes.Static), "static ")
-            .AppendType(OwnerType)
+            .IfAppend(MethodAttributes.HasFlags(MethodAttributes.Static), "static ")
+            .Render(OwnerType)
             .Append('.')
-            .AppendNameAndGenericTypes(Name, GenericTypes)
-            .AppendLine('(')
-            .EnumerateAndDelimit(Parameters, 
-                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param),
-                static tb => tb.Append(',').NewLine())
+            .NameGenericsParameters(Name, GenericTypes, Parameters)
+            .Append(" => ")
+            .Render(ReturnParameter)
             .NewLine()
-            .Append(") => ").AppendParameter(ReturnParameter).NewLine()
             .AppendLine("-- Locals")
-            .Enumerate(Locals, (tb, local) => tb.Append(local.Index).Append(": ").Render(local).NewLine())
+            .Enumerate(Locals, static (tb, local) => tb.Append($"{local.Index}: {local:@}").NewLine())
             .AppendLine("-- CIL")
-            .LineDelimit(Instructions, (tb, instr) => instr.RenderTo(tb))
+            .EnumerateAndLineDelimit(Instructions, static (tb, instr) => instr.RenderTo(tb))
             .ToStringAndDispose();
     }
 }

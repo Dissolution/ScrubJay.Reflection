@@ -69,7 +69,7 @@ public static class MemberAssert
         if (member is null)
             throw new ArgumentNullException(memberName);
         if (member.IsStatic())
-            throw new ArgumentOutOfRangeException(memberName, member, $"{member.NameOf()} is not an instance member");
+            throw new ArgumentOutOfRangeException(memberName, member, $"{member.Render()} is not an instance member");
     }
     
     public static void IsStatic([AllowNull, NotNull] MemberInfo? member,
@@ -79,6 +79,6 @@ public static class MemberAssert
         if (member is null)
             throw new ArgumentNullException(memberName);
         if (!member.IsStatic())
-            throw new ArgumentOutOfRangeException(memberName, member, $"{member.NameOf()} is not a static member");
+            throw new ArgumentOutOfRangeException(memberName, member, $"{member.Render()} is not a static member");
     }
 }

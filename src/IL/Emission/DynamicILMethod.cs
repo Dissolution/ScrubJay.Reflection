@@ -1,5 +1,4 @@
-﻿using ScrubJay.Reflection.IL.Instructions;
-using ScrubJay.Reflection.Validation;
+﻿using ScrubJay.Reflection.Validation;
 
 namespace ScrubJay.Reflection.IL.Emission;
 

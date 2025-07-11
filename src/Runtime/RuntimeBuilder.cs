@@ -60,13 +60,13 @@ public static class RuntimeBuilder
         var invoke = DelegateHelper.InvokeMethod(delegateType).SomeOrThrow();
         return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
     }
-    
+
     public static DynamicMethod CreateDynamicMethod(MethodInfo methodSignature, string? name = null)
     {
         Throw.IfNull(methodSignature);
         return CreateDynamicMethod(name, methodSignature.ReturnType, methodSignature.GetParameterTypes());
     }
-    
+
     public static DynamicMethod CreateDynamicMethod(DelegateInfo info)
     {
         Throw.IfNull(info);
@@ -77,9 +77,10 @@ public static class RuntimeBuilder
         {
             dm.DefineParameter(ip.Position + 1, ip.Attributes, ip.Name);
         }
+
         return dm;
     }
-    
+
 #endregion
 
     public static DynamicILMethod CreateDynamicILMethod(Type delegateType, string? name = null)
@@ -87,20 +88,19 @@ public static class RuntimeBuilder
         MemberAssert.IsDelegateType(delegateType);
         return new DynamicILMethod(delegateType, name);
     }
-    
+
     public static DynamicILMethod CreateDynamicILMethod(DelegateInfo delegateInfo, string? name = null)
     {
         return new DynamicILMethod(delegateInfo, name);
     }
-    
+
     public static DynamicILMethod<D> CreateDynamicILMethod<D>(string? name = null)
         where D : Delegate
     {
         return new DynamicILMethod<D>(name);
     }
 
-    
-    
+
 #region Create Delegate
 
     public static Result<D> TryGenerateDelegate<D>(Action<ILGenerator> generate)
@@ -128,25 +128,26 @@ public static class RuntimeBuilder
     }
 
 #endregion
-    
-    #region CustomAttributeBuilder
+
+#region CustomAttributeBuilder
+
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
         where TAttribute : Attribute, new()
     {
         var ctor = Reflect<TAttribute>().Constructors().Instance.NoParams.OneOrThrow();
         return new CustomAttributeBuilder(ctor, []);
     }
-    
+
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>(params object?[] ctorArgs)
         where TAttribute : Attribute
     {
         var ctor = Reflect<TAttribute>()
             .Instance.Constructors()
             .Accepting(ctorArgs)
-            .OneOrThrow($"Could not find a {MemberNames.NameOf(typeof(TAttribute))} constructor with that would accept {string.Join(", ", ctorArgs)}");
+            .OneOrThrow($"Could not find a {typeof(TAttribute).Render()} constructor with that would accept {string.Join(", ", ctorArgs)}");
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
-    
+
     public static CustomAttributeBuilder GetCustomAttributeBuilder(Type attributeType, params object[] ctorArgs)
     {
         if (!attributeType.Implements<Attribute>())
@@ -154,9 +155,10 @@ public static class RuntimeBuilder
         var ctor = Reflect(attributeType)
             .Instance.Constructors()
             .Accepting(ctorArgs)
-            .OneOrThrow($"Could not find a {MemberNames.NameOf(attributeType)} constructor with that would accept {string.Join(", ", ctorArgs)}");
+            .OneOrThrow(
+                $"Could not find a {attributeType.Render()} constructor with that would accept {string.Join(", ", ctorArgs)}");
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
-    #endregion
-    
+
+#endregion
 }

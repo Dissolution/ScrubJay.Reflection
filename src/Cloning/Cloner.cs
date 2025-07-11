@@ -1,5 +1,4 @@
-﻿using ScrubJay.Debugging;
-using ScrubJay.Reflection.IL.Emission;
+﻿using ScrubJay.Reflection.IL.Emission;
 using static InlineIL.IL;
 
 namespace ScrubJay.Reflection.Cloning;
@@ -193,7 +192,7 @@ public static class Cloner
         }
         catch (Exception ex)
         {
-            var dump = ex.Dump();
+            var dump = ex.Render();
             Console.WriteLine(dump);
             Debugger.Break();
             throw;

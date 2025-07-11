@@ -86,7 +86,7 @@ public class DecompiledILMethod : ILMethod
             // operand is a 32-bit branch target
             case OperandType.InlineBrTarget:
             {
-                int delta = reader.TakeValue<int>();
+                int delta = reader.ReadI32();
                 return new OpCodeBranchInstruction(opCode, delta)
                 {
                     Offset = offset,
@@ -95,7 +95,7 @@ public class DecompiledILMethod : ILMethod
             // operand is a 32-bit metadata token for a field
             case OperandType.InlineField:
             {
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeFieldInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -110,7 +110,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineI:
             {
                 Debug.Assert(opCode == OpCodes.Ldc_I4);
-                int i32 = reader.TakeValue<int>();
+                int i32 = reader.ReadI32();
                 return new OpCodeValueInstruction<int>(opCode, i32)
                 {
                     Offset = offset,
@@ -120,7 +120,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineI8:
             {
                 Debug.Assert(opCode == OpCodes.Ldc_I8);
-                long i64 = reader.TakeValue<long>();
+                long i64 = reader.ReadI64();
                 return new OpCodeValueInstruction<long>(opCode, i64)
                 {
                     Offset = offset,
@@ -129,7 +129,7 @@ public class DecompiledILMethod : ILMethod
             // The operand is a 32-bit metadata token for a method
             case OperandType.InlineMethod:
             {
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeMethodInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -152,7 +152,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineR:
             {
                 Debug.Assert(opCode == OpCodes.Ldc_R8);
-                double f64 = reader.TakeValue<double>();
+                double f64 = reader.ReadF64();
                 return new OpCodeValueInstruction<double>(opCode, f64)
                 {
                     Offset = offset,
@@ -162,7 +162,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineSig:
             {
                 Debug.Assert(opCode == OpCodes.Calli);
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeSignatureInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -177,7 +177,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineString:
             {
                 Debug.Assert(opCode == OpCodes.Ldstr);
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeStringInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -192,11 +192,11 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineSwitch:
             {
                 Debug.Assert(opCode == OpCodes.Switch);
-                int cases = reader.TakeValue<int>();
+                int cases = reader.ReadI32();
                 int[] deltas = new int[cases];
                 for (int i = 0; i < cases; i++)
                 {
-                    deltas[i] = reader.TakeValue<int>();
+                    deltas[i] = reader.ReadI32();
                 }
                 return new OpCodeSwitchInstruction(opCode, deltas)
                 {
@@ -207,7 +207,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineTok:
             {
                 Debug.Assert(opCode == OpCodes.Ldtoken);
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeMemberInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -221,7 +221,7 @@ public class DecompiledILMethod : ILMethod
             // operand is a 32-bit metadata token for a Type
             case OperandType.InlineType:
             {
-                int token = reader.TakeValue<int>();
+                int token = reader.ReadI32();
                 var instr = new OpCodeTypeInstruction(opCode, token)
                 {
                     Offset = offset,
@@ -235,7 +235,7 @@ public class DecompiledILMethod : ILMethod
             // operand is 16-bit integer containing the index of a local variable or an argument
             case OperandType.InlineVar:
             {
-                ushort index = reader.TakeValue<ushort>();
+                ushort index = reader.ReadU16();
                 if (opCode.TargetsLocalVariable())
                 {
                     return new OpCodeLocalInstruction(opCode, Locals[index])
@@ -255,7 +255,7 @@ public class DecompiledILMethod : ILMethod
             // operand is an 8-bit integer branch target
             case OperandType.ShortInlineBrTarget:
             {
-                sbyte shortDelta = reader.TakeValue<sbyte>();
+                sbyte shortDelta = reader.ReadI8();
                 return new OpCodeBranchInstruction(opCode, shortDelta)
                 {
                     Offset = offset,
@@ -264,7 +264,7 @@ public class DecompiledILMethod : ILMethod
             // operand is a 8-bit integer
             case OperandType.ShortInlineI:
             {
-                sbyte i8 = reader.TakeValue<sbyte>();
+                sbyte i8 = reader.ReadI8();
                 return new OpCodeValueInstruction<sbyte>(opCode, i8)
                 {
                     Offset = offset,
@@ -274,7 +274,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.ShortInlineR:
             {
                 Debug.Assert(opCode == OpCodes.Ldc_R4);
-                float f32 = reader.TakeValue<float>();
+                float f32 = reader.ReadF32();
                 return new OpCodeValueInstruction<float>(opCode, f32)
                 {
                     Offset = offset,
@@ -283,7 +283,7 @@ public class DecompiledILMethod : ILMethod
             // operand is 8-bit integer containing the index of a local variable or an argument
             case OperandType.ShortInlineVar:
             {
-                byte index = reader.TakeValue<byte>();
+                byte index = reader.ReadU8();
                 if (opCode.TargetsLocalVariable())
                 {
                     return new OpCodeLocalInstruction(opCode, Locals[index])
@@ -311,7 +311,7 @@ public class DecompiledILMethod : ILMethod
         byte[] ilBytes = DecompileHelper.GetILBytes(method);
         SpanReader<byte> reader = new(ilBytes);
 
-        while (reader.RemainingCount > 0)
+        while (!reader.IsCompleted)
         {
             var instr = ReadOpCodeInstruction(ref reader);
             AddInstruction(instr);
@@ -349,24 +349,5 @@ public class DecompiledILMethod : ILMethod
     private Result<string> ResolveString(int token)
     {
         return TokenProvider.ResolveString(token);
-    }
-
-
-    public override string ToString()
-    {
-        return TextBuilder.New
-            .AppendIf(MethodAttributes.HasFlags(MethodAttributes.Static), "static ")
-            .AppendType(OwnerType)
-            .Append('.')
-            .AppendNameAndGenericTypes(Name, GenericTypes)
-            .AppendLine('(')
-            .Enumerate(Parameters,
-                static (tb, param) => tb.Append('[').Append(param.Position).Append("] ").AppendParameter(param).Append(',').NewLine())
-            .Append(") => ").AppendParameter(ReturnParameter).NewLine()
-            .AppendLine("-- Locals")
-            .Enumerate(Locals, (tb, local) => tb.Append(local.Index).Append(": ").Render(local).NewLine())
-            .AppendLine("-- CIL")
-            .LineDelimit(Instructions, (tb, instr) => instr.RenderTo(tb))
-            .ToStringAndDispose();
     }
 }

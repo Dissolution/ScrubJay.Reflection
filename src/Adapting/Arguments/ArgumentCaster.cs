@@ -17,7 +17,7 @@ public static class ArgumentCaster
         Safe = ParameterChecks | ObjectCastChecks | CannotPop,
     }
     
-    private static Exception GetError(Argument source, Argument dest, string? info = null)
+    private static InvalidOperationException GetError(Argument source, Argument dest, string? info = null)
     {
         string message = TextBuilder.New
             .Append("Cannot transition from ")
@@ -67,7 +67,7 @@ public static class ArgumentCaster
 
                 // Cannot
                 Debugger.Break();
-                return new InvalidOperationException($"{sourceType.NameOf()} does not inherit {destType.NameOf()}");
+                return new InvalidOperationException($"{sourceType.Render()} does not inherit {destType.Render()}");
             }
             else
             {
@@ -100,7 +100,7 @@ public static class ArgumentCaster
 
                 // Cannot
                 Debugger.Break();
-                return new InvalidOperationException($"{sourceType.NameOf()} does not inherit {destType.NameOf()}");
+                return new InvalidOperationException($"{sourceType.Render()} does not inherit {destType.Render()}");
             }
             else
             {
@@ -120,7 +120,7 @@ public static class ArgumentCaster
 
                 // Cannot
                 Debugger.Break();
-                return new InvalidOperationException($"{sourceType.NameOf()} does not inherit {destType.NameOf()}");
+                return new InvalidOperationException($"{sourceType.Render()} does not inherit {destType.Render()}");
             }
         }
 
@@ -228,7 +228,6 @@ public static class ArgumentCaster
         {
             if (sourceIsByRef)
                 return GetError(source, dest, "ref object source is not supported");
-            
 
             if (destType.IsValueType)
             {

@@ -22,7 +22,7 @@ public sealed class OpCodeValueInstruction<T> : OpCodeInstruction
         this.Value = value;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         base.RenderTo(builder);
         builder.Render(Value);

@@ -12,10 +12,10 @@ public sealed class ParameterArgument : Argument,
     public static implicit operator ParameterArgument(ParameterInfo param) => new ParameterArgument(param);
 
     public static bool operator ==(ParameterArgument? left, ParameterArgument? right)
-        => Equate.EquatableValues(left, right);
+        => Equate.EquatableValues<ParameterArgument>(left, right);
 
     public static bool operator !=(ParameterArgument? left, ParameterArgument? right)
-        => !Equate.EquatableValues(left, right);
+        => !Equate.EquatableValues<ParameterArgument>(left, right);
 
 
     public ParameterInfo Parameter { get; }
@@ -48,5 +48,5 @@ public sealed class ParameterArgument : Argument,
 
     public override int GetHashCode() => Hasher.HashMany(typeof(ParameterArgument), Parameter, Type);
     
-    public override void RenderTo<B>(B builder) => builder.Render(Parameter);
+    public override void RenderTo(TextBuilder builder) => builder.Render(Parameter);
 }

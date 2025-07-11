@@ -77,7 +77,7 @@ public abstract class OpCodeInstruction : Instruction
         this.OpCode = opCode;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo)
             // maximum OpCode.Name is 13, so this neatly sets us up with one space before the next render

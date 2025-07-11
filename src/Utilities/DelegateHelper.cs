@@ -21,7 +21,7 @@ public static class DelegateHelper
 
     public static string NameOf<TDelegate>(this TDelegate del)
         where TDelegate : Delegate
-        => typeof(TDelegate).NameOf();
+        => typeof(TDelegate).Render();
 
     public static Type CreateDelegateType(Type[] parameterTypes, Type returnType)
     {

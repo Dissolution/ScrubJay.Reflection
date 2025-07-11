@@ -65,7 +65,7 @@ public sealed class OpCodeLocalInstruction : OpCodeVarInstruction
         this.Local = local;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!);
         if (Local.TryGetValue(out var local))
@@ -73,12 +73,12 @@ public sealed class OpCodeLocalInstruction : OpCodeVarInstruction
             builder
                 // inline none opcodes specify their index in their name (eg ldloc.2)
                 .If(OpCode.OperandType != OperandType.InlineNone,
-                    tb => tb.Append(Index).Append(": "))
+                    tb => tb.Format(Index).Append(": "))
                 .Append('`').Render(local).Append('`');
         }
         else
         {
-            builder.Append('[').Append(Index).Append(']');
+            builder.Append($"[{Index}]");
         }
     }
 }
@@ -105,7 +105,7 @@ public sealed class OpCodeParameterInstruction : OpCodeVarInstruction
         this.Parameter = parameter;
     }
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!);
         if (Parameter is not null)
@@ -113,12 +113,12 @@ public sealed class OpCodeParameterInstruction : OpCodeVarInstruction
             builder
                 // inline none opcodes specify their index in their name (eg ldloc.2)
                 .If(OpCode.OperandType != OperandType.InlineNone,
-                    tb => tb.Append(Index).Append(": "))
+                    tb => tb.Format(Index).Append(": "))
                 .Append('`').Render(Parameter).Append('`');
         }
         else
         {
-            builder.Append('[').Append(Index).Append(']');
+            builder.Append('[').Format(Index).Append(']');
         }
     }
 }

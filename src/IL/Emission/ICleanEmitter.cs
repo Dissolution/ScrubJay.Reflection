@@ -87,7 +87,7 @@ public class CleanEmitter : CleanEmitterBase<CleanEmitter, Emitter>,
 }
 
 
-public class CleanEmitterBase<E, W> : BuilderBase<E>, ICleanEmitter<E>
+public class CleanEmitterBase<E, W> : FluentBuilderBase<E>, ICleanEmitter<E>
     where E : CleanEmitterBase<E, W>
     where W : ISimpleEmitter<W>
 {

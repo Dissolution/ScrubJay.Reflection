@@ -12,10 +12,10 @@ public sealed class LocalArgument : Argument,
     public static implicit operator LocalArgument(ILLocal local) => new LocalArgument(local);
 
     public static bool operator ==(LocalArgument? left, LocalArgument? right)
-        => Equate.EquatableValues(left, right);
+        => Equate.EquatableValues<LocalArgument>(left, right);
 
     public static bool operator !=(LocalArgument? left, LocalArgument? right)
-        => !Equate.EquatableValues(left, right);
+        => !Equate.EquatableValues<LocalArgument>(left, right);
 
     
     public ILLocal Local { get; }
@@ -48,5 +48,5 @@ public sealed class LocalArgument : Argument,
 
     public override int GetHashCode() => Hasher.HashMany(typeof(LocalArgument), Type, Local);
     
-    public override void RenderTo<B>(B builder) => builder.Render(Local);
+    public override void RenderTo(TextBuilder builder) => builder.Render(Local);
 }

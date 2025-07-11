@@ -83,18 +83,16 @@ public sealed class InstructionStream : IInstructionStream
             if (instr.Offset > offset)
                 break;
         }
+
         return None();
     }
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    
+
     public IEnumerator<Instruction> GetEnumerator() => _instructions.GetEnumerator();
 
     public override string ToString()
         => TextBuilder.New
-            .Delimit(
-                static tb => tb.NewLine(), 
-                _instructions,
-                static (tb, instr) => instr.RenderTo(tb))
+            .EnumerateAndLineDelimit(_instructions, static (tb, instr) => instr.RenderTo(tb))
             .ToStringAndDispose();
 }

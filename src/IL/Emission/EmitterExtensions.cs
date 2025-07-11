@@ -1,6 +1,4 @@
 ﻿
-using ScrubJay.Reflection.Adapting.Arguments;
-
 namespace ScrubJay.Reflection.IL.Emission;
 
 public static class EmitterExtensions

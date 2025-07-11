@@ -6,9 +6,9 @@
         <!-- and .NET Standard 2.0 (so this library may be referenced by Source Generators) -->
         <!-- and some out of support frameworks caught in the middle of features -->
         <TargetFrameworks>
-            net9.0;net8.0;netstandard2.1;netcoreapp3.1;net481;
-            netstandard2.0;
-            net7.0;net6.0;net5.0;
+            net9.0;net8.0;
+<!--            netstandard2.1;netstandard2.0;-->
+<!--            net481;-->
         </TargetFrameworks>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
         <LangVersion>latest</LangVersion>
@@ -41,7 +41,7 @@
         
         <Using Include="JetBrains.Annotations"/>
 
-        <Using Include="ScrubJay.Functional.Prelude" Static="true"/>
+        <Using Include="ScrubJay.Prelude" Static="true"/>
         <Using Include="ScrubJay.Reflection.Prelude" Static="true"/>
         
         <Using Include="ScrubJay.Functional"/>
@@ -53,6 +53,7 @@
         <Using Include="ScrubJay.Extensions"/>
         <Using Include="ScrubJay.Memory"/>
         <Using Include="ScrubJay.Text"/>
+        <Using Include="ScrubJay.Text.Rendering"/>
         <Using Include="ScrubJay.Utilities"/>
         <Using Include="ScrubJay.Validation"/>
         
@@ -67,10 +68,10 @@
 
     <!-- NuGet Packages -->
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
-        <PackageReference Include="ScrubJay.Core" Version="0.42.2-alpha" />
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+        <PackageReference Include="ScrubJay.Core" Version="0.50.5-alpha" />
 
-        <PackageReference Include="Dunet" Version="1.11.2">
+        <PackageReference Include="Dunet" Version="1.11.3">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         
@@ -89,7 +90,7 @@
     <!-- Need System.Memory for older frameworks -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net481' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
         <PackageReference Include="System.Memory" Version="4.6.3" />
-        <PackageReference Include="System.Text.Json" Version="9.0.4"/>
+        <PackageReference Include="System.Text.Json" Version="9.0.7" />
     </ItemGroup>
 
     <!-- And additional packages for NetStandard 2.0 -->
@@ -103,5 +104,9 @@
         <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="System.Text.Json" Version="9.0.7" />
+    </ItemGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+      <PackageReference Include="System.Text.Json" Version="9.0.7" />
     </ItemGroup>
 </Project>

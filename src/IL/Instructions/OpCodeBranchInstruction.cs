@@ -17,7 +17,7 @@ public class OpCodeLabelInstruction : OpCodeBranchInstruction
         this.Label = label;
     }
     
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Render(Label);
@@ -70,7 +70,7 @@ public class OpCodeBranchInstruction : OpCodeInstruction
     }
 
 
-    public override void RenderTo<B>(B builder)
+    public override void RenderTo(TextBuilder builder)
     {
         builder.Invoke(base.RenderTo!)
             .Render(TargetOffset)

@@ -16,8 +16,8 @@ public abstract class Argument :
     public static implicit operator Argument(ParameterInfo param) => new ParameterArgument(param);
     public static implicit operator Argument(Type type) => new StackArgument(type);
 
-    public static bool operator ==(Argument? left, Argument? right) => Equate.EquatableValues(left, right);
-    public static bool operator !=(Argument? left, Argument? right) => !Equate.EquatableValues(left, right);
+    public static bool operator ==(Argument? left, Argument? right) => Equate.EquatableValues<Argument>(left, right);
+    public static bool operator !=(Argument? left, Argument? right) => !Equate.EquatableValues<Argument>(left, right);
 
     public Type Type { get; }
 
@@ -50,9 +50,7 @@ public abstract class Argument :
 
     public abstract bool Equals(Argument? other);
 
-    public abstract void RenderTo<B>(B builder)
-        where B : TextBuilderBase<B>;
-
+    public abstract void RenderTo(TextBuilder builder);
 
     public bool IsByRef() => Type.IsByRef;
 
