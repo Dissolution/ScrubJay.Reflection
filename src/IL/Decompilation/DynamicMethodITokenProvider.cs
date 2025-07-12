@@ -24,37 +24,38 @@ public sealed class DynamicMethodITokenProvider : ITokenProvider
 
     public DynamicMethodITokenProvider(DynamicMethod dynamicMethod)
     {
-        var resolverField = Reflect<DynamicMethod>()
-            .Fields().Instance.NonPublic
+        var resolverField = Shard<DynamicMethod>()
+            .Fields().Instance().NonPublic()
             .Named("resolver", new StringMatch(StringComparison.Ordinal) { Contains = true })
             .OneOrThrow();
         var resolver = resolverField.GetValue(dynamicMethod);
         if (resolver is null) 
             throw new ArgumentException("The DynamicMethod's IL has not been finalized", nameof(dynamicMethod));
 
-        var resolveTokenMethod = ReflectOn(resolver)
+        var resolveTokenMethod = ShardOn(resolver)
             .Methods()
-            .Instance.NonPublic
+            .Instance()
+            .NonPublic()
             .Named("ResolveToken")
             .OneOrThrow();
         _tokenResolver = resolveTokenMethod.CreateDelegate<TokenResolver>(resolver);
 
-        var getStringLiteralMethod = ReflectOn(resolver)
-            .Methods().Instance.NonPublic
+        var getStringLiteralMethod = ShardOn(resolver)
+            .Methods().Instance().NonPublic()
             .Named("GetStringLiteral")
             .OneOrThrow();
         _stringResolver = getStringLiteralMethod.CreateDelegate<StringResolver>(resolver);
 
-        var resolveSignatureMethod = ReflectOn(resolver)
-            .Methods().Instance.NonPublic
+        var resolveSignatureMethod = ShardOn(resolver)
+            .Methods().Instance().NonPublic()
             .Named("ResolveSignature")
             .OneOrThrow();
         _signatureResolver = resolveSignatureMethod.CreateDelegate<SignatureResolver>(resolver);
 
-        var getTypeFromHandleUnsafeMethod = Reflect<Type>()
-            .Methods().Static
+        var getTypeFromHandleUnsafeMethod = Shard<Type>()
+            .Methods().Static()
             .Named("GetTypeFromHandleUnsafe")
-            .Parameters<IntPtr>()
+            .WithParameters<IntPtr>()
             .OneOrThrow();
         _getTypeFromHandleUnsafe = getTypeFromHandleUnsafeMethod.CreateDelegate<GetTypeFromHandleUnsafe>();
 
@@ -64,30 +65,30 @@ public sealed class DynamicMethodITokenProvider : ITokenProvider
         var runtimeMethodHandleInternal = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeMethodHandleInternal")
             .ThrowIfNull();
 
-        _getMethodBase = Reflect(runtimeType)
-            .Methods().Static
+        _getMethodBase = Shard(runtimeType)
+            .Methods().Static()
             .Named("GetMethodBase")
-            .Parameters(runtimeType, runtimeMethodHandleInternal)
+            .WithParameters(runtimeType, runtimeMethodHandleInternal)
             .OneOrThrow();
         
-        _runtimeMethodHandleInternalCtor = Reflect(runtimeMethodHandleInternal)
-            .Instance.NonPublic
+        _runtimeMethodHandleInternalCtor = Shard(runtimeMethodHandleInternal)
+            .Instance().NonPublic()
             .Constructors()
-            .Parameters<IntPtr>()
+            .WithParameters<IntPtr>()
             .OneOrThrow();
 
         var runtimeFieldInfoStub = typeof(RuntimeTypeHandle).Assembly.GetType("System.RuntimeFieldInfoStub").ThrowIfNull();
         
-        _runtimeFieldHandleStubCtor = Reflect(runtimeFieldInfoStub)
-            .Instance.Public
+        _runtimeFieldHandleStubCtor = Shard(runtimeFieldInfoStub)
+            .Instance().Public()
             .Constructors()
             //.Parameters<IntPtr, object>()
             .OneOrThrow();
 
-        _getFieldInfo = Reflect(runtimeType)
-            .Static.Methods()
+        _getFieldInfo = Shard(runtimeType)
+            .Static().Methods()
             .Named("GetFieldInfo")
-            .Parameters(runtimeType, typeof(RuntimeTypeHandle).Assembly.GetType("System.IRuntimeFieldInfo").ThrowIfNull())
+            .WithParameters(runtimeType, typeof(RuntimeTypeHandle).Assembly.GetType("System.IRuntimeFieldInfo").ThrowIfNull())
             .OneOrThrow();
     }
 

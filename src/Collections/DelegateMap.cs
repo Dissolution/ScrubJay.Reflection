@@ -12,7 +12,7 @@ public class DelegateMap : IEnumerable<Delegate>
     {
         var delegateType = typeof(D);
         //var genericTypes = delegateType.GetGenericArguments();
-        var invoke = DelegateHelper.InvokeMethod<D>();
+        var invoke = DelegateHelper.GetInvokeMethod<D>();
         var (_, ret) = invoke.ReturnParameter;
         var pTypes = invoke.GetParameterTypes();
         var pCount = pTypes.Length;

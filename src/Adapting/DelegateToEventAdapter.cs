@@ -22,7 +22,7 @@ public abstract class DelegateToEventAdapter : DelegateToMemberAdapter
         var eventHandlerType = backingField.FieldType;
 
         var invokeMethod = eventHandlerType
-            .InvokeMethod()
+            .GetInvokeMethod()
             .SomeOrThrow();
 
         var dm = NewDynamicILMethod<RaiseHandler<I>>($"raise_{backingField.Render()}");

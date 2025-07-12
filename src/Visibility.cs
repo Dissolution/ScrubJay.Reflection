@@ -7,17 +7,23 @@
 [Flags]
 public enum Visibility
 {
-    None      = 0,
-    
-    
-    Instance  = 1 << 0,
-    Static    = 1 << 1,
-    
-    Public    = 1 << 2,
-    Internal  = 1 << 3,
+    None = 0,
+
+    [RenderAs("instance")]
+    Instance = 1 << 0,
+    [RenderAs("static")]
+    Static = 1 << 1,
+
+    [RenderAs("public")]
+    Public = 1 << 2,
+    [RenderAs("internal")]
+    Internal = 1 << 3,
+    [RenderAs("protected")]
     Protected = 1 << 4,
-    Private   = 1 << 5,
-    NonPublic = Internal | Protected | Private,
+    [RenderAs("private")]
+    Private = 1 << 5,
     
+    NonPublic = Internal | Protected | Private,
+
     Any = Instance | Static | Public | NonPublic,
 }

@@ -10,7 +10,7 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<ClassEntity>().Fields<Guid>().OneOrThrow();
             var getter = DelegateToFieldAdapter
                 .TryAdapt<Getter<ClassEntity, Guid>>(field)
                 .OkOrThrow();
@@ -30,7 +30,7 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<ClassEntity>().Fields<Guid>().OneOrThrow();
             var getter = DelegateToFieldAdapter
                 .TryAdapt<Getter<ClassEntity, object>>(field)
                 .OkOrThrow();
@@ -52,7 +52,7 @@ public class GetterTests
         public void AsSubTypeWorks()
         {
             var field = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
             var getter = DelegateToFieldAdapter
@@ -75,7 +75,7 @@ public class GetterTests
         public void AsInterfaceWorks()
         {
             var field = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Fields<NameStampClassEntity>()
                 .OneOrThrow();
             var getter = DelegateToFieldAdapter
@@ -100,7 +100,7 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<StructEntity>().Fields<Guid>().OneOrThrow();
             var getter = DelegateToFieldAdapter
                 .TryAdapt<Getter<StructEntity, Guid>>(field)
                 .OkOrThrow();
@@ -119,7 +119,7 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<StructEntity>().Fields<Guid>().OneOrThrow();
             var getter = DelegateToFieldAdapter
                 .TryAdapt<Getter<StructEntity, object>>(field)
                 .OkOrThrow();
@@ -141,7 +141,7 @@ public class GetterTests
         public void AsInterfaceWorks()
         {
             var field = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Fields<StructEntity>()
                 .OneOrThrow();
             var getter = DelegateToFieldAdapter
@@ -165,7 +165,7 @@ public class GetterTests
     [Fact]
     public void StaticExactGetterWorks()
     {
-        var field = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
+        var field = Prelude.Shard(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
         var getter = DelegateToFieldAdapter
             .TryAdapt<Getter<None, Guid>>(field)
             .OkOrThrow();

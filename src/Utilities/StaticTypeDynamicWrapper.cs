@@ -12,6 +12,16 @@ public abstract class DynamicWrapper
     {
         return StaticTypeDynamicWrapper.For(staticType);
     }
+
+    [return: NotNullIfNotNull(nameof(instance))]
+    public static dynamic? WrapInstance<T>(T? instance)
+    {
+        if (instance is null)
+            return null;
+
+        Type type = instance.GetType();
+        return new InstanceDynamicWrapper((object)instance, type);
+    }
 }
 
 [PublicAPI]
@@ -45,6 +55,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         {
             argTypes[i] = args[i]?.GetType() ?? typeof(object);
         }
+
         return (args, argTypes);
     }
 
@@ -61,42 +72,50 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         return dmo;
     }
 
-    
+
     public override bool TryBinaryOperation(BinaryOperationBinder binder, object arg, out object? result)
     {
         Debugger.Break();
         return base.TryBinaryOperation(binder, arg, out result);
     }
+
     public override bool TryConvert(ConvertBinder binder, out object? result)
     {
-         Debugger.Break();
+        Debugger.Break();
         return base.TryConvert(binder, out result);
     }
-    public override bool TryCreateInstance(CreateInstanceBinder binder, object?[]? args, [NotNullWhen(true)] out object? result)
+
+    public override bool TryCreateInstance(CreateInstanceBinder binder, object?[]? args,
+        [NotNullWhen(true)] out object? result)
     {
         Debugger.Break();
         return base.TryCreateInstance(binder, args, out result);
     }
+
     public override bool TryDeleteIndex(DeleteIndexBinder binder, object[] indexes)
     {
         Debugger.Break();
         return base.TryDeleteIndex(binder, indexes);
     }
+
     public override bool TryDeleteMember(DeleteMemberBinder binder)
     {
         Debugger.Break();
         return base.TryDeleteMember(binder);
     }
+
     public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object? result)
     {
         Debugger.Break();
         return base.TryGetIndex(binder, indexes, out result);
     }
+
     public override bool TryGetMember(GetMemberBinder binder, out object? result)
     {
         Debugger.Break();
         return base.TryGetMember(binder, out result);
     }
+
     public override bool TryInvoke(InvokeBinder binder, object?[]? args, out object? result)
     {
         Debugger.Break();
@@ -110,7 +129,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
             Debug.Assert(callInfo.ArgumentCount == 0);
             return [];
         }
-        
+
         int count = args.Length;
         Debug.Assert(callInfo.ArgumentCount == count);
         if (count == 0)
@@ -118,7 +137,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
 
         var argNames = callInfo.ArgumentNames;
         var parameters = new ParameterInfo[count];
-        
+
         for (var i = 0; i < count; i++)
         {
             ParameterInfo param = new OverridableParameterInfo()
@@ -147,9 +166,10 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
             args[i] = a;
             argTypes[i] = a is null ? typeof(object) : a.GetType();
         }
+
         return (args, argTypes);
     }
-    
+
 //    private ObjectInvoke? CreateObjectInvoke(MemberSearchOptions key)
 //    {
 //        // Our common search flags
@@ -269,7 +289,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
 //        Debug.WriteLine(Dump($"Nothing found on {_targetType} when searching for {key}"));
 //        return null;
 //    }
-    
+
     public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? arguments, out object? result)
     {
         string memberName = binder.Name;
@@ -279,16 +299,18 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         if (returnType == typeof(Type))
             Debugger.Break();
 
-        Mirror members = Reflect(_type)
-            .Static
+        var members = Shard(_type)
+            .Static()
             .Named(memberName, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 
         var (args, argTypes) = ExtractArgTypes(arguments);
-        
+
         if (args.Length == 0)
         {
             // Field?
-            if (members.OfType<FieldInfo>()
+            if (members
+                .ToEnumerable()
+                .OfType<FieldInfo>()
                 .Where(f => f.FieldType.Implements(returnType))
                 .TryGetOne()
                 .IsOk(out var field))
@@ -299,9 +321,11 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
                 result = value;
                 return true;
             }
-            
+
             // Property?
-            if (members.OfType<PropertyInfo>()
+            if (members
+                .ToEnumerable()
+                .OfType<PropertyInfo>()
                 .Where(p => p.PropertyType.Implements(returnType))
                 .Where(p => p.GetIndexParameters().IsNullOrEmpty())
                 .TryGetOne()
@@ -313,20 +337,22 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
                 result = value;
                 return true;
             }
-            
+
             // Method?
-            if (members.OfType<MethodBase>()
-                    .Where(m => m.GetParameters().Length == 0)
-                    .Where(m => m.ReturnType().Implements(returnType))
-                    .TryGetOne()
-                    .IsOk(out var method))
+            if (members
+                .ToEnumerable()
+                .OfType<MethodBase>()
+                .Where(m => m.GetParameters().Length == 0)
+                .Where(m => m.ReturnType().Implements(returnType))
+                .TryGetOne()
+                .IsOk(out var method))
             {
                 object? value = method.Invoke(null, null);
                 Debug.Assert(value.As(returnType).IsSome());
                 result = value;
                 return true;
             }
-            
+
             // no match
             Debugger.Break();
             result = null;
@@ -335,46 +361,47 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         else if (argTypes.Length == 1)
         {
             // Field?
-            if (members.OfType<FieldInfo>()
+            if (members
+                .ToEnumerable()
+                .OfType<FieldInfo>()
                 .Where(f => returnType.Implements(f.FieldType))
                 .TryGetOne()
                 .IsOk(out var field))
             {
                 // field setter
                 field.SetValue(null, args[0]);
-                
+
                 Debugger.Break();
                 result = DBNull.Value;
                 return true;
             }
-            
+
             // Property?
-            if (members.OfType<PropertyInfo>()
+            if (members
+                .ToEnumerable()
+                .OfType<PropertyInfo>()
                 .Where(p => returnType.Implements(p.PropertyType))
                 .TryGetOne()
                 .IsOk(out var property))
             {
                 // property setter
                 property.SetValue(null, args[0]);
-                
+
                 Debugger.Break();
                 result = DBNull.Value;
                 return true;
             }
-         
-           
-
         }
 
         // Method?
         var methods = members
             .MethodBases()
-            .Only(argTypes, static (method, aTypes) => method.Parameters().CanAcceptA((aTypes)));
+            .WithParameters(argTypes, TypeMatch.ImplementedBy);
 
         if (returnType == typeof(void))
         {
             // We can invoke _any_ matching method
-            if (methods.TryGetFirst().IsOk(out var method))
+            if (methods.TryGetOnly().IsOk(out var method))
             {
                 object? value = method.Invoke(null, args);
                 Debug.Assert(value.As(returnType).IsSome());
@@ -386,7 +413,7 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
         {
             // We have no idea what we want?
             if (methods.Returning(typeof(void))
-                .TryGetFirst().IsOk(out var method))
+                .TryGetOnly().IsOk(out var method))
             {
                 object? value = method.Invoke(null, args);
                 Debug.Assert(value is null);
@@ -394,45 +421,127 @@ public sealed class StaticTypeDynamicWrapper : DynamicObject, IDynamicMetaObject
                 return true;
             }
         }
-        
+
 
         var invoked = base.TryInvokeMember(binder, args, out var baseResult);
         Debugger.Break();
-        
+
         result = default;
         return false;
     }
-    
+
     public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object? value)
     {
         Debugger.Break();
         return base.TrySetIndex(binder, indexes, value);
     }
+
     public override bool TrySetMember(SetMemberBinder binder, object? value)
     {
         Debugger.Break();
         return base.TrySetMember(binder, value);
     }
+
     public override bool TryUnaryOperation(UnaryOperationBinder binder, out object? result)
     {
         Debugger.Break();
         return base.TryUnaryOperation(binder, out result);
     }
-    
+
     public override bool Equals(object? obj)
     {
         bool equals = base.Equals(obj);
         Debugger.Break();
         return equals;
     }
-    
+
     public override int GetHashCode()
     {
         return Hasher.Hash(_type);
     }
-    
+
     public override string ToString()
     {
         return $"dynamic_static({_type.Render()})";
+    }
+}
+
+[PublicAPI]
+public sealed class InstanceDynamicWrapper : DynamicObject, IDynamicMetaObjectProvider
+{
+    internal InstanceDynamicWrapper(object instance, Type instanceType)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override IEnumerable<string> GetDynamicMemberNames()
+    {
+        return base.GetDynamicMemberNames();
+    }
+
+    public override DynamicMetaObject GetMetaObject(Expression parameter)
+    {
+        return base.GetMetaObject(parameter);
+    }
+
+    public override bool TryBinaryOperation(BinaryOperationBinder binder, object arg, out object? result)
+    {
+        return base.TryBinaryOperation(binder, arg, out result);
+    }
+
+    public override bool TryConvert(ConvertBinder binder, out object? result)
+    {
+        return base.TryConvert(binder, out result);
+    }
+
+    public override bool TryCreateInstance(CreateInstanceBinder binder, object?[]? args,
+        [NotNullWhen(true)] out object? result)
+    {
+        return base.TryCreateInstance(binder, args, out result);
+    }
+
+    public override bool TryDeleteIndex(DeleteIndexBinder binder, object[] indexes)
+    {
+        return base.TryDeleteIndex(binder, indexes);
+    }
+
+    public override bool TryDeleteMember(DeleteMemberBinder binder)
+    {
+        return base.TryDeleteMember(binder);
+    }
+
+    public override bool TryGetIndex(GetIndexBinder binder, object[] indexes, out object? result)
+    {
+        return base.TryGetIndex(binder, indexes, out result);
+    }
+
+    public override bool TryGetMember(GetMemberBinder binder, out object? result)
+    {
+        return base.TryGetMember(binder, out result);
+    }
+
+    public override bool TryInvoke(InvokeBinder binder, object?[]? args, out object? result)
+    {
+        return base.TryInvoke(binder, args, out result);
+    }
+
+    public override bool TryInvokeMember(InvokeMemberBinder binder, object?[]? args, out object? result)
+    {
+        return base.TryInvokeMember(binder, args, out result);
+    }
+
+    public override bool TrySetIndex(SetIndexBinder binder, object[] indexes, object? value)
+    {
+        return base.TrySetIndex(binder, indexes, value);
+    }
+
+    public override bool TrySetMember(SetMemberBinder binder, object? value)
+    {
+        return base.TrySetMember(binder, value);
+    }
+
+    public override bool TryUnaryOperation(UnaryOperationBinder binder, out object? result)
+    {
+        return base.TryUnaryOperation(binder, out result);
     }
 }

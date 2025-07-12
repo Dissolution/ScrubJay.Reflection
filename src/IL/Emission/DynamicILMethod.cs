@@ -24,7 +24,7 @@ public class DynamicILMethod : ILMethod
     {
         MemberAssert.IsDelegateType(delegateType);
         this.DelegateType = delegateType;
-        this.DelegateInvokeMethod = delegateType.InvokeMethod().SomeOrThrow();
+        this.DelegateInvokeMethod = delegateType.GetInvokeMethod().SomeOrThrow();
         _dynamicMethod = RuntimeBuilder.CreateDynamicMethod(DelegateInvokeMethod);
         
         this.Name = name ?? delegateType.Name;
@@ -36,7 +36,7 @@ public class DynamicILMethod : ILMethod
     internal DynamicILMethod(DelegateInfo info, string? name = null)
     {
         this.DelegateType = info.DelegateType;
-        this.DelegateInvokeMethod = DelegateType.InvokeMethod().SomeOrThrow();
+        this.DelegateInvokeMethod = DelegateType.GetInvokeMethod().SomeOrThrow();
         _dynamicMethod = RuntimeBuilder.CreateDynamicMethod(info);
 
         this.Name = name ?? info.Name;

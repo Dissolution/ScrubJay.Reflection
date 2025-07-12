@@ -15,28 +15,28 @@ public static class EmissionHelper
     
     static EmissionHelper()
     {
-        Type_GetTypeFromHandle_Method = Reflect<Type>()
-            .Public.Static.Methods()
+        Type_GetTypeFromHandle_Method = Shard<Type>()
+            .Public().Static().Methods()
             .Named(nameof(Type.GetTypeFromHandle))
             .OneOrThrow();
 
-        Method_GetMethodFromHandle_Method = Reflect<MethodBase>()
-            .Public.Static.Methods()
+        Method_GetMethodFromHandle_Method = Shard<MethodBase>()
+            .Public().Static().Methods()
             .Named(nameof(MethodBase.GetMethodFromHandle))
-            .ParamCount(1)
+            .WithParameters(1)
             .OneOrThrow();
 
-        Delegate_GetInvocationList_Method = Reflect<Delegate>()
-            .Instance.Methods()
+        Delegate_GetInvocationList_Method = Shard<Delegate>()
+            .Instance().Methods()
             .Named(nameof(Delegate.GetInvocationList))
-            .NoParams
+            .NoParameters()
             .Returning<Delegate[]>()
             .OneOrThrow();
         
         
 #if NETFRAMEWORK || NETSTANDARD2_0
         GetUninitializedObject_Method = Reflect(typeof(FormatterServices))
-            .Public.Static.Methods()
+            .Public().Static().Methods()
             .Named(nameof(FormatterServices.GetUninitializedObject))
             .OneOrThrow();
 #else
@@ -46,7 +46,7 @@ public static class EmissionHelper
         
         /*
         GetUninitializedObject_Method = Reflect(typeof(RuntimeHelpers))
-            .Public.Static.Methods
+            .Public().Static().Methods
             .Named(nameof(RuntimeHelpers.GetUninitializedObject))
             .OneOrThrow();
         */

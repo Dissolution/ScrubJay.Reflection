@@ -107,7 +107,7 @@ public static class MemberInfoExtensions
         if (member is MethodBase method)
             return method.GetParameters();
         if (member is EventInfo eventInfo)
-            return eventInfo.EventHandlerType.InvokeMethod().SomeOrThrow().GetParameters();
+            return eventInfo.EventHandlerType.GetInvokeMethod().SomeOrThrow().GetParameters();
         if (member is PropertyInfo property)
             return property.GetIndexParameters();
         return [];

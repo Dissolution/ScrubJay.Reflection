@@ -10,7 +10,7 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<ClassEntity>().Properties<Guid>().OneOrThrow();
             var setter = DelegateToPropertyAdapter.TryAdapt<Setter<ClassEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
@@ -27,7 +27,7 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<ClassEntity>().Properties<Guid>().OneOrThrow();
             var setter = DelegateToPropertyAdapter.TryAdapt<Setter<ClassEntity, object>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
@@ -47,7 +47,7 @@ public class SetterTests
         public void FromSuperTypeWorks()
         {
             var property = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Properties<ClassEntity>()
                 .OneOrThrow();
             var setter = DelegateToPropertyAdapter.TryAdapt<Setter<EntityHolder, NameStampClassEntity>>(property).OkOrThrow();
@@ -72,7 +72,7 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<StructEntity>().Properties<Guid>().OneOrThrow();
             var setter = DelegateToPropertyAdapter.TryAdapt<Setter<StructEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
@@ -89,7 +89,7 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<StructEntity>().Properties<Guid>().OneOrThrow();
             var setter = DelegateToPropertyAdapter.TryAdapt<Setter<StructEntity, object>>(property).OkOrThrow();
             Assert.NotNull(setter);
 
@@ -110,7 +110,7 @@ public class SetterTests
     [Fact]
     public void StaticExactSetterWorks()
     {
-        var property = Prelude.Reflect(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
+        var property = Prelude.Shard(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
         var setter = DelegateToPropertyAdapter.TryAdapt<Setter<None, Guid>>(property).OkOrThrow();
         Assert.NotNull(setter);
 

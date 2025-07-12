@@ -14,8 +14,10 @@ public class ReflectionException : Exception, IRenderable
 
     static ReflectionException()
     {
-        var exceptionMessageField = Reflect<Exception>()
-            .NonPublic.Instance.Fields<string>()
+        var exceptionMessageField = Shard<Exception>()
+            .NonPublic()
+            .Instance()
+            .Fields<string>()
             .Named("message", new StringMatch(StringComparison.OrdinalIgnoreCase){ Contains = true})
             .OneOrThrow();
 
@@ -26,8 +28,10 @@ public class ReflectionException : Exception, IRenderable
                 .Ret())
             .OkOrThrow();
 
-        var exceptionInnerExceptionField = Reflect<Exception>()
-            .NonPublic.Instance.Fields<Exception>()
+        var exceptionInnerExceptionField = Shard<Exception>()
+            .NonPublic()
+            .Instance()
+            .Fields<Exception>()
             .Named("innerException", new StringMatch(StringComparison.OrdinalIgnoreCase){ Contains = true })
             .OneOrThrow();
 

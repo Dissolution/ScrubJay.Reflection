@@ -6,7 +6,12 @@ namespace ScrubJay.Reflection;
 /// Information about a <see cref="Delegate"/>
 /// </summary>
 [PublicAPI]
-public sealed record class DelegateInfo : IRenderable
+public sealed record class DelegateInfo :
+    #if NET7_0_OR_GREATER
+    IEqualityOperators<DelegateInfo, DelegateInfo, bool>,
+#endif
+    IEquatable<DelegateInfo>,
+    IRenderable
 {
     public static DelegateInfo New<D>(string? name = null)
         where D : Delegate
@@ -19,6 +24,7 @@ public sealed record class DelegateInfo : IRenderable
         => new(method, name);
 
 
+    
     private Type[]? _parameterTypes = null;
     private Type? _delegateType = null;
 
@@ -54,7 +60,7 @@ public sealed record class DelegateInfo : IRenderable
     {
         MemberAssert.IsDelegateType(delegateType);
         
-        var invokeMethod = delegateType.InvokeMethod().SomeOrThrow();
+        var invokeMethod = delegateType.GetInvokeMethod().SomeOrThrow();
         Attributes = Attribute.GetCustomAttributes(delegateType);
         Name = name ?? delegateType.Name;
         GenericTypes = delegateType.GetGenericArguments();
@@ -74,8 +80,6 @@ public sealed record class DelegateInfo : IRenderable
         ReturnParameter = method.ReturnParameter();
         Parameters = method.GetParameters();
     }
-
-    
     
     public void RenderTo(TextBuilder builder)
     {

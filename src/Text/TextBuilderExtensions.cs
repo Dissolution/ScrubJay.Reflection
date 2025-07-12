@@ -1,8 +1,8 @@
 ﻿namespace ScrubJay.Reflection.Text;
 
-public static class TextBuilderExtensions
+internal static class TextBuilderExtensions
 {
-    internal static TextBuilder NameGenericsParameters(
+    public static TextBuilder NameGenericsParameters(
         this TextBuilder builder,
         string? name,
         Type[]? genericTypes = null,

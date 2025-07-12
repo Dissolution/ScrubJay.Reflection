@@ -25,14 +25,17 @@ public static class Cloner
     [return: NotNullIfNotNull(nameof(str))]
     private static string? DeepCloneString(string? str) => str;
 
-    private static readonly MethodInfo _deepCloneUnmanagedMethod = Reflect(typeof(Cloner))
-        .Private.Static.Methods().Named(nameof(DeepCloneUnmanaged))
-        .GenericCount(1)
+    private static readonly MethodInfo _deepCloneUnmanagedMethod = Shard(typeof(Cloner))
+        .Private()
+        .Static()
+        .Methods()
+        .Named(nameof(DeepCloneUnmanaged))
+        .AreGeneric(1)
         .OneOrThrow();
 
-    private static readonly MethodInfo _deepCloneMethod = Reflect(typeof(Cloner))
-        .Public.Static.Methods().Named(nameof(DeepClone))
-        .GenericCount(1)
+    private static readonly MethodInfo _deepCloneMethod = Shard(typeof(Cloner))
+        .Public().Static().Methods().Named(nameof(DeepClone))
+        .AreGeneric(1)
         .OneOrThrow();
     
     private static U DeepCloneUnmanaged<U>(U value)
@@ -121,7 +124,7 @@ public static class Cloner
         if (type.IsArray)
             return DeepCloneArray(type);
 
-        var fields = Reflect(type).Instance.Fields().AsList();
+        var fields = Shard(type).Instance().Fields().ToList();
 
         if (fields.Count == 0)
             throw new NotImplementedException();

@@ -43,15 +43,15 @@ public static class DecompileHelper
     public static byte[] GetILBytes(DynamicMethod dynamicMethod)
     {
         // Find the DynamicMethod's Resolver field
-        var resolverField = Reflect<DynamicMethod>()
+        var resolverField = Shard<DynamicMethod>()
             .Fields()
-            .Instance
-            .NonPublic
+            .Instance()
+            .NonPublic()
             .Named("_resolver", new StringMatch(StringComparison.OrdinalIgnoreCase)
             {
                 EndsWith = true,
             })
-            .OneOrThrow("DynamicMethod does not contain a '_resolver' field");
+            .OneOrThrow();
 
         object? resolver = resolverField.GetValue(dynamicMethod);
         if (resolver == null)
@@ -60,15 +60,15 @@ public static class DecompileHelper
             throw new ArgumentException("The dynamic method's IL has not been finalized.");
         }
 
-        var codeField = ReflectOn(resolver)
-            .Instance
-            .NonPublic
+        var codeField = ShardOn(resolver)
+            .Instance()
+            .NonPublic()
             .Fields<byte[]>()
             .Named("_code", new StringMatch(StringComparison.OrdinalIgnoreCase)
             {
                 EndsWith = true,
             })
-            .OneOrThrow("DynamicMethod's Resolver does not contain a '_code' field");
+            .OneOrThrow();
 
         object? code = codeField.GetValue(resolver);
         if (code is null)

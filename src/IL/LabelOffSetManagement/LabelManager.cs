@@ -6,11 +6,11 @@ public class LabelManager
 
     static LabelManager()
     {
-        var labelCtor = Reflect<Label>()
+        var labelCtor = Shard<Label>()
             .Constructors()
-            .Instance
-            .Parameters<int>()
-            .OneOrThrow("Could not find Label(int) ctor");
+            .Instance()
+            .WithParameters<int>()
+            .TryGetOnly().OkOrThrow();
         
         // use ILGen because all emitters depend on LabelManager
         _newLabel = RuntimeBuilder.TryGenerateDelegate<Func<int, Label>>(gen =>

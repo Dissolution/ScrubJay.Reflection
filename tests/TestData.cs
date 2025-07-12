@@ -80,9 +80,9 @@ public static class TestData
         Assert.Equal<bool>(left is null, right is null);
         if (left is null) return;
 
-        var properties = Mirror.Reflect<T>()
-            .Properties().Public.Instance
-            .NonIndexer
+        var properties = Mirror.Shard<T>()
+            .Properties().Public().Instance()
+            .NonIndexers()
             .ToList();
 
         if (properties.Count == 0)

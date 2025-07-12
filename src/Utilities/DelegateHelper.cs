@@ -3,7 +3,7 @@
 [PublicAPI]
 public static class DelegateHelper
 {
-    public static Option<MethodInfo> InvokeMethod(this Type? delegateType)
+    public static Option<MethodInfo> GetInvokeMethod(this Type? delegateType)
     {
         if (delegateType is null)
             return None();
@@ -11,7 +11,7 @@ public static class DelegateHelper
             .GetMethod("Invoke", BF.Public | BF.Instance));
     }
 
-    public static MethodInfo InvokeMethod<TDelegate>()
+    public static MethodInfo GetInvokeMethod<TDelegate>()
         where TDelegate : Delegate
     {
         return typeof(TDelegate)
@@ -19,7 +19,7 @@ public static class DelegateHelper
             .ThrowIfNull();
     }
 
-    public static string NameOf<TDelegate>(this TDelegate del)
+    public static string Render<TDelegate>(this TDelegate del)
         where TDelegate : Delegate
         => typeof(TDelegate).Render();
 

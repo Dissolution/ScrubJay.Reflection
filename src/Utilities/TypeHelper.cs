@@ -33,11 +33,11 @@ public static class TypeHelper
 #else
     private static bool DetermineIsRef(Type type)
     {
-        return Reflect(typeof(RuntimeHelpers))
-            .Public.Static.Methods()
+        return Shard(typeof(RuntimeHelpers))
+            .Public().Static().Methods()
             .Named(nameof(RuntimeHelpers.IsReferenceOrContainsReferences))
-            .GenericCount(1)
-            .OneOrThrow("Could not find RuntimeHelpers.IsReferenceOrContainsReferences method")
+            .AreGeneric(1)
+            .TryGetOnly().OkOrThrow()
             .MakeGenericMethod(type)
             .Invoke(null, null)
             .ThrowIfNot<bool>();

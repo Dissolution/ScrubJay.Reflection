@@ -75,16 +75,6 @@ public static class TypeExtensions
         return type;
     }
 
-    /// <summary>
-    /// Gets all <see cref="MemberInfo"/>s that belongs to this <see cref="Type"/>
-    /// </summary>
-    public static MemberInfo[] AllMembers(this Type? type)
-    {
-        if (type is null)
-            return [];
-        return type.GetMembers(BF.Public | BF.NonPublic | BF.Instance | BF.Static | BF.FlattenHierarchy);
-    }
-
     public static bool Equals(this Type? type, Type? other, TypeMatch typeMatch)
     {
         if (typeMatch.HasFlags<TypeMatch>(TypeMatch.Exact) && type == other)

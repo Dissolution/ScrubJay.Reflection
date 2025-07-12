@@ -40,8 +40,8 @@ public static class EmitterExtensions
         where E : ISimpleEmitter<E>
         where X : Exception
     {
-        var exCtor = Reflect<X>()
-            .Instance
+        var exCtor = Shard<X>()
+            .Instance()
             .Constructors()
             .Accepting(exceptionArgs)
             .OneOrThrow();

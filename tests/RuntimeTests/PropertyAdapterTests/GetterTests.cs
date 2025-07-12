@@ -10,7 +10,7 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<ClassEntity>().Properties<Guid>().OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<ClassEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
@@ -27,7 +27,7 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var property = Prelude.Reflect<ClassEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<ClassEntity>().Properties<Guid>().OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<ClassEntity, object>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
@@ -47,7 +47,7 @@ public class GetterTests
         public void AsSubTypeWorks()
         {
             var property = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Properties<NameStampClassEntity>()
                 .OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, ClassEntity>>(property).OkOrThrow();
@@ -68,7 +68,7 @@ public class GetterTests
         public void AsInterfaceWorks()
         {
             var property = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Properties<NameStampClassEntity>()
                 .OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, IEntity>>(property).OkOrThrow();
@@ -91,7 +91,7 @@ public class GetterTests
         [Fact]
         public void ExactWorks()
         {
-            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<StructEntity>().Properties<Guid>().OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<StructEntity, Guid>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
@@ -108,7 +108,7 @@ public class GetterTests
         [Fact]
         public void AsObjectWorks()
         {
-            var property = Prelude.Reflect<StructEntity>().Properties<Guid>().OneOrThrow();
+            var property = Prelude.Shard<StructEntity>().Properties<Guid>().OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<StructEntity, object>>(property).OkOrThrow();
             Assert.NotNull(getter);
 
@@ -128,7 +128,7 @@ public class GetterTests
         public void AsInterfaceWorks()
         {
             var property = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Properties<StructEntity>()
                 .OneOrThrow();
             var getter = DelegateToPropertyAdapter.TryAdapt<Getter<EntityHolder, IEntity>>(property).OkOrThrow();
@@ -150,7 +150,7 @@ public class GetterTests
     [Fact]
     public void StaticExactGetterWorks()
     {
-        var property = Prelude.Reflect(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
+        var property = Prelude.Shard(typeof(StaticEntity)).Properties<Guid>().OneOrThrow();
         var getter = DelegateToPropertyAdapter.TryAdapt<Getter<None, Guid>>(property).OkOrThrow();
         Assert.NotNull(getter);
 

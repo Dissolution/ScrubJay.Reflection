@@ -10,7 +10,7 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<ClassEntity>().Fields<Guid>().OneOrThrow();
             var setter = DelegateToFieldAdapter
                 .TryAdapt<Setter<ClassEntity, Guid>>(field)
                 .OkOrThrow();
@@ -29,7 +29,7 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var field = Prelude.Reflect<ClassEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<ClassEntity>().Fields<Guid>().OneOrThrow();
             var setter = DelegateToFieldAdapter
                 .TryAdapt<Setter<ClassEntity, object>>(field)
                 .OkOrThrow();
@@ -51,7 +51,7 @@ public class SetterTests
         public void FromSuperTypeWorks()
         {
             var field = Prelude
-                .Reflect<EntityHolder>()
+                .Shard<EntityHolder>()
                 .Fields<ClassEntity>()
                 .OneOrThrow();
             var setter = DelegateToFieldAdapter
@@ -78,7 +78,7 @@ public class SetterTests
         [Fact]
         public void ExactWorks()
         {
-            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<StructEntity>().Fields<Guid>().OneOrThrow();
             var setter = DelegateToFieldAdapter
                 .TryAdapt<Setter<StructEntity, Guid>>(field)
                 .OkOrThrow();
@@ -97,7 +97,7 @@ public class SetterTests
         [Fact]
         public void FromObjectWorks()
         {
-            var field = Prelude.Reflect<StructEntity>().Fields<Guid>().OneOrThrow();
+            var field = Prelude.Shard<StructEntity>().Fields<Guid>().OneOrThrow();
             var setter = DelegateToFieldAdapter
                 .TryAdapt<Setter<StructEntity, object>>(field)
                 .OkOrThrow();
@@ -120,7 +120,7 @@ public class SetterTests
     [Fact]
     public void StaticExactSetterWorks()
     {
-        var field = Prelude.Reflect(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
+        var field = Prelude.Shard(typeof(StaticEntity)).Fields<Guid>().OneOrThrow();
         var setter = DelegateToFieldAdapter
             .TryAdapt<Setter<None, Guid>>(field)
             .OkOrThrow();

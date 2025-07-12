@@ -10,8 +10,10 @@ public static class OpCoding
     internal static readonly OpCode[] _twoByteOpCodes;
 
 
-    public static IReadOnlyList<OpCode> AllOpCodes { get; } = Reflect<OpCodes>()
-        .Fields().Containing<OpCode>()
+    public static IReadOnlyList<OpCode> AllOpCodes { get; } = Shard<OpCodes>()
+        .Fields()
+        .Containing<OpCode>()
+        .ToEnumerable()
         .Select(field => field.GetValue(null).ThrowIfNot<OpCode>())
         .ToList();
 

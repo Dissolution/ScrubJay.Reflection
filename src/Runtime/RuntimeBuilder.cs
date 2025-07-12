@@ -50,14 +50,14 @@ public static class RuntimeBuilder
     public static DynamicMethod CreateDynamicMethod<D>(string? name = null)
         where D : Delegate
     {
-        var invoke = DelegateHelper.InvokeMethod<D>();
+        var invoke = DelegateHelper.GetInvokeMethod<D>();
         return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
     }
 
     public static DynamicMethod CreateDynamicMethod(Type delegateType, string? name = null)
     {
         MemberAssert.IsDelegateType(delegateType);
-        var invoke = DelegateHelper.InvokeMethod(delegateType).SomeOrThrow();
+        var invoke = DelegateHelper.GetInvokeMethod(delegateType).SomeOrThrow();
         return CreateDynamicMethod(name, invoke.ReturnType, invoke.GetParameterTypes());
     }
 
@@ -134,17 +134,21 @@ public static class RuntimeBuilder
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>()
         where TAttribute : Attribute, new()
     {
-        var ctor = Reflect<TAttribute>().Constructors().Instance.NoParams.OneOrThrow();
+        var ctor = Shard<TAttribute>()
+            .Constructors()
+            .Instance()
+            .OneOrThrow();
         return new CustomAttributeBuilder(ctor, []);
     }
 
     public static CustomAttributeBuilder GetCustomAttributeBuilder<TAttribute>(params object?[] ctorArgs)
         where TAttribute : Attribute
     {
-        var ctor = Reflect<TAttribute>()
-            .Instance.Constructors()
+        var ctor = Shard<TAttribute>()
+            .Instance()
+            .Constructors()
             .Accepting(ctorArgs)
-            .OneOrThrow($"Could not find a {typeof(TAttribute).Render()} constructor with that would accept {string.Join(", ", ctorArgs)}");
+            .OneOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
 
@@ -152,11 +156,11 @@ public static class RuntimeBuilder
     {
         if (!attributeType.Implements<Attribute>())
             throw new ArgumentException($"{attributeType} is not an Attribute");
-        var ctor = Reflect(attributeType)
-            .Instance.Constructors()
+        var ctor = Shard(attributeType)
+            .Instance()
+            .Constructors()
             .Accepting(ctorArgs)
-            .OneOrThrow(
-                $"Could not find a {attributeType.Render()} constructor with that would accept {string.Join(", ", ctorArgs)}");
+            .OneOrThrow();
         return new CustomAttributeBuilder(ctor, ctorArgs);
     }
 
