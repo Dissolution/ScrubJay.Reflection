@@ -13,15 +13,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Using Include="System.Reflection"/>
-        <Using Include="ScrubJay.Reflection.Extensions"/>
-        <Using Include="ScrubJay.Extensions"/>
-        <Using Include="ScrubJay.Text"/>
-        <Using Include="ScrubJay.Text.Comparison"/>
-        <Using Include="ScrubJay.Validation"/>
-        
-        <Using Include="ScrubJay.Prelude" Static="true"/>
-        <Using Include="ScrubJay.Reflection.Prelude" Static="true"/>
+
     </ItemGroup>
     
     <ItemGroup>

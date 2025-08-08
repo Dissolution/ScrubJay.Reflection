@@ -1,75 +1,46 @@
 ﻿using ScrubJay.Collections.NonGeneric;
-using ScrubJay.Text.Comparison;
+using ScrubJay.Validation;
 
 namespace ScrubJay.Reflection.Exceptions;
 
-/// <summary>
-/// An <see cref="Exception"/> thrown during Reflection operations
-/// </summary>
 [PublicAPI]
-public class ReflectionException : Exception, IRenderable
+public class ReflectionException : Exception
 {
-    private static readonly Action<Exception, string?> _setExceptionMessage;
-    private static readonly Action<Exception, Exception?> _setExceptionInnerException;
-
+    private static readonly Action<Exception, string> _setExceptionMessage;
+    
     static ReflectionException()
     {
-        var exceptionMessageField = Shard<Exception>()
-            .NonPublic()
-            .Instance()
-            .Fields<string>()
-            .Named("message", new StringMatch(StringComparison.OrdinalIgnoreCase){ Contains = true})
-            .OneOrThrow();
+        // Message Setter
+        var messageField = typeof(Exception)
+            .GetFields(BindingFlags.Instance | BindingFlags.NonPublic)
+            .Where(field => TextHelper.Contains(field.Name, "message", StringComparison.OrdinalIgnoreCase))
+            .OneOrDefault()
+            .ThrowIfNull("Could not find Exception._message field");
 
-        _setExceptionMessage = RuntimeBuilder.TryEmitDelegate<Action<Exception, string?>>(emitter => emitter
-                .Ldarg(0)
-                .Ldarg(1)
-                .Stfld(exceptionMessageField)
-                .Ret())
-            .OkOrThrow();
-
-        var exceptionInnerExceptionField = Shard<Exception>()
-            .NonPublic()
-            .Instance()
-            .Fields<Exception>()
-            .Named("innerException", new StringMatch(StringComparison.OrdinalIgnoreCase){ Contains = true })
-            .OneOrThrow();
-
-        _setExceptionInnerException = RuntimeBuilder.TryEmitDelegate<Action<Exception, Exception?>>(emitter => emitter
-            .Ldarg(0)
-            .Ldarg(1)
-            .Stfld(exceptionInnerExceptionField)
-            .Ret())
-            .OkOrThrow();
+        var dyn = Runtime.CreateDynamicMethod($"set_{messageField.Name}", typeof(void), [typeof(Exception), typeof(string)]);
+        var gen = dyn.GetILGenerator();
+        gen.Emit(OpCodes.Ldarg_0);
+        gen.Emit(OpCodes.Ldarg_1);
+        gen.Emit(OpCodes.Stfld, messageField);
+        gen.Emit(OpCodes.Ret);
+        _setExceptionMessage = dyn.CreateDelegate<Action<Exception, string>>();
     }
+    
     
     public new string Message
     {
         get => base.Message;
-        init => _setExceptionMessage(this, value);
+        set => _setExceptionMessage(this, value);
     }
 
-    public new Exception? InnerException
+    public new IDictionary<string, object?> Data
     {
-        get => base.InnerException;
-        init => _setExceptionInnerException(this, value);
-    }
-
-    private DictionaryAdapter<string, object?>? _data = null;
-
-    public new IDictionary<string, object?> Data => _data ??= new(base.Data);
-
-    public ReflectionException() : base(message: null) { }
-
-    public ReflectionException(string? message) : base(message) { }
-
-    public void RenderTo(TextBuilder builder)
-    {
-        builder.Render(this);
+        get => new DictionaryAdapter<string, object?>(base.Data);
     }
     
-    public override string ToString()
-    {
-        return this.Render();
-    }
+    public ReflectionException() : base() { }
+    
+    public ReflectionException(ref InterpolatedTextBuilder message) : base(message.ToStringAndDispose()) { }
+    
+    public ReflectionException(ref InterpolatedTextBuilder message, Exception? innerException) : base(message.ToStringAndDispose(), innerException) { }
 }

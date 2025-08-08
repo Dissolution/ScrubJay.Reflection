@@ -6,10 +6,11 @@
 [PublicAPI]
 public static class DynamicMethodExtensions
 {
-#if NETFRAMEWORK || NETSTANDARD || NETCOREAPP
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static TDelegate CreateDelegate<TDelegate>(this DynamicMethod dynamicMethod)
-        where TDelegate : Delegate
-        => (TDelegate)dynamicMethod.CreateDelegate(typeof(TDelegate));
+#if NETFRAMEWORK || NETSTANDARD
+    public static D CreateDelegate<D>(this DynamicMethod dynamicMethod)
+        where D : Delegate
+    {
+        return (D)dynamicMethod.CreateDelegate(typeof(D));
+    }
 #endif
 }
