@@ -96,7 +96,7 @@ public static class OpCoding
 
         return None();
     }
-    
+
     public static Option<Option<int>> TargetsArgument(this OpCode opCode)
     {
         var regex = new Regex(@"(?:ld|st)arg[\.as]*(\d)?", RegexOptions.Compiled);
@@ -124,7 +124,7 @@ public static class OpCoding
             {
                 return Some(-1);
             }
-            
+
             char ch = opCode.Name[^1];
             if (ch >= '0' && ch <= '8')
             {

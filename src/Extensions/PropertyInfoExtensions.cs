@@ -79,7 +79,7 @@ public static class PropertyInfoExtensions
         return DecompiledILMethod.Decompile(method)
             .Instructions
             .Reverse()
-            .OfType<OpCodeFieldInstruction>()
+            .OfType<FieldInstruction>()
             .Where(static instr => instr.Field is not null)
             .SelectWhere(instr =>
             {

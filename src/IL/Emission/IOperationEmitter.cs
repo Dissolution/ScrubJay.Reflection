@@ -1,8 +1,6 @@
 ﻿// ReSharper disable IdentifierTypo
 // ReSharper disable CommentTypo
 
-using ScrubJay.Reflection.IL.LabelOffSetManagement;
-
 namespace ScrubJay.Reflection.IL.Emission;
 
 /// <summary>

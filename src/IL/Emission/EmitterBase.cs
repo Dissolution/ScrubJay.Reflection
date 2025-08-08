@@ -85,7 +85,7 @@ public abstract class EmitterBase<E> : EmitterBase,
             throw new ArgumentException(null, nameof(opCode));
 
         _ilGenerator.Emit(opCode);
-        AddInstruction(new OpCodeNoneInstruction(opCode));
+        AddInstruction(new NoneInstruction(opCode));
         return _emitter;
     }
 
@@ -119,7 +119,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     public E Emit(OpCode opCode, int i32)
     {
         _ilGenerator.Emit(opCode, i32);
-        AddInstruction(new OpCodeValueInstruction<int>(opCode, i32));
+        AddInstruction(new ValueInstruction<int>(opCode, i32));
         return _emitter;
     }
 
@@ -148,7 +148,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(str);
         _ilGenerator.Emit(opCode, str);
-        AddInstruction(new OpCodeStringInstruction(opCode, str));
+        AddInstruction(new StringInstruction(opCode, str));
         return _emitter;
     }
 
@@ -156,7 +156,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Label label = _labels.Declared(ilLabel).SomeOrThrow("Specified ILLabel does not belong to this emitter");
         _ilGenerator.Emit(opCode, label);
-        AddInstruction(new OpCodeLabelInstruction(opCode, ilLabel));
+        AddInstruction(new LabelInstruction(opCode, ilLabel));
         return _emitter;
     }
 
@@ -182,7 +182,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         var local = GetLocal(ilLocal);
 
         _ilGenerator.Emit(opCode, local);
-        AddInstruction(new OpCodeLocalInstruction(opCode, ilLocal));
+        AddInstruction(new LocalInstruction(opCode, ilLocal));
         return _emitter;
     }
 
@@ -190,7 +190,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(field);
         _ilGenerator.Emit(opCode, field);
-        AddInstruction(new OpCodeFieldInstruction(opCode, field));
+        AddInstruction(new FieldInstruction(opCode, field));
         return _emitter;
     }
 
@@ -209,7 +209,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(method);
         _ilGenerator.Emit(opCode, method);
-        AddInstruction(new OpCodeMethodInstruction(opCode, method.MetadataToken)
+        AddInstruction(new MethodInstruction(opCode, method.MetadataToken)
         {
             Method = method,
         });
@@ -220,7 +220,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Throw.IfNull(type);
         _ilGenerator.Emit(opCode, type);
-        AddInstruction(new OpCodeTypeInstruction(opCode, type.MetadataToken)
+        AddInstruction(new TypeInstruction(opCode, type.MetadataToken)
         {
             Type = type,
         });
@@ -245,7 +245,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         Label lbl = _ilGenerator.BeginExceptionBlock();
         label = _labels.Declare(lbl, labelName);
-        AddInstruction(new ILGeneratorBeginExceptionBlockInstruction(label));
+        AddInstruction(new BeginExceptionBlockInstruction(label));
         return _emitter;
     }
 
@@ -255,7 +255,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         if (!exceptionType.Implements<Exception>())
             throw new ArgumentException($"Exception Type '{exceptionType.Render()}' is not an Exception", nameof(exceptionType));
         _ilGenerator.BeginCatchBlock(exceptionType);
-        AddInstruction(new ILGeneratorBeginCatchBlockInstruction(exceptionType));
+        AddInstruction(new BeginCatchBlockInstruction(exceptionType));
         return _emitter;
     }
 
@@ -312,7 +312,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         if (!CodeHelper.IsValidNamespace(@namespace))
             throw new ArgumentException($"Namespace '{@namespace}' is not valid", nameof(@namespace));
         _ilGenerator.UsingNamespace(@namespace);
-        AddInstruction(new ILGeneratorUsingNamespaceInstruction(@namespace));
+        AddInstruction(new UsingNamespaceInstruction(@namespace));
         return _emitter;
     }
 
@@ -323,7 +323,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         var localBuilder = _ilGenerator.DeclareLocal(localType);
         local = new ILLocal(localBuilder, EmissionHelper.GetLocalName(localName));
         AddLocal(local, localBuilder);
-        AddInstruction(new ILGeneratorDeclareLocalInstruction(local));
+        AddInstruction(new DeclareLocalInstruction(local));
         return _emitter;
     }
 
@@ -339,7 +339,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         var localBuilder = _ilGenerator!.DeclareLocal(localType, pinned);
         local = new ILLocal(localBuilder, EmissionHelper.GetLocalName(localName));
         AddLocal(local, localBuilder);
-        AddInstruction(new ILGeneratorDeclareLocalInstruction(local));
+        AddInstruction(new DeclareLocalInstruction(local));
         return _emitter;
     }
 
@@ -352,7 +352,7 @@ public abstract class EmitterBase<E> : EmitterBase,
     {
         var lbl = _ilGenerator.DefineLabel();
         label = _labels.Declare(lbl, labelName);
-        AddInstruction(new ILGeneratorDefineLabelInstruction(label));
+        AddInstruction(new DefineLabelInstruction(label));
         return _emitter;
     }
 
@@ -361,7 +361,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         var lbl = _labels.Declared(label).SomeOrThrow();
         label.Offset = _ilGenerator.ILOffset;
         _ilGenerator.MarkLabel(lbl);
-        AddInstruction(new ILGeneratorMarkLabelInstruction(label));
+        AddInstruction(new MarkLabelInstruction(label));
         return _emitter;
     }
 
@@ -371,7 +371,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         var callOpCode = methodInfo.GetCallOpCode();
 
         _ilGenerator.EmitCall(callOpCode, methodInfo, optionalParameterTypes);
-        AddInstruction(new ILGeneratorCallVarargsInstruction(callOpCode, methodInfo, optionalParameterTypes));
+        AddInstruction(new CallVarargsInstruction(callOpCode, methodInfo, optionalParameterTypes));
         return _emitter;
     }
 
@@ -384,7 +384,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         _ilGenerator.EmitCalli(
             OpCodes.Calli,
             callingConventions, returnType, parameterTypes, optionalParameterTypes);
-        AddInstruction(new ILGeneratorCallManagedInstruction(callingConventions, returnType, parameterTypes, optionalParameterTypes));
+        AddInstruction(new CallManagedInstruction(callingConventions, returnType, parameterTypes, optionalParameterTypes));
         return _emitter;
     }
 
@@ -394,7 +394,7 @@ public abstract class EmitterBase<E> : EmitterBase,
         _ilGenerator.EmitCalli(
             OpCodes.Calli,
             unmanagedCallConv, returnType, parameterTypes);
-        AddInstruction(new ILGeneratorCallUnmanagedInstruction(unmanagedCallConv, returnType, parameterTypes));
+        AddInstruction(new CallUnmanagedInstruction(unmanagedCallConv, returnType, parameterTypes));
         return _emitter;
     }
 #endif

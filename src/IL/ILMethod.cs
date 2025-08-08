@@ -73,7 +73,7 @@ public abstract class ILMethod
             // ldloc.* stloc.*
             if (opCode.TargetsLocal().Flatten().IsSome(out int index))
             {
-                return new OpCodeLocalInstruction(opCode, Locals[index])
+                return new LocalInstruction(opCode, Locals[index])
                 {
                     Offset = opCodeInstr.Offset,
                 };
@@ -82,7 +82,7 @@ public abstract class ILMethod
             // ldarg* starg*
             if (opCode.TargetsArgument().Flatten().IsSome(out index))
             {
-                return new OpCodeParameterInstruction(opCode, Parameters[index])
+                return new ParameterInstruction(opCode, Parameters[index])
                 {
                     Offset = opCodeInstr.Offset,
                 };
@@ -91,13 +91,13 @@ public abstract class ILMethod
             // ldc.i4.*
             if (opCode.TargetsI32Const().IsSome(out var i32))
             {
-                return new OpCodeValueInstruction<int>(opCode, i32)
+                return new ValueInstruction<int>(opCode, i32)
                 {
                     Offset = opCodeInstr.Offset,
                 };
             }
 
-            return new OpCodeNoneInstruction(opCode)
+            return new NoneInstruction(opCode)
             {
                 Offset = opCodeInstr.Offset,
             };

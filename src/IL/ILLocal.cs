@@ -22,15 +22,16 @@ public readonly struct ILLocal :
     public ILLocal(int index, Type type, bool isPinned = false, string? name = null)
     {
         this.Index = index;
-        this.Type = type;
+        this.Type = type.ThrowIfNull();
         this.IsPinned = isPinned;
         this.Name = name;
     }
     
     public ILLocal(LocalVariableInfo localVariableInfo, string? name = null)
     {
+        Throw.IfNull(localVariableInfo);
         this.Index = localVariableInfo.LocalIndex;
-        this.Type = localVariableInfo.LocalType!;
+        this.Type = localVariableInfo.LocalType.ThrowIfNull();
         this.IsPinned = localVariableInfo.IsPinned;
         this.Name = name;
     }
@@ -64,10 +65,20 @@ public readonly struct ILLocal :
 
     public void RenderTo(TextBuilder builder)
     {
-        builder//.Append($"[{Index}] ")
+        builder
             .IfAppend(IsPinned, "fixed ")
             .Render(Type)
-            .IfNotNull(Name, static (tb, name) => tb.Append(' ').Append(name));
+            .Append(' ');
+        if (Name is not null)
+        {
+            builder.Append(Name);
+        }
+        else
+        {
+            builder.Append('[')
+                .Format(Index)
+                .Append(']');
+        }
     }
 
     public override string ToString() => TextBuilder.Build(RenderTo);

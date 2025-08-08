@@ -1,4 +1,4 @@
-﻿namespace ScrubJay.Reflection.IL.LabelOffSetManagement;
+﻿namespace ScrubJay.Reflection.IL;
 
 /// <summary>
 /// A wrapper around the positive part of an <see cref="int"/> where any negative value means the same as <see cref="Unknown"/>
@@ -48,9 +48,8 @@ public readonly struct ILOffset :
         return new(offset);
     }
 
-    public const int SIZE = 4;
-
     public static readonly ILOffset Unknown = new(int.MinValue);
+    
     
     private readonly int _offset;
 
@@ -68,14 +67,7 @@ public readonly struct ILOffset :
         }
     }
 
-    public void RenderTo(TextBuilder builder)
-    {
-        builder.Append("IL_")
-            .If(_offset, static off => off >= 0,
-                static (tb, off) => tb.Format(off, "X4"),
-                static (tb, _) => tb.Append("????"));
-    }
-
+  
     public int CompareTo(ILOffset other)
     {
         // Unknown is less than everything other than Unknown
@@ -116,7 +108,16 @@ public readonly struct ILOffset :
             return Equals(offset);
         return false;
     }
-    public override int GetHashCode() => _offset;
 
+    public override int GetHashCode() => _offset < 0 ? Hasher.NullHash : _offset;
+
+    public void RenderTo(TextBuilder builder)
+    {
+        builder.Append("IL_")
+            .If(_offset, static off => off >= 0,
+                static (tb, off) => tb.Format(off, "X4"),
+                static (tb, _) => tb.Append("????"));
+    }
+    
     public override string ToString() => TextBuilder.Build(RenderTo);
 }

@@ -6,7 +6,6 @@ global using TRK = ScrubJay.Reflection.TypeRefKind;
 global using NotNullAttribute = System.Diagnostics.CodeAnalysis.NotNullAttribute;
 global using text = System.ReadOnlySpan<char>;
 using System.Linq.Expressions;
-using ScrubJay.Reflection.Expressions;
 using ScrubJay.Reflection.Searching;
 using ScrubJay.Reflection.Searching.Sharding;
 

@@ -1,5 +1,6 @@
 ﻿namespace ScrubJay.Reflection.IL.Emission;
 
+[PublicAPI]
 [Flags]
 public enum CompareOp
 {
@@ -12,7 +13,7 @@ public enum CompareOp
     Unconditional = Equal | LessThan | GreaterThan,
 }
 
-
+[PublicAPI]
 public enum MathOp
 {
     Add,
@@ -22,6 +23,7 @@ public enum MathOp
     Modulo,
 }
 
+[PublicAPI]
 public enum BitwiseOp
 {
     And,

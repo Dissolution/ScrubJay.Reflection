@@ -70,10 +70,12 @@ public class DLCL<T> : IEnumerable<T>
         _count = 1;
     }
 
-    internal void InternalRemoveNode(DLCLNode<T> node)
+    internal void InternalRemoveNode(DLCLNode<T> node, bool invalidate = true)
     {
         Debug.Assert(node._dlclParent == this);
         Debug.Assert(_head != null);
+        
+        // Is this the only node?
         if (node._next == node)
         {
             Debug.Assert(_count == 1 && _head == node);
@@ -81,6 +83,7 @@ public class DLCL<T> : IEnumerable<T>
         }
         else
         {
+            // cut the node out
             node._next!._prev = node._prev;
             node._prev!._next = node._next;
             if (_head == node)
@@ -88,7 +91,8 @@ public class DLCL<T> : IEnumerable<T>
                 _head = node._next;
             }
         }
-        node.Invalidate();
+        if (invalidate)
+            node.Invalidate();
         _count--;
     }
 
@@ -425,53 +429,5 @@ public class DLCL<T> : IEnumerable<T>
         public void Dispose()
         {
         }
-    }
-}
-
-public sealed class DLCLNode<T> 
-{
-    internal DLCL<T>? _dlclParent;
-    internal DLCLNode<T>? _next;
-    internal DLCLNode<T>? _prev;
-    internal T _value;
-
-    public DLCLNode(T value)
-    {
-        _value = value;
-    }
-
-    internal DLCLNode(DLCL<T> list, T value)
-    {
-        this._dlclParent = list;
-        _value = value;
-    }
-
-    public DLCL<T>? List => _dlclParent;
-
-    public DLCLNode<T>? Next => _next == null || _next == _dlclParent!._head ? null : _next;
-
-    public DLCLNode<T>? Previous => _prev == null || this == _dlclParent!._head ? null : _prev;
-
-    public T Value
-    {
-        get => _value;
-        set => _value = value;
-    }
-    
-    public ref T ValueRef => ref _value;
-
-    // terminate at end
-    public DLCLNode<T>? DeleteAndNext()
-    {
-        var next = _next;
-        _dlclParent?.InternalRemoveNode(this);
-        return next;
-    }
-
-    internal void Invalidate()
-    {
-        _dlclParent = null;
-        _next = null;
-        _prev = null;
     }
 }

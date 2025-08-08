@@ -1,7 +1,7 @@
 ﻿namespace ScrubJay.Reflection.IL.Instructions;
 
 [PublicAPI]
-public sealed class OpCodeValueInstruction<T> : OpCodeInstruction
+public sealed class ValueInstruction<T> : OpCodeInstruction
     where T: unmanaged
 {
     public T Value { get; }
@@ -16,7 +16,7 @@ public sealed class OpCodeValueInstruction<T> : OpCodeInstruction
         }
     }
 
-    public OpCodeValueInstruction(OpCode opCode, T value)
+    public ValueInstruction(OpCode opCode, T value)
         : base(opCode)
     {
         this.Value = value;

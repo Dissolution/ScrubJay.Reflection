@@ -9,10 +9,10 @@ public static class InstructionLoader
     {
         switch (genInstr)
         {
-            case ILGeneratorBeginCatchBlockInstruction bcb:
+            case BeginCatchBlockInstruction bcb:
                 emitter.BeginCatchBlock(bcb.ExceptionType!);
                 break;
-            case ILGeneratorBeginExceptionBlockInstruction beb:
+            case BeginExceptionBlockInstruction beb:
             {
                 var incomingLabel = beb.Label;
                 emitter.BeginExceptionBlock(out var label, incomingLabel.Name);
@@ -20,10 +20,10 @@ public static class InstructionLoader
                     throw new InvalidOperationException();
                 break;
             }
-            case ILGeneratorUsingNamespaceInstruction ns:
+            case UsingNamespaceInstruction ns:
                 emitter.UsingNamespace(ns.Namespace);
                 break;
-            case ILGeneratorDeclareLocalInstruction dlInstruction:
+            case DeclareLocalInstruction dlInstruction:
             {
                 var incomingLocal = dlInstruction.Local;
                 emitter.DeclareLocal(incomingLocal.Type, incomingLocal.IsPinned, out var local, incomingLocal.Name);
@@ -31,7 +31,7 @@ public static class InstructionLoader
                     throw new InvalidOperationException();
                 break;
             }
-            case ILGeneratorDefineLabelInstruction dlInstruction:
+            case DefineLabelInstruction dlInstruction:
             {
                 var incomingLabel = dlInstruction.Label;
                 emitter.DefineLabel(out var label, incomingLabel.Name);
@@ -39,24 +39,24 @@ public static class InstructionLoader
                     throw new InvalidOperationException();
                 break;
             }
-            case ILGeneratorMarkLabelInstruction mlInstruction:
+            case MarkLabelInstruction mlInstruction:
                 emitter.MarkLabel(mlInstruction.Label);
                 break;
-            case ILGeneratorCallVarargsInstruction call:
+            case CallVarargsInstruction call:
                 emitter.EmitCall(call.Method, call.OptionalParameterTypes);
                 break;
-            case ILGeneratorCallManagedInstruction call:
+            case CallManagedInstruction call:
                 emitter.EmitCalli(call.CallingConventions, call.ReturnType, call.ParameterTypes, call.OptionalParameterTypes);
                 break;
 #if !NETSTANDARD2_0
-            case ILGeneratorCallUnmanagedInstruction call:
+            case CallUnmanagedInstruction call:
                 emitter.EmitCalli(call.CallingConvention, call.ReturnType, call.ParameterTypes);
                 break;
 #endif
-            case ILGeneratorWriteLineInstruction writeLine:
+            case WriteLineInstruction writeLine:
                 throw new NotImplementedException();
                 break;
-            case ILGeneratorThrowExceptionInstruction throwException:
+            case ThrowExceptionInstruction throwException:
                 throw new NotImplementedException();
                 break;
             default:
@@ -94,53 +94,53 @@ public static class InstructionLoader
     {
         switch (opCodeInstr)
         {
-            case OpCodeValueInstruction<byte> instr:
+            case ValueInstruction<byte> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<sbyte> instr:
+            case ValueInstruction<sbyte> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<short> instr:
+            case ValueInstruction<short> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<int> instr:
+            case ValueInstruction<int> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<long> instr:
+            case ValueInstruction<long> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<float> instr:
+            case ValueInstruction<float> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeValueInstruction<double> instr:
+            case ValueInstruction<double> instr:
                 emitter.Emit(instr.OpCode, instr.Value);
                 break;
-            case OpCodeStringInstruction instr:
+            case StringInstruction instr:
                 emitter.Emit(instr.OpCode, instr.String!);
                 break;
-            case OpCodeLabelInstruction instr:
+            case LabelInstruction instr:
                 emitter.Emit(instr.OpCode, instr.Label);
                 break;
-            case OpCodeSwitchInstruction instr:
+            case SwitchInstruction instr:
                 //emitter.Emit(instr.OpCode, instr.Deltas);
                 throw new NotImplementedException();
                 break;
-            case OpCodeLocalInstruction instr:
+            case LocalInstruction instr:
                 emitter.Emit(instr.OpCode, instr.Local!.Value);
                 break;
-            case OpCodeFieldInstruction instr:
+            case FieldInstruction instr:
                 emitter.Emit(instr.OpCode, instr.Field!);
                 break;
-            case OpCodeMethodInstruction instr:
+            case MethodInstruction instr:
                 if (instr.Method is ConstructorInfo ctor)
                     emitter.Emit(instr.OpCode, ctor);
                 else if (instr.Method is MethodInfo meth)
                     emitter.Emit(instr.OpCode, meth);
                 break;
-            case OpCodeTypeInstruction instr:
+            case TypeInstruction instr:
                 emitter.Emit(instr.OpCode, instr.Type!);
                 break;
-            case OpCodeSignatureInstruction instr:
+            case SignatureInstruction instr:
                 //emitter.Emit(instr.OpCode, instr.Signature!);
                 throw new NotImplementedException();
                 break;

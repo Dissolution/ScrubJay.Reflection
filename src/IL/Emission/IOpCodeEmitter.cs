@@ -1,5 +1,3 @@
-using ScrubJay.Reflection.IL.LabelOffSetManagement;
-
 namespace ScrubJay.Reflection.IL.Emission;
 
 public interface IOpCodeEmitter<E> : IEmitter<E>

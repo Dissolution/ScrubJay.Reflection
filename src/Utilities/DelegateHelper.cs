@@ -18,11 +18,7 @@ public static class DelegateHelper
             .GetMethod("Invoke", BF.Public | BF.Instance)
             .ThrowIfNull();
     }
-
-    public static string Render<TDelegate>(this TDelegate del)
-        where TDelegate : Delegate
-        => typeof(TDelegate).Render();
-
+    
     public static Type CreateDelegateType(Type[] parameterTypes, Type returnType)
     {
         int parameterCount = parameterTypes.Length;

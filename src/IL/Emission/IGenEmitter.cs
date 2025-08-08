@@ -1,6 +1,4 @@
-﻿using ScrubJay.Reflection.IL.LabelOffSetManagement;
-
-namespace ScrubJay.Reflection.IL.Emission;
+﻿namespace ScrubJay.Reflection.IL.Emission;
 
 [PublicAPI]
 public interface IGenEmitter<E> : IEmitter<E>

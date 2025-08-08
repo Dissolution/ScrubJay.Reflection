@@ -87,7 +87,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineBrTarget:
             {
                 int delta = reader.ReadI32();
-                return new OpCodeBranchInstruction(opCode, delta)
+                return new BranchInstruction(opCode, delta)
                 {
                     Offset = offset,
                 };
@@ -96,7 +96,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineField:
             {
                 int token = reader.ReadI32();
-                var instr = new OpCodeFieldInstruction(opCode, token)
+                var instr = new FieldInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -111,7 +111,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldc_I4);
                 int i32 = reader.ReadI32();
-                return new OpCodeValueInstruction<int>(opCode, i32)
+                return new ValueInstruction<int>(opCode, i32)
                 {
                     Offset = offset,
                 };
@@ -121,7 +121,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldc_I8);
                 long i64 = reader.ReadI64();
-                return new OpCodeValueInstruction<long>(opCode, i64)
+                return new ValueInstruction<long>(opCode, i64)
                 {
                     Offset = offset,
                 };
@@ -130,7 +130,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineMethod:
             {
                 int token = reader.ReadI32();
-                var instr = new OpCodeMethodInstruction(opCode, token)
+                var instr = new MethodInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -143,7 +143,7 @@ public class DecompiledILMethod : ILMethod
             // no operand
             case OperandType.InlineNone:
             {
-                return new OpCodeNoneInstruction(opCode)
+                return new NoneInstruction(opCode)
                 {
                     Offset = offset,
                 };
@@ -153,7 +153,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldc_R8);
                 double f64 = reader.ReadF64();
-                return new OpCodeValueInstruction<double>(opCode, f64)
+                return new ValueInstruction<double>(opCode, f64)
                 {
                     Offset = offset,
                 };
@@ -163,7 +163,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Calli);
                 int token = reader.ReadI32();
-                var instr = new OpCodeSignatureInstruction(opCode, token)
+                var instr = new SignatureInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -178,7 +178,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldstr);
                 int token = reader.ReadI32();
-                var instr = new OpCodeStringInstruction(opCode, token)
+                var instr = new StringInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -198,7 +198,7 @@ public class DecompiledILMethod : ILMethod
                 {
                     deltas[i] = reader.ReadI32();
                 }
-                return new OpCodeSwitchInstruction(opCode, deltas)
+                return new SwitchInstruction(opCode, deltas)
                 {
                     Offset = offset,
                 };
@@ -208,7 +208,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldtoken);
                 int token = reader.ReadI32();
-                var instr = new OpCodeMemberInstruction(opCode, token)
+                var instr = new MemberInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -222,7 +222,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.InlineType:
             {
                 int token = reader.ReadI32();
-                var instr = new OpCodeTypeInstruction(opCode, token)
+                var instr = new TypeInstruction(opCode, token)
                 {
                     Offset = offset,
                 };
@@ -238,14 +238,14 @@ public class DecompiledILMethod : ILMethod
                 ushort index = reader.ReadU16();
                 if (opCode.TargetsLocalVariable())
                 {
-                    return new OpCodeLocalInstruction(opCode, Locals[index])
+                    return new LocalInstruction(opCode, Locals[index])
                     {
                         Offset = offset,
                     };
                 }
                 else if (opCode.TargetsArgument())
                 {
-                    return new OpCodeParameterInstruction(opCode, Parameters[index])
+                    return new ParameterInstruction(opCode, Parameters[index])
                     {
                         Offset = offset,
                     };
@@ -256,7 +256,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.ShortInlineBrTarget:
             {
                 sbyte shortDelta = reader.ReadI8();
-                return new OpCodeBranchInstruction(opCode, shortDelta)
+                return new BranchInstruction(opCode, shortDelta)
                 {
                     Offset = offset,
                 };
@@ -265,7 +265,7 @@ public class DecompiledILMethod : ILMethod
             case OperandType.ShortInlineI:
             {
                 sbyte i8 = reader.ReadI8();
-                return new OpCodeValueInstruction<sbyte>(opCode, i8)
+                return new ValueInstruction<sbyte>(opCode, i8)
                 {
                     Offset = offset,
                 };
@@ -275,7 +275,7 @@ public class DecompiledILMethod : ILMethod
             {
                 Debug.Assert(opCode == OpCodes.Ldc_R4);
                 float f32 = reader.ReadF32();
-                return new OpCodeValueInstruction<float>(opCode, f32)
+                return new ValueInstruction<float>(opCode, f32)
                 {
                     Offset = offset,
                 };
@@ -286,14 +286,14 @@ public class DecompiledILMethod : ILMethod
                 byte index = reader.ReadU8();
                 if (opCode.TargetsLocalVariable())
                 {
-                    return new OpCodeLocalInstruction(opCode, Locals[index])
+                    return new LocalInstruction(opCode, Locals[index])
                     {
                         Offset = offset,
                     };
                 }
                 else if (opCode.TargetsArgument())
                 {
-                    return new OpCodeParameterInstruction(opCode, Parameters[index])
+                    return new ParameterInstruction(opCode, Parameters[index])
                     {
                         Offset = offset,
                     };

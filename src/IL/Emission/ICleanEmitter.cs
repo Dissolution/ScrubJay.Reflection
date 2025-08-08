@@ -1,7 +1,4 @@
-﻿using ScrubJay.Reflection.IL.Instructions;
-using ScrubJay.Reflection.IL.LabelOffSetManagement;
-
-namespace ScrubJay.Reflection.IL.Emission;
+﻿namespace ScrubJay.Reflection.IL.Emission;
 
 [PublicAPI]
 public interface ICleanEmitter<E> : IEmitter<E>
@@ -93,7 +90,7 @@ public class CleanEmitterBase<E, W> : FluentBuilderBase<E>, ICleanEmitter<E>
 {
     protected readonly W _emitter;
     
-    protected internal CleanEmitterBase(W emitter)
+    internal protected CleanEmitterBase(W emitter)
     {
         _emitter = emitter;
     }

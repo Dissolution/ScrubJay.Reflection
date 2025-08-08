@@ -231,5 +231,5 @@ public abstract class MemberShard<S, M> :
             .Append(']');
     }
 
-    public sealed override string ToString() => this.Render();
+    public override sealed string ToString() => this.Render();
 }
