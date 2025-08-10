@@ -1,5 +1,4 @@
 ﻿using ScrubJay.Collections.NonGeneric;
-using ScrubJay.Validation;
 
 namespace ScrubJay.Reflection.Exceptions;
 
@@ -17,7 +16,7 @@ public class ReflectionException : Exception
             .OneOrDefault()
             .ThrowIfNull("Could not find Exception._message field");
 
-        var dyn = Runtime.CreateDynamicMethod($"set_{messageField.Name}", typeof(void), [typeof(Exception), typeof(string)]);
+        var dyn = Runtime.Builder.CreateDynamicMethod($"set_{messageField.Name}", typeof(void), [typeof(Exception), typeof(string)]);
         var gen = dyn.GetILGenerator();
         gen.Emit(OpCodes.Ldarg_0);
         gen.Emit(OpCodes.Ldarg_1);
@@ -40,7 +39,15 @@ public class ReflectionException : Exception
     
     public ReflectionException() : base() { }
     
-    public ReflectionException(ref InterpolatedTextBuilder message) : base(message.ToStringAndDispose()) { }
+    public ReflectionException(ref InterpolatedTextBuilder message) 
+        : base(message.ToStringAndDispose()) { }
     
-    public ReflectionException(ref InterpolatedTextBuilder message, Exception? innerException) : base(message.ToStringAndDispose(), innerException) { }
+    public ReflectionException(ref InterpolatedTextBuilder message, Exception? innerException) 
+        : base(message.ToStringAndDispose(), innerException) { }
+    
+    public ReflectionException(string? message) 
+        : base(message) { }
+    
+    public ReflectionException(string? message, Exception? innerException) 
+        : base(message, innerException) { }
 }

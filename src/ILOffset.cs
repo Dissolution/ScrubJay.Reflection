@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Globalization;
+﻿using System.Globalization;
 using ScrubJay.Memory;
 using ScrubJay.Parsing;
 using ScrubJay.Text.Rendering;
@@ -72,6 +71,12 @@ public readonly struct ILOffset :
 
     [FieldOffset(0)] private readonly short _offset;
 
+    public bool IsUnknown
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => _offset == -1;
+    }
+    
     public ILOffset(short offset)
     {
         if (offset >= 0)

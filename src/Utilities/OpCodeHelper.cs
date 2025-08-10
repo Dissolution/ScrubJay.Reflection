@@ -1,4 +1,7 @@
-﻿namespace ScrubJay.Reflection.Utilities;
+﻿using ScrubJay.Memory;
+using ScrubJay.Reflection.Exceptions;
+
+namespace ScrubJay.Reflection.Utilities;
 
 [PublicAPI]
 public static class OpCodeHelper
@@ -11,9 +14,16 @@ public static class OpCodeHelper
         get
         {
             foreach (var code in OneByteOpCodes)
-                yield return code;
+            {
+                if (code.Name is not null)
+                    yield return code;
+            }
+
             foreach (var code in TwoByteOpCodes)
-                yield return code;
+            {
+                if (code.Name is not null)
+                    yield return code;
+            }
         }
     }
 
@@ -39,5 +49,28 @@ public static class OpCodeHelper
                 TwoByteOpCodes[opCode.Value & 0xFF] = opCode;
             }
         }
+    }
+    
+    public static OpCode ReadOpCode(ref SpanReader<byte> reader)
+    {
+        OpCode opCode;
+
+        byte u8 = reader.Take();
+
+        if (u8 != 0xFE)
+        {
+            opCode = OneByteOpCodes[u8];
+            if (string.IsNullOrEmpty(opCode.Name))
+                throw new ReflectionException($"Invalid one-byte OpCode for 0x{u8:X}");
+        }
+        else
+        {
+            u8 = reader.Take();
+            opCode = TwoByteOpCodes[u8];
+            if (string.IsNullOrEmpty(opCode.Name))
+                throw new ReflectionException($"Invalid two-byte OpCode for 0x{u8:X}");
+        }
+
+        return opCode;
     }
 }
