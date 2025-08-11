@@ -35,7 +35,7 @@ public static class OpCodeHelper
         var opCodeFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
         foreach (var field in opCodeFields)
         {
-            OpCode opCode = (OpCode)field.GetValue(null);
+            OpCode opCode = (OpCode)field.GetValue(null)!;
             if (opCode.OpCodeType == OpCodeType.Nternal)
                 continue;
 

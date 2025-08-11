@@ -17,7 +17,8 @@ foreach (var method in allMethods)
     }
     catch (Exception ex)
     {
-        Debugger.Break();
+        Console.Write(ex.Render());
+        Console.WriteLine();
     }
 }
 

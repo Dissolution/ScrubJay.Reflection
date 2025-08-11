@@ -1,4 +1,6 @@
-﻿using ScrubJay.Memory;
+﻿#pragma warning disable CS0618
+
+using ScrubJay.Memory;
 
 namespace ScrubJay.Reflection.Decompilation;
 
@@ -91,8 +93,8 @@ public sealed class DecompiledMethod
     private object ReadVariable(OpCode opCode, int index)
     {
         if (opCode.Name!.Contains("loc"))
-            return Locals[index];
-        return Parameters[index];
+            return Locals![index];
+        return Parameters![index];
     }
 
     private Option<object?> ReadOperand(ref SpanReader<byte> reader, OpCode opCode)
@@ -217,5 +219,31 @@ public sealed class DecompiledMethod
             default:
                 throw InvalidEnumException.New(operandType);
         }
+    }
+
+    public override string ToString()
+    {
+        return TextBuilder.New
+            .Render(Module)
+            .Append("::")
+            .Render(DeclaringType)
+            .Append('.')
+            .Render(Method)
+            .NewLine()
+            .IfNotEmpty(Locals, static (tb, locals) => tb
+                .Append("Locals:")
+                .Indent()
+                .NewLine()
+                .EnumerateAndDelimitLines(locals, static (t, l) => t.Render(l))
+                .Dedent()
+                .NewLine())
+            .IfNotEmpty(Instructions, static (tb, instructions) => tb
+                .Append("Instructions:")
+                .Indent()
+                .NewLine()
+                .EnumerateAndDelimitLines(instructions, static (t, i) => t.Render(i))
+                .Dedent()
+                .NewLine())
+            .ToStringAndDispose();
     }
 }
