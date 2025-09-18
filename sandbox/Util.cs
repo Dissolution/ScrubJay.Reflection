@@ -13,7 +13,7 @@ public static class Util
     {
         return AppDomain.CurrentDomain
             .GetAssemblies()
-            .SelectMany(static ass => Result.TryInvoke(ass.GetTypes).OkOr([]))
+            .SelectMany(static ass => Result.Try(ass.GetTypes).OkOr([]))
             .ToHashSet();
     }
 

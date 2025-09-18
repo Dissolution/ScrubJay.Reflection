@@ -214,7 +214,7 @@ public sealed class DecompiledMethod
             } case OperandType.InlineNone:
             case OperandType.InlinePhi:
             {
-                return None();
+                return None;
             }
             default:
                 throw InvalidEnumException.New(operandType);
@@ -234,14 +234,14 @@ public sealed class DecompiledMethod
                 .Append("Locals:")
                 .Indent()
                 .NewLine()
-                .EnumerateAndDelimitLines(locals, static (t, l) => t.Render(l))
+                .Delimit(Delimiter.NewLine, locals)
                 .Dedent()
                 .NewLine())
             .IfNotEmpty(Instructions, static (tb, instructions) => tb
                 .Append("Instructions:")
                 .Indent()
                 .NewLine()
-                .EnumerateAndDelimitLines(instructions, static (t, i) => t.Render(i))
+                .Delimit(Delimiter.NewLine, instructions)
                 .Dedent()
                 .NewLine())
             .ToStringAndDispose();

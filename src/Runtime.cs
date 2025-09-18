@@ -15,9 +15,9 @@ public static class Runtime
         private static string CreateMethodName(Type? returnType, Type[]? parameterTypes)
         {
             string name = new TextBuilder()
-                .IfAppend(returnType.IsNullOrVoid(), "action", "func")
+                .If(returnType.IsNullOrVoid(), "action", "func")
                 .Append('(')
-                .EnumerateAndDelimit(parameterTypes, static (tb, type) => tb.Render(type), ", ")
+                .Delimit(", ", parameterTypes)
                 .If(!returnType.IsNullOrVoid(),
                     tb => tb.Append(", ").Render(returnType))
                 .Append(')')

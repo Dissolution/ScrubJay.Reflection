@@ -8,7 +8,7 @@ public static class TextBuilderExtensions
         return builder.IfNotEmpty(genericTypes,
             static (tb, gts) => tb
                 .Append('<')
-                .EnumerateAndDelimit(gts, static (t, g) => t.Render(g), ", ")
+                .Delimit(", ", gts, static (t, g) => t.Render(g))
                 .Append('>'));
     }
 }

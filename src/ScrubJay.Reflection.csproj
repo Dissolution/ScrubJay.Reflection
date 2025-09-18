@@ -6,12 +6,14 @@
         <!-- and .NET Standard 2.0 (so this library may be referenced by Source Generators) -->
         <!-- and some out of support frameworks caught in the middle of features -->
         <TargetFrameworks>
-            net9.0;net8.0;net7.0;net6.0;net5.0;
+            net10.0;net9.0;net8.0;net7.0;net6.0;net5.0;
             netstandard2.1;netstandard2.0;
             net481;
         </TargetFrameworks>
         <CheckEolTargetFramework>false</CheckEolTargetFramework>
-        <LangVersion>latest</LangVersion>
+        <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+        
+        <LangVersion>preview</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -43,7 +45,6 @@
 
         <Using Include="ScrubJay.Prelude" Static="true"/>
         <Using Include="ScrubJay.Functional"/>
-        <Using Include="ScrubJay.Building"/>
         <Using Include="ScrubJay.Text"/>
         <Using Include="ScrubJay.Enums"/>
         <Using Include="ScrubJay.Extensions"/>
@@ -58,16 +59,16 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-        <PackageReference Include="ScrubJay.Core" Version="0.51.0-alpha" />
+        <PackageReference Include="ScrubJay.Core" Version="0.61.2-alpha" />
 
-        <PackageReference Include="Fody" Version="6.9.2">
+        <PackageReference Include="Fody" Version="6.9.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="InlineIL.Fody" Version="1.10.1">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="JetBrains.Annotations" Version="2025.2.0">
+        <PackageReference Include="JetBrains.Annotations" Version="2025.2.2">
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
@@ -75,7 +76,7 @@
     <!-- Need System.Memory for older frameworks -->
     <ItemGroup Condition="'$(TargetFramework)' == 'net481' Or '$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'netstandard2.1'">
         <PackageReference Include="System.Memory" Version="4.6.3"/>
-        <PackageReference Include="System.Text.Json" Version="9.0.8"/>
+        <PackageReference Include="System.Text.Json" Version="9.0.9" />
     </ItemGroup>
 
     <!-- And additional packages for NetStandard 2.0 -->

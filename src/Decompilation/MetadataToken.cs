@@ -116,12 +116,10 @@ public readonly struct MetadataToken :
 
     public string ToString(string? format, IFormatProvider? provider = null) => _token.ToString(format, provider);
 
-    public void RenderTo(TextBuilder builder)
-    {
-        builder.Render(TokenType)
-            .Append('.')
-            .Format(Identifier, "X6");
-    }
+    public TextBuilder RenderTo(TextBuilder builder) => builder
+        .Render(TokenType)
+        .Append('.')
+        .Format(Identifier, "X6");
 
     public override string ToString() => TextBuilder.Build(RenderTo);
 }

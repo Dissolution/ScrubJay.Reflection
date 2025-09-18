@@ -4,6 +4,7 @@ namespace ScrubJay.Reflection.Decompilation;
 
 public sealed class InstructionStream : 
     IReadOnlyCollection<Instruction>,
+    IEnumerable<Instruction>,
     IRenderable
 {
     private readonly List<Instruction> _instructions = [];
@@ -42,9 +43,9 @@ public sealed class InstructionStream :
         return _instructions.GetEnumerator();
     }
 
-    public void RenderTo(TextBuilder builder)
+    public TextBuilder RenderTo(TextBuilder builder)
     {
-        builder.EnumerateAndDelimitLines(_instructions, static (tb, i) => tb.Render(i));
+        return builder.Delimit(Delimiter.NewLine, _instructions, static (tb, i) => tb.Render(i));
     }
 
     public override string ToString() => TextBuilder.Build(RenderTo);

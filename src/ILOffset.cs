@@ -42,8 +42,14 @@ public readonly struct ILOffset :
         reader.SkipWhile(char.IsWhiteSpace);
         reader.SkipWhileMatching("IL_".AsSpan());
 
+#if NET9_0_OR_GREATER
         if (reader.TryPeek(4).IsSome(out var four) && four.Equate("????"))
-            return Unknown;
+            return Ok(Unknown);
+#else
+        Span<char> four = stackalloc char[4];
+        if (reader.TryPeekInto(four) && four.Equate("????"))
+            return Ok(Unknown);
+#endif
 
         var hex = reader.TakeWhile(ch => ch.IsAsciiHexDigit());
         reader.SkipWhile(char.IsWhiteSpace);
@@ -52,31 +58,32 @@ public readonly struct ILOffset :
 
 #if NETSTANDARD2_0 || NETFRAMEWORK
         var hexStr = hex.AsString();
-        
+
         if (short.TryParse(hexStr, NumberStyles.HexNumber, provider, out var offset))
-            return new ILOffset(offset);
+            return Ok(new ILOffset(offset));
 
         if (short.TryParse(hexStr, NumberStyles.Any, provider, out offset))
-            return new ILOffset(offset);
+            return Ok(new ILOffset(offset));
 #else
         if (short.TryParse(hex, NumberStyles.HexNumber, provider, out var offset))
-            return new ILOffset(offset);
+            return Ok(new ILOffset(offset));
 
         if (short.TryParse(hex, NumberStyles.Any, provider, out offset))
-            return new ILOffset(offset);
+            return Ok(new ILOffset(offset));
 #endif
         return ParseException<ILOffset>.Create(text);
     }
 
 
-    [FieldOffset(0)] private readonly short _offset;
+    [FieldOffset(0)]
+    private readonly short _offset;
 
     public bool IsUnknown
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => _offset == -1;
     }
-    
+
     public ILOffset(short offset)
     {
         if (offset >= 0)
@@ -145,9 +152,9 @@ public readonly struct ILOffset :
             .ToStringAndDispose();
     }
 
-    public void RenderTo(TextBuilder builder)
+    public TextBuilder RenderTo(TextBuilder builder)
     {
-        builder.Append("IL_")
+        return builder.Append("IL_")
             .If(_offset, static o => o >= 0,
                 static (tb, o) => tb.Format(o, "X4"),
                 static (tb, _) => tb.Append("????"));

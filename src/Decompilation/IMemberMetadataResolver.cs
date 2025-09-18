@@ -56,7 +56,7 @@ public sealed class ModuleMemberMetadataResolver : IMemberMetadataResolver
         if (field is null)
             return GetEx<FieldInfo>(metadataToken);
 
-        return field;
+        return Ok(field);
     }
     
     public Result<MethodBase> TryResolveMethod(MetadataToken metadataToken)
@@ -74,7 +74,7 @@ public sealed class ModuleMemberMetadataResolver : IMemberMetadataResolver
         if (method is null)
             return GetEx<MethodBase>(metadataToken);
 
-        return method;
+        return Ok(method);
     }
     
     public Result<Type> TryResolveType(MetadataToken metadataToken)
@@ -89,10 +89,13 @@ public sealed class ModuleMemberMetadataResolver : IMemberMetadataResolver
             return ex;
         }
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (type is null)
+        {
             return GetEx<Type>(metadataToken);
+        }
 
-        return type;
+        return Ok(type);
     }
     
     public Result<MemberInfo> TryResolveMember(MetadataToken metadataToken)
@@ -110,17 +113,17 @@ public sealed class ModuleMemberMetadataResolver : IMemberMetadataResolver
         if (member is null)
             return GetEx<MemberInfo>(metadataToken);
 
-        return member;
+        return Ok(member);
     }
 
     public Result<string> TryResolveString(MetadataToken metadataToken)
     {
-        return Result.TryInvoke(() => Module.ResolveString(metadataToken));
+        return Result.Try(() => Module.ResolveString(metadataToken));
     }
     
     public Result<byte[]> TryResolveSignature(MetadataToken metadataToken)
     {
-        return Result.TryInvoke(() => Module.ResolveSignature(metadataToken));
+        return Result.Try(() => Module.ResolveSignature(metadataToken));
     }
 
 }

@@ -69,7 +69,7 @@ public sealed record class Instruction(ILOffset Offset, OpCode OpCode, Option<ob
         }
     }
     
-    public void RenderTo(TextBuilder builder) => builder
+    public TextBuilder RenderTo(TextBuilder builder) => builder
         .Render(Offset)
         .Append(": ")
         .Align(OpCode.Name, 14, alignment: Alignment.Right)
