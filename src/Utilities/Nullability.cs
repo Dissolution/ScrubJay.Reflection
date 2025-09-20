@@ -68,27 +68,27 @@ public static class Nullability
 {
 #if NET6_0_OR_GREATER
     private static readonly NullabilityInfoContext _context = new NullabilityInfoContext();
-    
+
     public static NullabilityInfo? Get(EventInfo @event)
     {
         return _context.Create(@event);
     }
-    
+
     public static NullabilityInfo? Get(FieldInfo field)
     {
         return _context.Create(field);
     }
-    
+
     public static NullabilityInfo? Get(ParameterInfo parameter)
     {
         return _context.Create(parameter);
     }
-    
+
     public static NullabilityInfo? Get(PropertyInfo property)
     {
         return _context.Create(property);
     }
-    
+
     public static NullabilityInfo? Get(MemberInfo member)
     {
         if (member is FieldInfo field)
@@ -101,7 +101,6 @@ public static class Nullability
     }
 
 #else
-
     public static NullabilityInfo? Get(EventInfo @event)
     {
         return null;
@@ -172,5 +171,53 @@ public static class Nullability
             (NullabilityState.Nullable, NullabilityState.Nullable) => (null, "?"),
             _ => default,
         };
+    }
+
+    // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis
+    public static (string? Precondition, string? Postcondition, string? TypeQ) GetConditions(PropertyInfo? property)
+    {
+        string? precondition = null;
+        string? postcondition = null;
+        string? typeQ = null;
+
+        if (property is null)
+        {
+            return (precondition, postcondition, typeQ);
+        }
+
+        var nullabilityInfo = Get(property);
+        property.PropertyType.GetAttributes().TryGet<NullableContextAttribute>(out var nullableContextAttribute);
+
+        if (nullabilityInfo is null && nullableContextAttribute is null)
+        {
+            return (precondition, postcondition, typeQ);
+        }
+
+        Debugger.Break();
+        
+
+        if (nullabilityInfo is not null)
+        {
+            var (read, write) = nullabilityInfo;
+            if (read == NullabilityState.Nullable)
+            {
+                precondition = "AllowNull";
+            }
+            else if (read == NullabilityState.NotNull)
+            {
+                precondition = "DisallowNull";
+            }
+
+            if (write == NullabilityState.Nullable)
+            {
+                postcondition = "MaybeNull";
+            }
+            else if (write == NullabilityState.NotNull)
+            {
+                postcondition = "NotNull";
+            }
+        }
+
+        return (precondition, postcondition, typeQ);
     }
 }

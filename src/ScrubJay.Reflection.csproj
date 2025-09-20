@@ -96,7 +96,7 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-        <PackageReference Include="ScrubJay.Core" Version="0.61.3-alpha" />
+        <PackageReference Include="ScrubJay.Core" Version="0.61.4-alpha" />
 
         <PackageReference Include="Fody" Version="6.9.3">
             <PrivateAssets>all</PrivateAssets>

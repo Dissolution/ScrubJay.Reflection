@@ -41,11 +41,29 @@ public sealed class FieldRenderer : MemberRenderer<FieldInfo>
 
     protected override TextBuilder AppendPreName(TextBuilder builder, FieldInfo field)
     {
-        throw new NotImplementedException();
+        var fieldType = field.FieldType;
+        builder.Render(fieldType);
+        
+        var fieldTypeAttributes = Attribute.GetCustomAttributes(fieldType);
+        if (fieldTypeAttributes.TryGet<NullableContextAttribute>(out var attr))
+        {
+            NullabilityState state = (NullabilityState)attr.Flag;
+            if (state == NullabilityState.Nullable)
+            {
+                builder.Append('?');
+            }
+            else
+            {
+                Debugger.Break();
+            }
+        }
+
+        return builder.Append(' ');
     }
 
     protected override TextBuilder AppendPostName(TextBuilder builder, FieldInfo field)
     {
-        throw new NotImplementedException();
+        // nothing
+        return builder;
     }
 }

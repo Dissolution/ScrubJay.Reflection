@@ -2,8 +2,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrubJay.Reflection", "src\ScrubJay.Reflection.csproj", "{C1B75470-0E6E-46E3-BD48-AACD29B42358}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrubJay.Reflection.Tests", "tests\ScrubJay.Reflection.Tests.csproj", "{F8D77ACD-4DCB-4B87-A3C1-06B9ECCA7248}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScrubJay.Reflection.Sandbox", "sandbox\ScrubJay.Reflection.Sandbox.csproj", "{FAF7A416-C6C5-47EB-ABE0-B023C6C5E112}"
 EndProject
 Global
@@ -16,10 +14,6 @@ Global
 		{C1B75470-0E6E-46E3-BD48-AACD29B42358}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C1B75470-0E6E-46E3-BD48-AACD29B42358}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C1B75470-0E6E-46E3-BD48-AACD29B42358}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F8D77ACD-4DCB-4B87-A3C1-06B9ECCA7248}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F8D77ACD-4DCB-4B87-A3C1-06B9ECCA7248}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F8D77ACD-4DCB-4B87-A3C1-06B9ECCA7248}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F8D77ACD-4DCB-4B87-A3C1-06B9ECCA7248}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FAF7A416-C6C5-47EB-ABE0-B023C6C5E112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FAF7A416-C6C5-47EB-ABE0-B023C6C5E112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAF7A416-C6C5-47EB-ABE0-B023C6C5E112}.Release|Any CPU.ActiveCfg = Release|Any CPU

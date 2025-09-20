@@ -23,5 +23,30 @@ public static class PropertyInfoExtensions
                 return visibility;
             }
         }
+        
+        /// <summary>
+        /// Determines if this property is marked as init-only.
+        /// </summary>
+        public bool IsInitOnly
+        {
+            get
+            {
+                if (property is null) 
+                    return false;
+                
+                if (!property.CanWrite)
+                    return false;
+
+                var setMethod = property.SetMethod;
+
+                if (setMethod is null)
+                    return false;
+                
+                // `init` properties have a special custom modifier
+                return setMethod.ReturnParameter
+                    .GetRequiredCustomModifiers()
+                    .Contains(typeof(IsExternalInit));
+            }
+        }
     }
 }

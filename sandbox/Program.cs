@@ -11,15 +11,19 @@ using ScrubJay.Reflection.Utilities;
 using ScrubJay.Text.Rendering;
 
 
+var renderers = Runtime.AllTypes.Count;
+
+
 var props =
     typeof(Util.NullabilityProperties)
         .GetProperties(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
+
 foreach (var property in props)
 {
+    
     var r = RendererCache.Render(property);
     Console.WriteLine(r);
-    Debugger.Break();
 
     // var attrs = Attribute.GetCustomAttributes(property);
     // var nullability = Nullability.Get(property);
