@@ -37,7 +37,7 @@ public sealed class DecompiledMethod
         }
         else
         {
-            Parameters = [new ThisParameter(Method), ..method.GetParameters()];
+            Parameters = [new ThisParameterInfo(Method), ..method.GetParameters()];
         }
 
         ParameterTypes = Parameters.ConvertAll(static p => p.ParameterType);
@@ -48,7 +48,7 @@ public sealed class DecompiledMethod
         }
         else if (method is ConstructorInfo constructorInfo)
         {
-            Return = new ReturnParameter(constructorInfo);
+            Return = new ReturnParameterInfo(constructorInfo);
         }
         else
         {
@@ -227,7 +227,7 @@ public sealed class DecompiledMethod
             .Render(Module)
             .Append("::")
             .Render(DeclaringType)
-            .Append('.')
+            .Append("  ")
             .Render(Method)
             .NewLine()
             .IfNotEmpty(Locals, static (tb, locals) => tb

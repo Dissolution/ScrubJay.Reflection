@@ -22,6 +22,43 @@
         <RootNamespace>ScrubJay.Reflection</RootNamespace>
     </PropertyGroup>
 
+    <!-- NuGet -->
+    <PropertyGroup>
+        <IsPackable>true</IsPackable>
+        <PackageId>ScrubJay.Reflection</PackageId>
+        <Title>ScrubJay - Reflection</Title>
+        <Version>0.0.1-alpha</Version>
+        <Authors>Dissolution</Authors>
+
+        <Description>
+            ScrubJay.Reflection
+        </Description>
+
+        <RepositoryUrl>https://github.com/Dissolution/ScrubJay.Reflection</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageIcon>jay.png</PackageIcon>
+        <PackageOutputPath>..\packages\</PackageOutputPath>
+    </PropertyGroup>
+
+    <!-- Special Release configurations -->
+    <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+        <!-- Create NuGet Package -->
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <!-- Validate -->
+        <EnablePackageValidation>false</EnablePackageValidation>
+    </PropertyGroup>
+
+    <!-- Additional release includes -->
+    <ItemGroup Condition="'$(Configuration)' == 'Release'">
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+        <None Include="..\LICENSE.txt" Pack="true" PackagePath="\"/>
+        <None Include="..\jay.png" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+    
+    
     <!-- Expose our internals to our tests and other trusted ScrubJay libraries -->
     <ItemGroup>
         <InternalsVisibleTo Include="ScrubJay.Reflection.Tests"/>
@@ -59,7 +96,7 @@
     <!-- NuGet Packages -->
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0"/>
-        <PackageReference Include="ScrubJay.Core" Version="0.61.2-alpha" />
+        <PackageReference Include="ScrubJay.Core" Version="0.61.3-alpha" />
 
         <PackageReference Include="Fody" Version="6.9.3">
             <PrivateAssets>all</PrivateAssets>

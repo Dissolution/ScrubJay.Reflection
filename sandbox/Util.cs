@@ -23,6 +23,7 @@ public static class Util
     }
     
     
+    
     public class NullabilityProperties
     {
         public object Prop { get; set; }

@@ -32,7 +32,7 @@ public static class OpCodeHelper
         OneByteOpCodes = new OpCode[0xE1];
         TwoByteOpCodes = new OpCode[0x1F];
 
-        var opCodeFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static);
+        var opCodeFields = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
         foreach (var field in opCodeFields)
         {
             OpCode opCode = (OpCode)field.GetValue(null)!;
@@ -72,5 +72,27 @@ public static class OpCodeHelper
         }
 
         return opCode;
+    }
+
+    public static Result<OpCode> TryReadOpCode(ref SpanReader<byte> reader)
+    {
+        OpCode opCode;
+        byte u8 = reader.Take();
+
+        if (u8 != 0xFE)
+        {
+            opCode = OneByteOpCodes[u8];
+            if (string.IsNullOrEmpty(opCode.Name))
+                return new ReflectionException($"Invalid one-byte OpCode for 0x{u8:X}");
+        }
+        else
+        {
+            u8 = reader.Take();
+            opCode = TwoByteOpCodes[u8];
+            if (string.IsNullOrEmpty(opCode.Name))
+                return new ReflectionException($"Invalid two-byte OpCode for 0x{u8:X}");
+        }
+
+        return Ok(opCode);
     }
 }
