@@ -21,10 +21,27 @@ public abstract class MemberRenderer<M> : Renderer<M>
     
     protected virtual TextBuilder AppendPostName(TextBuilder builder, M member) => builder;
 
-    protected MemberRenderer()
+    protected virtual void WriteAttributes(TextBuilder builder, M member, out bool typeNullable)
     {
-    }
+        var conditions = Nullability.GetConditions(member);
+        
+        HashSet<Attribute> attributes = new();
+        if (conditions.ReadAttr is not null)
+            attributes.Add(conditions.ReadAttr);
+        if (conditions.WriteAttr is not null)
+            attributes.Add(conditions.WriteAttr);
+        attributes.AddMany(member.GetAttributes());
+        attributes.RemoveWhere(static attr => attr is NullableAttribute);
 
+        builder.If(attributes,
+            static attrs => attrs.Count > 0,
+            static (tb, attrs) => tb
+                .Append('[')
+                .Delimit(", ", attrs)
+                .Append("] "));
+        typeNullable = conditions.TypeNullable;
+    }
+    
     public override TextBuilder RenderTo(TextBuilder builder, M? member)
     {
         if (member is null)

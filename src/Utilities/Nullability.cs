@@ -63,9 +63,31 @@ public enum NullabilityState
 #endif
 
 
+/// <summary>
+/// 
+/// </summary>
+/// <seealso href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis"/>
 [PublicAPI]
 public static class Nullability
 {
+    extension(NullabilityInfo? nullabilityInfo)
+    {
+        public void Deconstruct(out NullabilityState readState, out NullabilityState writeState)
+        {
+            if (nullabilityInfo is not null)
+            {
+                readState = nullabilityInfo.ReadState;
+                writeState = nullabilityInfo.WriteState;
+            }
+            else
+            {
+                readState = NullabilityState.Unknown;
+                writeState = NullabilityState.Unknown;
+            }
+        }
+    }
+
+
 #if NET6_0_OR_GREATER
     private static readonly NullabilityInfoContext _context = new NullabilityInfoContext();
 
@@ -134,90 +156,216 @@ public static class Nullability
 
 #endif
 
-    public static void Deconstruct(this NullabilityInfo? nullabilityInfo,
-        out NullabilityState readState,
-        out NullabilityState writeState)
+    public static (Attribute? ReadAttr, Attribute? WriteAttr) GetAttributes(MemberInfo member)
     {
-        if (nullabilityInfo is not null)
-        {
-            readState = nullabilityInfo.ReadState;
-            writeState = nullabilityInfo.WriteState;
-        }
-        else
-        {
-            readState = NullabilityState.Unknown;
-            writeState = NullabilityState.Unknown;
-        }
-    }
-
-    public static (string? Prefix, string? Postfix) GetPrefixPostfix(this NullabilityInfo? nullabilityInfo)
-    {
+        NullabilityInfo? nullabilityInfo = Get(member);
         if (nullabilityInfo is null)
             return default;
-
-        var (read, write) = nullabilityInfo;
-
-        // Attributes are usually declared as WriteMod, ReadMod
-        return (write, read) switch
+        
+        // postconditions (on read) (get)
+        Attribute? readAttr = nullabilityInfo.ReadState switch
         {
-            (NullabilityState.Unknown, NullabilityState.Unknown) => default,
-            (NullabilityState.Unknown, NullabilityState.NotNull) => ("[NotNull]", null),
-            (NullabilityState.Unknown, NullabilityState.Nullable) => ("[MaybeNull]", null),
-            (NullabilityState.NotNull, NullabilityState.Unknown) => ("[DisallowNull]", null),
-            (NullabilityState.NotNull, NullabilityState.NotNull) => default,
-            (NullabilityState.NotNull, NullabilityState.Nullable) => ("[DisallowNull, MaybeNull]", null),
-            (NullabilityState.Nullable, NullabilityState.Unknown) => ("[AllowNull]", null),
-            (NullabilityState.Nullable, NullabilityState.NotNull) => ("[AllowNull, NotNull]", null),
-            (NullabilityState.Nullable, NullabilityState.Nullable) => (null, "?"),
-            _ => default,
+            NullabilityState.Nullable => new MaybeNullAttribute(),
+            NullabilityState.NotNull => new NotNullAttribute(),
+            _ => null,
         };
+
+        // preconditions (on write) (set)
+        Attribute? writeAttr = nullabilityInfo.WriteState switch
+        {
+            NullabilityState.Nullable => new AllowNullAttribute(),
+            NullabilityState.NotNull => new DisallowNullAttribute(),
+            _ => null,
+        };
+        return (readAttr, writeAttr);
     }
-
+    
     // https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/nullable-analysis
-    public static (string? Precondition, string? Postcondition, string? TypeQ) GetConditions(PropertyInfo? property)
+    public static (Attribute? ReadAttr, Attribute? WriteAttr, bool TypeNullable) GetConditions(PropertyInfo? property)
     {
-        string? precondition = null;
-        string? postcondition = null;
-        string? typeQ = null;
-
         if (property is null)
         {
-            return (precondition, postcondition, typeQ);
+            return default;
         }
 
-        var nullabilityInfo = Get(property);
-        property.PropertyType.GetAttributes().TryGet<NullableContextAttribute>(out var nullableContextAttribute);
+        NullabilityInfo? nullabilityInfo = Get(property);
+        property.GetAttributes().TryGet<NullableAttribute>(out var nullableAttribute);
+        var propertyType = property.PropertyType;
+        propertyType.GetAttributes().TryGet<NullableContextAttribute>(out var nullableContextAttribute);
 
         if (nullabilityInfo is null && nullableContextAttribute is null)
         {
-            return (precondition, postcondition, typeQ);
+            return default;
         }
 
-        Debugger.Break();
-        
 
-        if (nullabilityInfo is not null)
+        NullableContext propertyContext = default;
+        if (nullableAttribute is not null)
         {
-            var (read, write) = nullabilityInfo;
-            if (read == NullabilityState.Nullable)
-            {
-                precondition = "AllowNull";
-            }
-            else if (read == NullabilityState.NotNull)
-            {
-                precondition = "DisallowNull";
-            }
+            var flags = nullableAttribute.NullableFlags;
+            if (flags.Length != 1 || flags[0] > 2)
+                Debugger.Break();
+            propertyContext = (NullableContext)flags[0];
+        }
 
-            if (write == NullabilityState.Nullable)
+        NullableContext propertyTypeContext = (NullableContext)(nullableContextAttribute?.Flag ?? 0);
+        var (readState, writeState) = nullabilityInfo;
+
+        // postconditions (on read) (get)
+        Attribute? readAttr = readState switch
+        {
+            NullabilityState.Nullable => new MaybeNullAttribute(),
+            NullabilityState.NotNull => new NotNullAttribute(),
+            _ => null,
+        };
+
+        // preconditions (on write) (set)
+        Attribute? writeAttr = writeState switch
+        {
+            NullabilityState.Nullable => new AllowNullAttribute(),
+            NullabilityState.NotNull => new DisallowNullAttribute(),
+            _ => null,
+        };
+
+        if (propertyContext == NullableContext.Oblivious &&
+            propertyTypeContext == NullableContext.Oblivious)
+        {
+            if (propertyType.IsValueType)
             {
-                postcondition = "MaybeNull";
+                // we do not write any attributes nor q for value types
+                return default;
             }
-            else if (write == NullabilityState.NotNull)
+            else
             {
-                postcondition = "NotNull";
+                Debugger.Break();
+                throw new NotImplementedException();
             }
         }
 
-        return (precondition, postcondition, typeQ);
+        // the property context tells us if the return type has been specified as null
+        bool typeNullable;
+        if (propertyContext == NullableContext.Oblivious)
+        {
+            typeNullable = false;
+        }
+        else if (propertyContext == NullableContext.Annotated)
+        {
+            typeNullable = true;
+        }
+        else
+        {
+            Debugger.Break();
+            throw new NotImplementedException();
+        }
+
+
+        if (!typeNullable)
+        {
+            if (readState == NullabilityState.NotNull)
+                readAttr = null;
+            if (writeState == NullabilityState.NotNull)
+                writeAttr = null;
+        }
+        else
+        {
+            if (readState == NullabilityState.Nullable)
+                readAttr = null;
+            if (writeState == NullabilityState.Nullable)
+                writeAttr = null;
+        }
+
+        return (readAttr, writeAttr, typeNullable);
+    }
+    
+
+    public static (Attribute? ReadAttr, Attribute? WriteAttr, bool TypeNullable) GetConditions(MemberInfo? member)
+    {
+        if (member is null)
+        {
+            return default;
+        }
+
+        Type? relatedType = member switch
+        {
+            FieldInfo fieldInfo => fieldInfo.FieldType,
+            PropertyInfo propertyInfo => propertyInfo.PropertyType,
+            EventInfo eventInfo => eventInfo.EventHandlerType,
+            MethodInfo methodInfo => methodInfo.ReturnType,
+            ConstructorInfo constructorInfo => constructorInfo.DeclaringType,
+            Type type => type,
+            _ => null,
+        };
+
+        NullabilityInfo? nullabilityInfo = Get(member);
+        NullableAttribute? nullableAttribute = null;
+        NullableContextAttribute? nullableContextAttribute = null;
+        
+        member.GetAttributes().TryGet<NullableAttribute>(out nullableAttribute);
+        relatedType?.GetAttributes().TryGet<NullableContextAttribute>(out nullableContextAttribute);
+
+        if (nullabilityInfo is null && nullableContextAttribute is null)
+        {
+            return default;
+        }
+        
+        NullableContext propertyContext = default;
+        if (nullableAttribute is not null)
+        {
+            var flags = nullableAttribute.NullableFlags;
+            if (flags.Length != 1 || flags[0] > 2)
+                Debugger.Break();
+            propertyContext = (NullableContext)flags[0];
+        }
+
+        NullableContext propertyTypeContext = (NullableContext)(nullableContextAttribute?.Flag ?? 0);
+        var (readState, writeState) = nullabilityInfo;
+
+        // postconditions (on read) (get)
+        Attribute? readAttr = readState switch
+        {
+            NullabilityState.Nullable => new MaybeNullAttribute(),
+            NullabilityState.NotNull => new NotNullAttribute(),
+            _ => null,
+        };
+
+        // preconditions (on write) (set)
+        Attribute? writeAttr = writeState switch
+        {
+            NullabilityState.Nullable => new AllowNullAttribute(),
+            NullabilityState.NotNull => new DisallowNullAttribute(),
+            _ => null,
+        };
+
+        // ?? no specification required ??
+        if (propertyContext == NullableContext.Oblivious && propertyTypeContext == NullableContext.Oblivious)
+        {
+            return default;
+        }
+
+        // the property context tells us if the return type has been specified as null
+        bool typeNullable = propertyContext switch
+        {
+            NullableContext.Oblivious => false,
+            NullableContext.NotAnnotated => false,
+            NullableContext.Annotated => true,
+            _ => throw InvalidEnumException.New(propertyContext),
+        };
+
+        if (!typeNullable)
+        {
+            if (readState == NullabilityState.NotNull)
+                readAttr = null;
+            if (writeState == NullabilityState.NotNull)
+                writeAttr = null;
+        }
+        else
+        {
+            if (readState == NullabilityState.Nullable)
+                readAttr = null;
+            if (writeState == NullabilityState.Nullable)
+                writeAttr = null;
+        }
+
+        return (readAttr, writeAttr, typeNullable);
     }
 }

@@ -26,64 +26,56 @@ public static class Util
     
     public class NullabilityProperties
     {
-        public object Prop { get; set; }
+        [NotNull, DisallowNull]
+        public int Int_NN_DN { get; set; }
         
-        [AllowNull]
-        public object AllowNullProp { get; set; }
+        [NotNull, AllowNull]
+        public int Int_NN_AN { get; set; }
         
-        [DisallowNull]
-        public object DisallowNullProp { get; set; }
+        [MaybeNull, DisallowNull]
+        public int Int_MN_DN { get; set; }
         
+        [MaybeNull, AllowNull]
+        public int Int_MN_AN { get; set; }
         
-        [NotNull]
-        public object PropNotNull { get; set; }
+        [NotNull, DisallowNull]
+        public int? NInt_NN_DN { get; set; }
         
-        [MaybeNull]
-        public object PropMaybeNull { get; set; }
+        [NotNull, AllowNull]
+        public int? NInt_NN_AN { get; set; }
         
+        [MaybeNull, DisallowNull]
+        public int? NInt_MN_DN { get; set; }
         
-        [AllowNull, NotNull]
-        public object AllowNullPropNotNull { get; set; }
-        
-        [AllowNull, MaybeNull]
-        public object AllowNullPropMaybeNull { get; set; }
-        
-        
-        [DisallowNull, NotNull]
-        public object DisallowNullPropNotNull { get; set; }
-        
-        [DisallowNull, MaybeNull]
-        public object DisallowNullPropMaybeNull { get; set; }
+        [MaybeNull, AllowNull]
+        public int? NInt_MN_AN { get; set; }
         
         
+        [NotNull, DisallowNull]
+        public object Obj_NN_DN { get; set; }
         
-        public object? PropQ { get; set; }
+        [NotNull, AllowNull]
+        public object Obj_NN_AN { get; set; }
         
-        [AllowNull]
-        public object? AllowNullPropQ { get; set; }
+        [MaybeNull, DisallowNull]
+        public object Obj_MN_DN { get; set; }
         
-        [DisallowNull]
-        public object? DisallowNullPropQ { get; set; }
-        
-        
-        [NotNull]
-        public object? PropQNotNull { get; set; }
-        
-        [MaybeNull]
-        public object? PropQMaybeNull { get; set; }
+        [MaybeNull, AllowNull]
+        public object Obj_MN_AN { get; set; }
         
         
-        [AllowNull, NotNull]
-        public object? AllowNullPropQNotNull { get; set; }
+        [NotNull, DisallowNull]
+        public object? NObj_NN_DN { get; set; }
         
-        [AllowNull, MaybeNull]
-        public object? AllowNullPropQMaybeNull { get; set; }
+        [NotNull, AllowNull]
+        public object? NObj_NN_AN { get; set; }
         
+        [MaybeNull, DisallowNull]
+        public object? NObj_MN_DN { get; set; }
         
-        [DisallowNull, NotNull]
-        public object? DisallowNullPropQNotNull { get; set; }
+        [MaybeNull, AllowNull]
+        public object? NObj_MN_AN { get; set; }
         
-        [DisallowNull, MaybeNull]
-        public object? DisallowNullPropQMaybeNull { get; set; }
+        public Guid G_GI { get; init; }
     }
 }

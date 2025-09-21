@@ -9,7 +9,7 @@ using ScrubJay.Reflection.Sandbox;
 using ScrubJay.Reflection.Shards;
 using ScrubJay.Reflection.Utilities;
 using ScrubJay.Text.Rendering;
-
+using static ScrubJay.Prelude;
 
 var renderers = Runtime.AllTypes.Count;
 
@@ -21,23 +21,9 @@ var props =
 
 foreach (var property in props)
 {
-    
     var r = RendererCache.Render(property);
     Console.WriteLine(r);
-
-    // var attrs = Attribute.GetCustomAttributes(property);
-    // var nullability = Nullability.Get(property);
-    // var (pre, post) = nullability.GetPrefixPostfix();
-    // if (attrs.TryGet<NullableAttribute>(out var nullableAttr))
-    // {
-    //     var flags = nullableAttr.NullableFlags;
-    //     if (flags.Length != 1)
-    //         Debugger.Break();
-    //     var k = flags.ConvertAll(b => (NullabilityState)b)[0];
-    //     Debugger.Break();
-    // }
-
-    // Debugger.Break();
+    Debugger.Break();
 }
 
 

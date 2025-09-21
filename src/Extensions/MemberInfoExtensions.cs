@@ -49,10 +49,10 @@ public static class MemberInfoExtensions
             }
         }
 
-        public Attribute[] GetAttributes()
+        public Attribute[] GetAttributes(bool inherit = true)
         {
             if (member is null) return [];
-            return Attribute.GetCustomAttributes(member);
+            return Attribute.GetCustomAttributes(member, inherit);
         }
     }
 }
