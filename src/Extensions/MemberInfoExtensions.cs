@@ -54,5 +54,15 @@ public static class MemberInfoExtensions
             if (member is null) return [];
             return Attribute.GetCustomAttributes(member, inherit);
         }
+
+        public Type[] GetGenericTypes()
+        {
+            return member switch
+            {
+                MethodBase method => method.GetGenericArguments(),
+                Type type => type.GetGenericArguments(),
+                _ => [],
+            };
+        }
     }
 }

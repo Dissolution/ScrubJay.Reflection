@@ -2,43 +2,46 @@
 
 internal static class TextBuilderExtensions
 {
-    public static TextBuilder NameGenericsParameters(
-        this TextBuilder builder,
-        string? name,
-        Type[]? genericTypes = null,
-        ParameterInfo[]? parameters = null)
+    extension(TextBuilder builder)
     {
-        if (name is not null)
+        public TextBuilder AppendNameGenericsAndParameters(MemberInfo member)
         {
+            string name = member.Name;
             int i = name.LastIndexOf('`');
             if (i >= 0)
             {
-                builder.Append(name.AsSpan(0, i));
+                builder.Write(name.AsSpan(0, i));
             }
             else
             {
-                builder.Append(name);
+                builder.Write(name);
             }
-        }
-        else
-        {
-            builder.Append("__???");
-        }
+            
+            var genericTypes = member.GetGenericTypes();
+            builder.IfNotEmpty(genericTypes, static (tb, types) => tb
+                .Append('<')
+                .Delimit(", ", types)
+                .Append('>'));
 
-        if (genericTypes is not null && genericTypes.Length > 0)
-        {
-            builder.Append('<')
-                .Delimit(", ", genericTypes)
-                .Append('>');
-        }
+            if (member is PropertyInfo property)
+            {
+                var indexers = (property.GetIndexParameters());
+                if (indexers.Length > 0)
+                {
+                    builder.Append('(')
+                        .Delimit(", ", indexers)
+                        .Append(')');
+                }
+            }
+            else if (member is MethodBase method)
+            {
+                var parameters = method.GetParameters();
+                builder.Append('(')
+                    .Delimit(", ", parameters)
+                    .Append(')');
+            }
 
-        if (parameters is not null)
-        {
-            builder.Append('(')
-                .Delimit(", ", parameters)
-                .Append(')');
+            return builder;
         }
-
-        return builder;
     }
 }

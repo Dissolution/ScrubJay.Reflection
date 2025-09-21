@@ -29,6 +29,12 @@ public static class ParameterInfoExtensions
                 return None;
             }
         }
+
+        public Attribute[] GetAttributes()
+        {
+            if (parameter is null) return [];
+            return Attribute.GetCustomAttributes(parameter, true);
+        }
     }
     
     

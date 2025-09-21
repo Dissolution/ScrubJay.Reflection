@@ -3,12 +3,14 @@
 namespace ScrubJay.Reflection.Text.Rendering;
 
 [PublicAPI]
-public sealed class MethodInfoRenderer : Renderer<MethodInfo>
+public sealed class MethodInfoRenderer : MemberRenderer<MethodInfo>
 {
     public override TextBuilder RenderTo(TextBuilder builder, MethodInfo? method)
     {
         if (method is null)
             return builder;
+
+        WriteAttributes(builder, method, out var typeNullable);
 
         return builder
             .Render(method.Visibility)
@@ -17,13 +19,10 @@ public sealed class MethodInfoRenderer : Renderer<MethodInfo>
             .If(method.IsAsync, "async ")
             .IfNotNull(method.ReturnParameter,
                 static (tb, p) => tb.Render(p),
-                tb => tb.Render(method.ReturnType))
+                tb => tb.Render(method.ReturnType).If(typeNullable, '?'))
             .Append(' ')
             .Render(method.OwnerType)
             .Append('.')
-            .NameGenericsParameters(
-                method.Name,
-                method.GetGenericArguments(),
-                method.GetParameters());
+            .AppendNameGenericsAndParameters(method);
     }
 }
